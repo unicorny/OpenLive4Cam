@@ -10,22 +10,22 @@ extern "C"
 {
 #endif
 
-typedef struct{
+typedef struct SInterface{
 #ifdef _WIN32
     HMODULE dll;
 #else
     void* dll;
 #endif
     int (*init)(void);
-    void (*exit)(void);
+    void (*ende)(void);
     void (*setParameter)(const char*,int);
     int (*getParameter)(const char*,int);
 	
 } SInterface;
 
 //! \return 0 alles okay, -1 bei fehler
-int interface_loadDll(const char* dllname);
-void interface_close();
+SInterface* interface_loadDll(const char* dllname);
+void interface_close(SInterface* interface);
 
     
 
