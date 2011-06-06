@@ -7,10 +7,10 @@
 int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
-    MainWindow w;
-    CInterface in;
-    if(in.init())
+    CInterface* in = new CInterface;
+    if(in->init())
     {
+        MainWindow w(in);
         w.show();
         return a.exec();
     }

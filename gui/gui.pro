@@ -6,10 +6,10 @@ TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
     ../interface/interface.c \
-    CInterface.cpp
-
+    CInterface.cpp \
+    capturecom.cpp
 HEADERS += mainwindow.h \
     ../interface/interface.h \
-    CInterface.h
-
+    CInterface.h \
+    capturecom.h
 FORMS += mainwindow.ui

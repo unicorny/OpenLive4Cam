@@ -12,7 +12,8 @@ CInterface::~CInterface()
    if(mCapture->ende)
         mCapture->ende();
    interface_close(mCapture);
-   interface_close(mServer);
+   if(mServer)
+    interface_close(mServer);
    mCapture = NULL;
    mServer = NULL;
 
@@ -34,8 +35,14 @@ int CInterface::init()
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), error, QMessageBox::Abort);
         return false;
     }
+    int ret = mCapture->init();
 
 
     return true;
 
+}
+
+int CInterface::getParameter(QString name)
+{
+    return mCapture->getParameter(qPrintable(name));
 }

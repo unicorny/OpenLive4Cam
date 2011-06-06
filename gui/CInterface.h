@@ -12,6 +12,8 @@ public:
 
     //! \return 1 true, 0 bei fehler
     int init();
+    int getParameter(QString name);
+
 
 private:
     SInterface* mCapture;

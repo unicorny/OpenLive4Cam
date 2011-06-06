@@ -53,16 +53,6 @@
       <height>24</height>
      </rect>
     </property>
-    <item>
-     <property name="text">
-      <string>Logitech Quick Cam Express Go</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Bildschirm</string>
-     </property>
-    </item>
    </widget>
    <widget class="QLabel" name="label_2">
     <property name="geometry">
@@ -121,16 +111,6 @@
       <height>24</height>
      </rect>
     </property>
-    <item>
-     <property name="text">
-      <string>640x480</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>640x800</string>
-     </property>
-    </item>
    </widget>
    <widget class="QPushButton" name="startButton">
     <property name="geometry">
@@ -225,22 +205,6 @@
     <hint type="destinationlabel">
      <x>299</x>
      <y>199</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>port_spinBox</sender>
-   <signal>valueChanged(QString)</signal>
-   <receiver>startButton</receiver>
-   <slot>showMenu()</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>250</x>
-     <y>41</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>475</x>
-     <y>43</y>
     </hint>
    </hints>
   </connection>

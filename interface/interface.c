@@ -8,7 +8,22 @@
     void (*exit)(void);
     void (*setParameter)(const char*,int);
     int (*getParameter)(const char*);
+    int (*start)(void);
+    int (*stop)(void);
   */
+
+#ifdef _WIN32
+//extern void *interface_loadFunction
+#else
+extern void *interface_loadFunction(void *__handle,
+                                    __const char *__name)
+{
+    return dlsym(__handle, __name);
+}
+
+#endif
+
+
 SInterface* interface_loadDll(const char* dllname)
 {
     SInterface* interface = (SInterface*)malloc(sizeof(SInterface));
@@ -24,27 +39,20 @@ SInterface* interface_loadDll(const char* dllname)
     }
     if(interface->dll)
     {
-#ifdef _WIN32
         if(!interface->init)
-            interface->init = (int (*)())(GetProcAddress(interface->dll, "init"));
+            interface->init = (int (*)())(interface_loadFunction(interface->dll, "init"));
         if(!interface->ende)
-            interface->ende = (void (*)())(GetProcAddress(interface->dll, "ende"));
+            interface->ende = (void (*)())(interface_loadFunction(interface->dll, "ende"));
+        if(!interface->start)
+            interface->start = (int (*)())(interface_loadFunction(interface->dll, "start"));
+        if(!interface->stop)
+            interface->stop = (int (*)())(interface_loadFunction(interface->dll, "stop"));
         if(!interface->setParameter)
-            interface->setParameter = (void (*)(const char*,int))(GetProcAddress(interface->dll, "setParameter"));
+            interface->setParameter = (void (*)(const char*,int))(interface_loadFunction(interface->dll, "setParameter"));
         if(!interface->getParameter)
-            interface->getParameter = (int* (*)(const char*))(GetProcAddress(interface->dll, "getParameter"));
+            interface->getParameter = (int* (*)(const char*))(interface_loadFunction(interface->dll, "getParameter"));
 
-#else
-        if(!interface->init)
-            interface->init = (int (*)())(dlsym(interface->dll, "init"));
-        if(!interface->ende)
-            interface->ende = (void (*)())(dlsym(interface->dll, "ende"));
-        if(!interface->setParameter)
-            interface->setParameter = (void (*)(const char*,int))(dlsym(interface->dll, "setParameter"));
-        if(!interface->getParameter)
-            interface->getParameter = (int* (*)(const char*))(dlsym(interface->dll, "getParameter"));
-#endif
-        if(!interface->init || !interface->ende || !interface->getParameter || !interface->setParameter)
+        if(!interface->init || !interface->ende || !interface->start || !interface->stop || !interface->getParameter || !interface->setParameter)
         {
             free(interface);
             return NULL;

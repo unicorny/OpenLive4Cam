@@ -19,7 +19,9 @@ typedef struct SInterface{
     int (*init)(void);
     void (*ende)(void);
     void (*setParameter)(const char*,int);
-    int (*getParameter)(const char*,int);
+    int (*getParameter)(const char*);
+    int (*start)(void);
+    int (*stop)(void);
 	
 } SInterface;
 
