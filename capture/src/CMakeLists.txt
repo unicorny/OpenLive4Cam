@@ -6,11 +6,13 @@ if(COMMAND cmake_policy)
       cmake_policy(SET CMP0003 NEW)
 endif(COMMAND cmake_policy)
 
+SET(CMAKE_C_COMPILER ${CMAKE_CXX_COMPILER})
+
 FIND_PACKAGE( OpenCV REQUIRED )
 
-SET(CaptureSrc main camera)
+SET(CaptureSrc main camera ../../interface/picture.c)
 #IF(WIN32)
-SET(CaptureSrc ${CaptureSrc} ../include/capture.h ../include/camera.h)
+SET(CaptureSrc ${CaptureSrc} ../include/capture.h ../include/camera.h ../../interface/picture.h)
 #ENDIF(WIN32)
 
 # Declare the target (an executable)

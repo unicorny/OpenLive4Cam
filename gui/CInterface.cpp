@@ -54,3 +54,19 @@ int CInterface::getParameter(QString name)
 {
     return mCapture->getParameter(qPrintable(name));
 }
+
+void CInterface::setParameter(QString name, int parameter)
+{
+    mCapture->setParameter(qPrintable(name), parameter);
+}
+
+void CInterface::start()
+{
+    qWarning("Start");
+    mCapture->start();
+}
+
+void CInterface::stop()
+{
+    mCapture->stop();
+}

@@ -1,7 +1,7 @@
 #include "capturecom.h"
 
 CaptureCom::CaptureCom(CInterface* in, QObject *parent) :
-    QObject(parent), mInterface(in)
+    QObject(parent), mInterface(in), getPictureFunc(NULL)
 {
 }
 
@@ -38,4 +38,26 @@ void CaptureCom::updateResolution(QComboBox* target)
         target->addItem(trUtf8("Keine Auflösung!"), QVariant(-1));
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), trUtf8("Es existiert keine Auflösung!"), QMessageBox::Abort);
     }
+}
+
+void CaptureCom::startStreaming(int cameraNr, int resolutionNr)
+{
+    mInterface->setParameter("capture.camera.choose", cameraNr);
+    QString res;
+    mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
+    mInterface->start();
+}
+
+void CaptureCom::stopStream()
+{
+    mInterface->stop();
+}
+
+void CaptureCom::nextFrame()
+{
+    if(!getPictureFunc)
+        getPictureFunc = (int (*)(bool, bool))mInterface->getParameter("capture.getPictureFunc");
+
+    SPicture* pic = (SPicture*)getPictureFunc(true, false);
+    //QImage image(pic->channel1)
 }

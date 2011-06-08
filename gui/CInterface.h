@@ -13,6 +13,9 @@ public:
     //! \return 1 true, 0 bei fehler
     int init();
     int getParameter(QString name);
+    void setParameter(QString name, int parameter);
+    void start();
+    void stop();
 
 
 private:

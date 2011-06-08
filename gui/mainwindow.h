@@ -2,8 +2,10 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QTimer>
 #include <CInterface.h>
 #include <capturecom.h>
+
 
 namespace Ui {
     class MainWindow;
@@ -22,6 +24,8 @@ private:
     Ui::MainWindow *ui;
     CInterface     *mInterface;
     CaptureCom     *mCapture;
+
+    QTimer          mTimer;
 
 private slots:
     void on_startButton_clicked();

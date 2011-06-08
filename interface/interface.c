@@ -2,7 +2,6 @@
 #include <memory.h>
 #include "interface.h"
 #include <stdio.h>
-#include <tchar.h>
 
 
 /*
