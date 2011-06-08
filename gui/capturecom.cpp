@@ -1,7 +1,7 @@
 #include "capturecom.h"
 
-CaptureCom::CaptureCom(CInterface* interface, QObject *parent) :
-    QObject(parent), mInterface(interface)
+CaptureCom::CaptureCom(CInterface* in, QObject *parent) :
+    QObject(parent), mInterface(in)
 {
 }
 

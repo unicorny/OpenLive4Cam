@@ -21,7 +21,12 @@ CInterface::~CInterface()
 
 int CInterface::init()
 {
-    mCapture = interface_loadDll("libcapture.so");
+#ifdef _WIN32
+   mCapture = interface_loadDll("libcapture.dll");
+#else
+   mCapture = interface_loadDll("libcapture.so");
+#endif
+
    // mServer = interface_loadDll("OpenLive4Cam_server");
     if(!mCapture)// || !mServer)
     {
@@ -30,15 +35,18 @@ int CInterface::init()
 #ifndef _WIN32
         error.sprintf("Fehler beim laden einer Bibliothek (*.so)\n%s",  dlerror());
 #else
-        error.sprintf("Fehler beim laden einer dll\nerror nr: %d ", GetLastError());
+        if(GetLastError() == 126)
+            error.sprintf("Fehler beim laden einer dll\nDLL wurde nicht gefunden. ");
+        else
+            error.sprintf("Fehler beim laden einer dll\nerror nr: %d ", (int)GetLastError());
 #endif
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), error, QMessageBox::Abort);
         return false;
     }
     int ret = mCapture->init();
 
-
-    return true;
+    return ret;
+    //return true;
 
 }
 

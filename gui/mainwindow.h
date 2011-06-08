@@ -12,7 +12,7 @@ namespace Ui {
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    MainWindow(CInterface* interface, QWidget *parent = 0);
+    MainWindow(CInterface* in, QWidget *parent = 0);
     ~MainWindow();
 
 protected:

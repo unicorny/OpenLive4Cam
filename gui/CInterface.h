@@ -1,7 +1,7 @@
 #ifndef __GUI_INTERFACE_H
 #define __GUI_INTERFACE_H
 
- #include <QMessageBox>
+#include <QMessageBox>
 #include "../interface/interface.h"
 
 class CInterface

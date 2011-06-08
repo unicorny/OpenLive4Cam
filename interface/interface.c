@@ -1,6 +1,8 @@
-#include "malloc.h"
-#include "memory.h"
+#include <malloc.h>
+#include <memory.h>
 #include "interface.h"
+#include <stdio.h>
+#include <tchar.h>
 
 
 /*
@@ -13,7 +15,11 @@
   */
 
 #ifdef _WIN32
-//extern void *interface_loadFunction
+WINBASEAPI FARPROC WINAPI interface_loadFunction(HINSTANCE instance,LPCSTR lpcString)
+{
+    return GetProcAddress(instance, lpcString);
+}
+
 #else
 extern void *interface_loadFunction(void *__handle,
                                     __const char *__name)
@@ -23,60 +29,59 @@ extern void *interface_loadFunction(void *__handle,
 
 #endif
 
-
-SInterface* interface_loadDll(const char* dllname)
+struct SInterface* interface_loadDll(const char* dllname)
 {
-    SInterface* interface = (SInterface*)malloc(sizeof(SInterface));
-    memset(interface, 0, sizeof(SInterface));
+    struct SInterface* in = (SInterface*)malloc(sizeof(SInterface));
+    memset(in, 0, sizeof(SInterface));
     //try to load from dll
-    if(!interface->dll)
+    if(!in->dll)
     {
 #ifdef _WIN32
-        interface->dll = LoadLibrary(dllname);
+        in->dll = LoadLibraryA(dllname);
 #else
-        interface->dll = dlopen(dllname, RTLD_LAZY);
+        in->dll = dlopen(dllname, RTLD_LAZY);
 #endif
     }
-    if(interface->dll)
+    if(in->dll)
     {
-        if(!interface->init)
-            interface->init = (int (*)())(interface_loadFunction(interface->dll, "init"));
-        if(!interface->ende)
-            interface->ende = (void (*)())(interface_loadFunction(interface->dll, "ende"));
-        if(!interface->start)
-            interface->start = (int (*)())(interface_loadFunction(interface->dll, "start"));
-        if(!interface->stop)
-            interface->stop = (int (*)())(interface_loadFunction(interface->dll, "stop"));
-        if(!interface->setParameter)
-            interface->setParameter = (void (*)(const char*,int))(interface_loadFunction(interface->dll, "setParameter"));
-        if(!interface->getParameter)
-            interface->getParameter = (int* (*)(const char*))(interface_loadFunction(interface->dll, "getParameter"));
+        if(!in->init)
+            in->init = (int (*)())(interface_loadFunction(in->dll, "init"));
+        if(!in->ende)
+            in->ende = (void (*)())(interface_loadFunction(in->dll, "ende"));
+        if(!in->start)
+            in->start = (int (*)())(interface_loadFunction(in->dll, "start"));
+        if(!in->stop)
+            in->stop = (int (*)())(interface_loadFunction(in->dll, "stop"));
+        if(!in->setParameter)
+            in->setParameter = (void (*)(const char*,int))(interface_loadFunction(in->dll, "setParameter"));
+        if(!in->getParameter)
+            in->getParameter = (int* (*)(const char*))(interface_loadFunction(in->dll, "getParameter"));
 
-        if(!interface->init || !interface->ende || !interface->start || !interface->stop || !interface->getParameter || !interface->setParameter)
+        if(!in->init || !in->ende || !in->start || !in->stop || !in->getParameter || !in->setParameter)
         {
-            free(interface);
+            free(in);
             return NULL;
         }
     }
     else
     {
-        free(interface);
+        free(in);
         return NULL;
     }
-    return interface;
+    return in;
 
 }
-
-void interface_close(SInterface* interface)
+//
+void interface_close(SInterface* in)
 {
-    if(interface->dll)
+    if(in->dll)
     {
 #ifdef _WIN32
-        FreeLibrary(interface->dll);
+        FreeLibrary(in->dll);
 #else
-        dlclose(interface->dll);
+        dlclose(in->dll);
 #endif
-        memset(interface, 0, sizeof(SInterface));
-        free(interface);
+        memset(in, 0, sizeof(SInterface));
+        free(in);
     }
 }

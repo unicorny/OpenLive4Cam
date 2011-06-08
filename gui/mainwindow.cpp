@@ -1,11 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(CInterface* interface, QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mInterface(interface)
+MainWindow::MainWindow(CInterface* in, QWidget *parent) :
+    QMainWindow(parent), ui(new Ui::MainWindow), mInterface(in)
 {
     ui->setupUi(this);
-    mCapture = new CaptureCom(interface, this);
+    mCapture = new CaptureCom(in, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"));

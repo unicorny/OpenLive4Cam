@@ -17,6 +17,7 @@ int camera_resolution(string* params)
     if(params[0] == string("0"))
     {
         VideoCapture cap(0);
+        
         double v = 0.0;
         if(params[1] == string("x") || params[1] == string("width"))
             v = cap.get(CV_CAP_PROP_FRAME_WIDTH);

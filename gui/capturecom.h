@@ -9,7 +9,7 @@ class CaptureCom : public QObject
 {
 Q_OBJECT
 public:
-    explicit CaptureCom(CInterface* interface, QObject *parent = 0);
+    explicit CaptureCom(CInterface* in, QObject *parent = 0);
     void updateCamera(QComboBox* target);
     void updateResolution(QComboBox* target);
 
