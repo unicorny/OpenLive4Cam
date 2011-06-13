@@ -1,8 +1,17 @@
 #include "capturecom.h"
 
 CaptureCom::CaptureCom(CInterface* in, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL)
+    QObject(parent), mInterface(in), getPictureFunc(NULL), mImage(NULL)
 {
+}
+
+CaptureCom::~CaptureCom()
+{
+    if(mImage)
+    {
+        delete mImage;
+        mImage = NULL;
+    }
 }
 
 void CaptureCom::updateCamera(QComboBox* target)
@@ -58,6 +67,24 @@ void CaptureCom::nextFrame()
     if(!getPictureFunc)
         getPictureFunc = (int (*)(bool, bool))mInterface->getParameter("capture.getPictureFunc");
 
-    SPicture* pic = (SPicture*)getPictureFunc(true, false);
-    //QImage image(pic->channel1)
+    SPicture* pic = (SPicture*)getPictureFunc(true, true);
+    if(!pic) return;
+
+    if(mImage &&(mImage->width() != pic->width || mImage->height() != pic->height))
+    {
+        delete mImage;
+        mImage = NULL;
+    }
+    if(!mImage)
+    {
+        mImage = new QImage(pic->width, pic->height, QImage::Format_RGB32);
+    }
+   // qDebug("StepSize: %d\n", pic->pixelsize);
+    if(pic->pixelsize == 4)
+        memcpy(mImage->bits(), pic->channel1, pic->width*pic->height*4);
+    else
+        qDebug("Fehler, falsches Imageformat von capture Komponente\n");
+    //mImage.*/
+    emit setPicture(mImage);
+    
 }

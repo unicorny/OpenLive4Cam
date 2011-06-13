@@ -8,10 +8,12 @@ SOURCES += main.cpp \
     ../interface/interface.c \
     ../interface/picture.c \
     CInterface.cpp \
-    capturecom.cpp
+    capturecom.cpp \
+    videoview.cpp
 HEADERS += mainwindow.h \
     ../interface/interface.h \
     ../interface/picture.h \
     CInterface.h \
-    capturecom.h
+    capturecom.h \
+    videoview.h
 FORMS += mainwindow.ui

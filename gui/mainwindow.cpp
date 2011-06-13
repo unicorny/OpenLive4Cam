@@ -11,6 +11,7 @@ MainWindow::MainWindow(CInterface* in, QWidget *parent) :
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"));
 
     connect(&mTimer, SIGNAL(timeout()), mCapture, SLOT(nextFrame()));
+    connect(mCapture, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
 
 }
 

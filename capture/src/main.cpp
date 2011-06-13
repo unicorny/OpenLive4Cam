@@ -120,41 +120,59 @@ int start()
 
 int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
 {
-    Mat m, m2;
+    Mat m, m2, m3;
     if(!removeFrame)
         g_capture.retrieve(m);
     else
         g_capture >> m; // get a new frame from camera
-    //imshow("LIVE", frame);
+    imshow("LIVE", m);
     if(m.depth() != CV_8U)
     {
         printf("Error, depth != unsigned char\n");
         return 0;
     }
     //m.convertTo(m2, )
-    Mat* matrices = new Mat[m.channels()];
+    Mat matrices[4];
     
     if(rgb)
     {
-        split(m, matrices);
+        //split(m, matrices);
         int oldSize = picture_getSize(&g_rgbPicture);
         g_rgbPicture.width = m.cols;
         g_rgbPicture.height = m.rows;
         int newSize = picture_getSize(&g_rgbPicture);
         
+        //matrices[3] = Mat(m.cols, m.rows, 0);
+        
+        split(m, matrices);
+        matrices[3] = matrices[0].clone();
+        matrices[3] = Scalar(255);
+        merge(matrices, 4, m2);
+        //m.convertTo(m3, CV_8SC4);
+        
+        //return 0;
+        
+        
+        
+        
         if(oldSize != newSize)
         {
             picture_release(&g_rgbPicture);
-            if(picture_create(&g_rgbPicture, m.cols, m.rows, 1))
+            if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
                 printf("Fehler beim speicher reservieren in getPicture!\n");
                 return 0;
             }
+            IplImage image = m2;
+            printf("channels: %d, size: %dx%d, elemSize: %d, elemSize1: %d, step: %d\n", 
+                    m2.channels(), image.height, image.width, m2.elemSize(), m2.elemSize1(), image.widthStep);
         }
-        size_t size = m.cols*m.rows;
-        memcpy(g_rgbPicture.channel1, matrices[0].data, size);
-        memcpy(g_rgbPicture.channel2, matrices[1].data, size);
+        //return 0;
+        size_t size = m2.cols*m2.rows*4;
+        memcpy(g_rgbPicture.channel1, m2.data, size);
+        /*memcpy(g_rgbPicture.channel2, matrices[1].data, size);
         memcpy(g_rgbPicture.channel3, matrices[2].data, size);
+         */
 
         return (int)&g_rgbPicture;
         

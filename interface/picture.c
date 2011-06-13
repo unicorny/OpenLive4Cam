@@ -54,12 +54,13 @@ int picture_create(SPicture* data, int width, int height, int pixelsize)
     memset(data->channel1, 0, size);
     if(data->rgb)
     {
-        data->channel2 = (unsigned char*)malloc(size);
+        /*data->channel2 = (unsigned char*)malloc(size);
         data->channel3 = (unsigned char*)malloc(size);
         memset(data->channel2, 0, size);
         memset(data->channel3, 0, size);
         if(!data->channel2) return -2;
         if(!data->channel3) return -3;
+         */
     }
     else
     {
