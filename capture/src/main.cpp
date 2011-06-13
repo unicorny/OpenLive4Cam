@@ -164,9 +164,8 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
                 return 0;
             }
             IplImage image = m2;
-            printf("channels: %d, size: %dx%d, elemSize: %d, elemSize1: %d, step: %d, size for memcpy: %d\n", 
-                    m2.channels(), image.height, image.width, m2.elemSize(), m2.elemSize1(), image.widthStep,
-                    m2.cols*m2.rows*4);
+            printf("size for memcpy: %d, prt: %d\n", 
+                    m2.cols*m2.rows*4, g_rgbPicture.channel1);
         }
         //return 0;
         size_t size = m2.cols*m2.rows*4;
