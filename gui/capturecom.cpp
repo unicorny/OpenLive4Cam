@@ -78,6 +78,7 @@ void CaptureCom::nextFrame()
     if(!mImage)
     {
         mImage = new QImage(pic->width, pic->height, QImage::Format_RGB32);
+        qDebug("Size for memcpy: %d\n", pic->width*pic->height*4);
     }
    // qDebug("StepSize: %d\n", pic->pixelsize);
     if(pic->pixelsize == 4)
