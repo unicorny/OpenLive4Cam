@@ -53,7 +53,7 @@ void CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 {
     mInterface->setParameter("capture.camera.choose", cameraNr);
     QString res;
-    mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
+    mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), 1);
     mInterface->start();
 }
 
@@ -82,9 +82,17 @@ void CaptureCom::nextFrame()
     }
    // qDebug("StepSize: %d\n", pic->pixelsize);
     if(pic->pixelsize == 4)
-        memcpy(mImage->bits(), pic->channel1, pic->width*pic->height*4);
+    {
+        for(int i = 0; i < pic->height; i++)
+        {
+            memcpy(mImage->scanLine(i), &pic->channel1[i*pic->width*4], pic->width*4);
+        }
+        //memcpy(mImage->bits(), pic->channel1, pic->width*pic->height*4);
+    }
     else
+    {
         qDebug("Fehler, falsches Imageformat von capture Komponente\n");
+    }
     //mImage.*/
     emit setPicture(mImage);
     

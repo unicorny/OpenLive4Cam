@@ -42,12 +42,14 @@ void VideoView::paintEvent(QPaintEvent * /* event */)
         x = (area->width() - mImage->width())/2;
     if(area && area->height() > mImage->height())
         y = (area->height() - mImage->height())/2;
+    QTransform transform;
+    transform.translate(x,y);
 
-    if(x == 0 && y == 0)
-    {
-        this->parentWidget()->resize(mImage->width(), mImage->height());
-        this->resize(mImage->width(), mImage->height());
-    }
-    painter.drawRect(QRect(x, y, mImage->width(), mImage->height()));
+    int width = mImage->width() > area->width()? mImage->width():area->width();
+    int height = mImage->height() > area->height()? mImage->height():area->height();
+    this->parentWidget()->resize(width, height);
+    this->resize(width, height);
+    painter.setTransform(transform);
+    painter.drawRect(QRect(0, 0, mImage->width(), mImage->height()));
 
 }

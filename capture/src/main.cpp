@@ -98,7 +98,8 @@ int getParameter(const char* name)
 
 int start()
 {
-    g_capture.open(g_cfg.cameraNr);
+        
+    g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
         return -1;
     /*
@@ -125,7 +126,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         g_capture.retrieve(m);
     else
         g_capture >> m; // get a new frame from camera
-    imshow("LIVE", m);
+    //m = cvLoadImage("test.jpg");
     if(m.depth() != CV_8U)
     {
         printf("Error, depth != unsigned char\n");
@@ -135,45 +136,36 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
     Mat matrices[4];
     
     if(rgb)
-    {
-        //split(m, matrices);
-        int oldSize = picture_getSize(&g_rgbPicture);
-        g_rgbPicture.width = m.cols;
-        g_rgbPicture.height = m.rows;
-        int newSize = picture_getSize(&g_rgbPicture);
+    {        
         
-        //matrices[3] = Mat(m.cols, m.rows, 0);
-        
+        IplImage src = m;
+        IplImage* scaled = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 3);
+        cvResize( &src, scaled, CV_INTER_LINEAR );
+        //imshow("LIVE", scaled);
         split(m, matrices);
         matrices[3] = matrices[0].clone();
         matrices[3] = Scalar(255);
         merge(matrices, 4, m2);
-        //m.convertTo(m3, CV_8SC4);
         
-        //return 0;
-        
-        
-        
+        int oldSize = picture_getSize(&g_rgbPicture);
+        g_rgbPicture.width = m.cols;
+        g_rgbPicture.height = m.rows;
+        int newSize = picture_getSize(&g_rgbPicture);        
         
         if(oldSize != newSize)
         {
             picture_release(&g_rgbPicture);
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
-                printf("Fehler beim speicher reservieren in getPicture!\n");
+                printf("Fehler beim speicher reservieren in getPicture rgb!\n");
                 return 0;
             }
-            IplImage image = m2;
-            printf("size for memcpy: %d, prt: %d\n", 
-                    m2.cols*m2.rows*4, g_rgbPicture.channel1);
         }
         //return 0;
         size_t size = m2.cols*m2.rows*4;
         memcpy(g_rgbPicture.channel1, m2.data, size);
-        /*memcpy(g_rgbPicture.channel2, matrices[1].data, size);
-        memcpy(g_rgbPicture.channel3, matrices[2].data, size);
-         */
-
+        cvReleaseImage(&scaled);
+        
         return (int)&g_rgbPicture;
         
     }
@@ -181,6 +173,42 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
     {
         cvtColor(m, m2, CV_BGR2YCrCb);
         split(m2, matrices);
+        
+        IplImage* U = cvCreateImage(cvSize(m.cols/2, m.rows/2), IPL_DEPTH_8U, 1);
+        IplImage* V = cvCreateImage(cvSize(m.cols/2, m.rows/2), IPL_DEPTH_8U, 1);
+        IplImage uSrc = matrices[1];
+        IplImage vSrc = matrices[2];
+        cvResize(&uSrc, U, CV_INTER_LINEAR);
+        cvResize( &vSrc, V, CV_INTER_LINEAR );
+        imshow("Y", matrices[0]);
+        imshow("U", U);
+        imshow("V", V);
+        
+        int oldSize = picture_getSize(&g_yuvPicture);
+        g_yuvPicture.width = m.cols;
+        g_yuvPicture.height = m.rows;
+        int newSize = picture_getSize(&g_yuvPicture);
+
+        if(oldSize != newSize)
+        {
+            picture_release(&g_yuvPicture);
+            if(picture_create(&g_yuvPicture, m2.cols, m2.rows, 1))
+            {
+                printf("Fehler beim speicher reservieren in getPicture yuv!\n");
+                return 0;
+            }
+        }
+        //return 0;
+        size_t size = m2.cols*m2.rows;
+        memcpy(g_yuvPicture.channel1, matrices[0].data, size);
+        memcpy(g_yuvPicture.channel2, U->imageData, size/2);
+        memcpy(g_yuvPicture.channel3, V->imageData, size/2);
+        
+        cvReleaseImage(&U);
+        cvReleaseImage(&V);
+        
+        return (int)&g_yuvPicture;
+
         
     }
     return 0;
