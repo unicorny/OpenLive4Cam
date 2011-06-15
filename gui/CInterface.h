@@ -21,6 +21,7 @@ public:
 private:
     SInterface* mCapture;
     SInterface* mServer;
+    SInterface* mEncoder;
 };
 
 #endif // __GUI_INTERFACE_H

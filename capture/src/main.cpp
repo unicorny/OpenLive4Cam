@@ -48,7 +48,8 @@ int init()
     picture_init(&g_yuvPicture);
     g_rgbPicture.rgb = 1;
     g_yuvPicture.rgb = 0;
-        return 42;
+    
+    return 42;
 }
 
 void ende()
@@ -133,8 +134,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         return 0;
     }
     //m.convertTo(m2, )
-    Mat matrices[4];
-    
+    Mat matrices[4];    
     if(rgb)
     {        
         
@@ -215,7 +215,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
 }
 int stop()
 {
-    
+    g_capture.release();
     return 0;
 }
 

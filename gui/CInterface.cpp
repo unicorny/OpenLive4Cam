@@ -14,8 +14,11 @@ CInterface::~CInterface()
    interface_close(mCapture);
    if(mServer)
     interface_close(mServer);
+   if(mEncoder)
+       interface_close(mEncoder);
    mCapture = NULL;
    mServer = NULL;
+   mEncoder = NULL;
 
 }
 
@@ -25,10 +28,11 @@ int CInterface::init()
    mCapture = interface_loadDll("libcapture.dll");
 #else
    mCapture = interface_loadDll("libcapture.so");
+   //mEncoder = interface_loadDll("x264");
 #endif
 
    // mServer = interface_loadDll("OpenLive4Cam_server");
-    if(!mCapture)// || !mServer)
+    if(!mCapture)// || !mEncoder)
     {
         QString error;
 
