@@ -45,10 +45,12 @@ void picture_release(SPicture* data)
 
 int picture_create(SPicture* data, int width, int height, int pixelsize)
 {
+	size_t size = sizeof(unsigned char)* picture_getSize(data);
+
     data->width = width;
     data->height = height;
     data->pixelsize = pixelsize;
-    size_t size = sizeof(unsigned char)*picture_getSize(data);
+
     data->channel1 = (unsigned char*)malloc(size);
     if(!data->channel1) return -1;
     memset(data->channel1, 0, size);

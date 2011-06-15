@@ -25,7 +25,7 @@ CInterface::~CInterface()
 int CInterface::init()
 {
 #ifdef _WIN32
-   mCapture = interface_loadDll("libcapture.dll");
+   mCapture = interface_loadDll("capture.dll");
 #else
    mCapture = interface_loadDll("libcapture.so");
    //mEncoder = interface_loadDll("x264");

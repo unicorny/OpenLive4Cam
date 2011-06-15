@@ -36,7 +36,8 @@ struct SInterface* interface_loadDll(const char* dllname)
     if(!in->dll)
     {
 #ifdef _WIN32
-        in->dll = LoadLibraryA(dllname);
+        //in->dll = LoadLibraryA(dllname);
+        in->dll = LoadLibrary(L".\\libcapture.dll");
 #else
         in->dll = dlopen(dllname, RTLD_LAZY);
 #endif
