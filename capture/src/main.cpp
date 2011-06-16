@@ -56,7 +56,7 @@ void ende()
 {
     picture_release(&g_rgbPicture);
     picture_release(&g_yuvPicture);
-    printf("Ende called\n");
+    printf("capture.ende: called\n");
 }
 
 

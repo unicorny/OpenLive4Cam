@@ -16,7 +16,7 @@ VideoView::VideoView(QWidget *parent) :
 
 VideoView::~VideoView()
 {
-    delete mImage;
+    //delete mImage;
 }
 
 void VideoView::newPicture(QImage *image)
