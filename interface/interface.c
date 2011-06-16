@@ -83,5 +83,6 @@ void interface_close(SInterface* in)
 #endif
         memset(in, 0, sizeof(SInterface));
         free(in);
+        in = NULL;
     }
 }

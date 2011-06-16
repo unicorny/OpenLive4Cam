@@ -2,7 +2,7 @@
 
 
 CInterface::CInterface()
-    : mCapture(NULL), mServer(NULL)
+    : mCapture(NULL), mServer(NULL), mEncoder(NULL)
 {
 
 }
