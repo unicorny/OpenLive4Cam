@@ -1,7 +1,7 @@
 #include "picture.h"
 #include <stdlib.h>
 #include <memory.h>
-
+#include <stdio.h>
 
 /*
  bool rgb;
@@ -45,15 +45,17 @@ void picture_release(SPicture* data)
 
 int picture_create(SPicture* data, int width, int height, int pixelsize)
 {
-	size_t size = sizeof(unsigned char)* picture_getSize(data);
+    size_t size = 0;
 
     data->width = width;
     data->height = height;
     data->pixelsize = pixelsize;
+    size = sizeof(unsigned char)* picture_getSize(data);
 
     data->channel1 = (unsigned char*)malloc(size);
     if(!data->channel1) return -1;
     memset(data->channel1, 0, size);
+    printf("channel 1: %d bytes allociert\n", size);
     if(data->rgb)
     {
         /*data->channel2 = (unsigned char*)malloc(size);

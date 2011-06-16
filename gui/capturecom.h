@@ -13,8 +13,8 @@ public:
     ~CaptureCom();
 
     void updateCamera(QComboBox* target);
-    void updateResolution(QComboBox* target);
-    void startStreaming(int cameraNr, int resolutionNr);
+    void updateResolution(QComboBox* target, QComboBox* camera);
+    int startStreaming(int cameraNr, int resolutionNr);
     void stopStream();
 
 signals:

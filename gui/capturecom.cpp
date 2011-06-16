@@ -31,15 +31,19 @@ void CaptureCom::updateCamera(QComboBox* target)
     }
 }
 
-void CaptureCom::updateResolution(QComboBox* target)
+void CaptureCom::updateResolution(QComboBox* target, QComboBox* camera)
 {
     //Auflösung
-    int count = mInterface->getParameter("capture.camera.0.resolution.count");
+    QString getCount;
+    int choosenKamera = camera->itemData(camera->currentIndex()).toInt();
+    getCount.sprintf("capture.camera.%d.resolution.count", choosenKamera);
+    int count = mInterface->getParameter(getCount);
+    target->clear();
     for(int i = 0; i < count; i++)
     {
         QString name;
-        QString x(QString((const char*)mInterface->getParameter(name.sprintf("capture.camera.0.resolution.%d.x", i))));
-        QString y(QString((const char*)mInterface->getParameter(name.sprintf("capture.camera.0.resolution.%d.y", i))));
+        QString x(QString((const char*)mInterface->getParameter(name.sprintf("capture.camera.%d.resolution.%d.x", choosenKamera, i))));
+        QString y(QString((const char*)mInterface->getParameter(name.sprintf("capture.camera.%d.resolution.%d.y", choosenKamera, i))));
         target->addItem(x+"x"+y, QVariant(i));
     }
     if(count == 0)
@@ -49,12 +53,17 @@ void CaptureCom::updateResolution(QComboBox* target)
     }
 }
 
-void CaptureCom::startStreaming(int cameraNr, int resolutionNr)
+int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 {
     mInterface->setParameter("capture.camera.choose", cameraNr);
     QString res;
-    mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), 1);
-    mInterface->start();
+    mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
+    if(mInterface->start())
+    {
+        qDebug("Fehler, Capture konnte nicht gestartet werden!");
+        return -1;
+    }
+    return 0;
 }
 
 void CaptureCom::stopStream()

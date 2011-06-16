@@ -26,8 +26,10 @@ private:
     CaptureCom     *mCapture;
 
     QTimer          mTimer;
+    bool            mStreamingRunning;
 
 private slots:
+    void on_source_comboBox_currentIndexChanged(int index);
     void on_startButton_clicked();
 
 };

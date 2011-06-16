@@ -63,6 +63,12 @@ void ende()
 
 void setParameter(const char* name, int value)
 {
+    //printf("capture.setParameter: name: %s, value: %d\n", name, value);
+    if(string(name) == string("capture.camera.choose"))
+    {
+      //  printf("Kamera Nummer: %d ausgewaehlt\n", value);
+        g_cfg.cameraNr = value;
+    }
 }
 
 int getParameter(const char* name)
@@ -99,7 +105,6 @@ int getParameter(const char* name)
 
 int start()
 {
-        
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
         return -1;
@@ -148,10 +153,10 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         merge(matrices, 4, m2);
         
         int oldSize = picture_getSize(&g_rgbPicture);
-        g_rgbPicture.width = m.cols;
-        g_rgbPicture.height = m.rows;
-        int newSize = picture_getSize(&g_rgbPicture);        
-        
+        g_rgbPicture.width = m2.cols;
+        g_rgbPicture.height = m2.rows;
+        int newSize = picture_getSize(&g_rgbPicture);  
+                
         if(oldSize != newSize)
         {
             picture_release(&g_rgbPicture);
@@ -161,9 +166,11 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
                 return 0;
             }
         }
+        
         //return 0;
         size_t size = m2.cols*m2.rows*4;
         memcpy(g_rgbPicture.channel1, m2.data, size);
+ 
         cvReleaseImage(&scaled);
         
         return (int)&g_rgbPicture;

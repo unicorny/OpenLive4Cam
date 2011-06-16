@@ -64,10 +64,9 @@ void CInterface::setParameter(QString name, int parameter)
     mCapture->setParameter(qPrintable(name), parameter);
 }
 
-void CInterface::start()
+int CInterface::start()
 {
-    qWarning("Start");
-    mCapture->start();
+    return mCapture->start();
 }
 
 void CInterface::stop()
