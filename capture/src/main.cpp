@@ -176,7 +176,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         IplImage src = m;
         IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
         cvResize( &src, scaled, CV_INTER_LINEAR );
-        //imshow("LIVE", scaled);
+        imshow("LIVE", scaled);
         split(scaled, matrices);
         matrices[3] = matrices[0].clone();
         matrices[3] = Scalar(255);

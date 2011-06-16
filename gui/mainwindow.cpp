@@ -1,13 +1,15 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(CInterface* in, QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mInterface(in), mCapture(NULL), mTimer(this), mStreamingRunning(false)
+MainWindow::MainWindow(QWidget *parent) :
+    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL), mTimer(this), mStreamingRunning(false)
 {
+    if(!mInterface.init())
+        QCoreApplication::exit();
     ui->setupUi(this);
     QTextEdit* line = this->findChild<QTextEdit*>("textLog");
 
-    mCapture = new CaptureCom(in, line, this);
+    mCapture = new CaptureCom(&mInterface, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"), this->findChild<QComboBox*>("source_comboBox"));
@@ -22,9 +24,6 @@ MainWindow::~MainWindow()
     delete ui;
     if(mCapture)
         delete mCapture;
-    if(mInterface)
-        delete mInterface;
-
 }
 
 void MainWindow::changeEvent(QEvent *e)

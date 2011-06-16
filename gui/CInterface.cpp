@@ -9,6 +9,7 @@ CInterface::CInterface()
 
 CInterface::~CInterface()
 {
+    qDebug("call ende for modules!\n");
    if(mCapture->ende)
         mCapture->ende();
    interface_close(mCapture);
@@ -19,13 +20,17 @@ CInterface::~CInterface()
    mCapture = NULL;
    mServer = NULL;
    mEncoder = NULL;
+   qDebug("Cinterface deconstructor ende!\n");
 
 }
+
 
 int CInterface::init()
 {
 #ifdef _WIN32
-   mCapture = interface_loadDll("capture.dll");
+    QString name = "libcapture.dll";
+    mCapture = interface_loadDll(qPrintable(name));
+    qDebug(qPrintable(name));
 #else
    mCapture = interface_loadDll("libcapture.so");
    //mEncoder = interface_loadDll("x264");

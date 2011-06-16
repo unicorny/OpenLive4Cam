@@ -14,7 +14,7 @@ namespace Ui {
 class MainWindow : public QMainWindow {
     Q_OBJECT
 public:
-    MainWindow(CInterface* in, QWidget *parent = 0);
+    MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
 protected:
@@ -22,7 +22,7 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    CInterface     *mInterface;
+    CInterface     mInterface;
     CaptureCom     *mCapture;
 
     QTimer          mTimer;

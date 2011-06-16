@@ -2,6 +2,7 @@
 #define __GUI_INTERFACE_H
 
 #include <QMessageBox>
+#include <QTextEdit>
 #include "../interface/interface.h"
 
 class CInterface
@@ -16,7 +17,6 @@ public:
     void setParameter(QString name, int parameter);
     int start();
     void stop();
-
 
 private:
     SInterface* mCapture;
