@@ -1,7 +1,7 @@
 #include "capturecom.h"
 
-CaptureCom::CaptureCom(CInterface* in, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL), mImage(NULL)
+CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
+    QObject(parent), mInterface(in), getPictureFunc(NULL), mImage(NULL), mLogger(logger)
 {
 }
 
@@ -56,6 +56,8 @@ void CaptureCom::updateResolution(QComboBox* target, QComboBox* camera)
 void CaptureCom::chooseCurrentCamera(int cameraNr)
 {
     mInterface->setParameter("capture.camera.choose", cameraNr);
+    QString text;
+    mLogger->append(text.sprintf("Kamera: %d wurde ausgewaehlt", cameraNr));
 }
 
 int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
@@ -68,12 +70,14 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
         qDebug("Fehler, Capture konnte nicht gestartet werden!");
         return -1;
     }
+    mLogger->append("Der Stream wurde gestartet!");
     return 0;
 }
 
 void CaptureCom::stopStream()
 {
     mInterface->stop();
+    mLogger->append("Der Stream wurde angehalten!");
 }
 
 void CaptureCom::nextFrame()

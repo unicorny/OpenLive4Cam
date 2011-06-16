@@ -3,13 +3,14 @@
 
 #include <QObject>
 #include <QComboBox>
+#include <QTextEdit>
 #include <CInterface.h>
 
 class CaptureCom : public QObject
 {
 Q_OBJECT
 public:
-    explicit CaptureCom(CInterface* in, QObject *parent = 0);
+    explicit CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent = 0);
     ~CaptureCom();
 
     void updateCamera(QComboBox* target);
@@ -32,6 +33,7 @@ private:
     CInterface* mInterface;
     int (*getPictureFunc)(bool,bool);
     QImage* mImage;
+    QTextEdit*   mLogger;
 
 
 };

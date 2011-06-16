@@ -5,7 +5,9 @@ MainWindow::MainWindow(CInterface* in, QWidget *parent) :
     QMainWindow(parent), ui(new Ui::MainWindow), mInterface(in), mCapture(NULL), mTimer(this), mStreamingRunning(false)
 {
     ui->setupUi(this);
-    mCapture = new CaptureCom(in, this);
+    QTextEdit* line = this->findChild<QTextEdit*>("textLog");
+
+    mCapture = new CaptureCom(in, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"), this->findChild<QComboBox*>("source_comboBox"));
