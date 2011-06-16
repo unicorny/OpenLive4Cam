@@ -39,7 +39,7 @@ int camera_count()
     int i = 0;
     while(true)
     {
-        VideoCapture cap(i); // open the default camera
+        VideoCapture cap(i); // try to open a camera
         if(!cap.isOpened())  // check if we succeeded
                 return i;
         cap.release();
@@ -53,30 +53,31 @@ int camera_count()
 
 int camera_number(int number, string* params)
 {
-    VideoCapture cap(number); // open the choosen camera
+   /* VideoCapture cap(number); // open the choosen camera
     if(!cap.isOpened())  // check if we succeeded
         return 0;
+    * */
     
     if(params[0] == string("name"))
     {
         if(number == 0)
         {
-            cap.release();
+            //cap.release();
             return (int)"0 (default)";
         }
         else 
         {
             sprintf(gBuffer, "%d", number);
-            cap.release();
+           // cap.release();
             return (int)gBuffer;
         }
     }
     else if(params[0] == string("resolution"))
     {
-        cap.release();
+       // cap.release();
         return camera_resolution(&params[1], number);
     }
-    cap.release();
+   // cap.release();
     return 0;
 }
 

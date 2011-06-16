@@ -9,6 +9,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     QTextEdit* line = this->findChild<QTextEdit*>("textLog");
 
+#ifdef _WIN32
+    //Bedienung an Windows anpassen
+
+#endif
+
     mCapture = new CaptureCom(&mInterface, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
