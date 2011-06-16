@@ -16,6 +16,7 @@ public:
     void updateResolution(QComboBox* target, QComboBox* camera);
     int startStreaming(int cameraNr, int resolutionNr);
     void stopStream();
+    void chooseCurrentCamera(int cameraNr);
 
 signals:
     //void addNewCamera(QString name);

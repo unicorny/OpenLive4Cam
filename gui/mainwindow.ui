@@ -18,216 +18,127 @@
     <normaloff>../doc/symbol.gif</normaloff>../doc/symbol.gif</iconset>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <widget class="QPushButton" name="exitButton">
-    <property name="geometry">
-     <rect>
-      <x>560</x>
-      <y>550</y>
-      <width>85</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Beenden</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>10</y>
-      <width>112</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Kamera auswählen: </string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="source_comboBox">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>191</width>
-      <height>24</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>10</y>
-      <width>52</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Port:</string>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="port_spinBox">
-    <property name="geometry">
-     <rect>
-      <x>220</x>
-      <y>30</y>
-      <width>61</width>
-      <height>23</height>
-     </rect>
-    </property>
-    <property name="toolTip">
-     <string comment="Port" extracomment="Port für RTSP Streaming uaswählen">Port für RTSP Streaming auswählen (default ist 554)</string>
-    </property>
-    <property name="minimum">
-     <number>0</number>
-    </property>
-    <property name="maximum">
-     <number>10000</number>
-    </property>
-    <property name="value">
-     <number>8554</number>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_3">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>10</y>
-      <width>61</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Auflösung:</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="resolution_comboBox">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>30</y>
-      <width>81</width>
-      <height>24</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="startButton">
-    <property name="geometry">
-     <rect>
-      <x>420</x>
-      <y>30</y>
-      <width>111</width>
-      <height>27</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Start Streaming</string>
-    </property>
-   </widget>
-   <widget class="QLCDNumber" name="lcdNumber">
-    <property name="geometry">
-     <rect>
-      <x>470</x>
-      <y>550</y>
-      <width>64</width>
-      <height>23</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>400</x>
-      <y>550</y>
-      <width>71</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Zuschauer:</string>
-    </property>
-   </widget>
-   <widget class="QTextEdit" name="logText">
-    <property name="enabled">
-     <bool>true</bool>
-    </property>
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>590</y>
-      <width>641</width>
-      <height>51</height>
-     </rect>
-    </property>
-    <property name="readOnly">
-     <bool>true</bool>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>570</y>
-      <width>52</width>
-      <height>13</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Logging:</string>
-    </property>
-   </widget>
-   <widget class="QScrollArea" name="scrollArea">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>60</y>
-      <width>640</width>
-      <height>480</height>
-     </rect>
-    </property>
-    <property name="verticalScrollBarPolicy">
-     <enum>Qt::ScrollBarAsNeeded</enum>
-    </property>
-    <property name="horizontalScrollBarPolicy">
-     <enum>Qt::ScrollBarAsNeeded</enum>
-    </property>
-    <property name="widgetResizable">
-     <bool>false</bool>
-    </property>
-    <widget class="QWidget" name="scrollAreaWidgetContents">
-     <property name="geometry">
-      <rect>
-       <x>0</x>
-       <y>0</y>
-       <width>397</width>
-       <height>249</height>
-      </rect>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <widget class="VideoView" name="Picture" native="true">
-      <property name="geometry">
-       <rect>
-        <x>0</x>
-        <y>0</y>
-        <width>511</width>
-        <height>361</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Kamera auswählen: </string>
       </property>
      </widget>
-    </widget>
-   </widget>
+    </item>
+    <item row="0" column="1">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Auflösung:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Port:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
+     <widget class="QComboBox" name="source_comboBox"/>
+    </item>
+    <item row="1" column="1">
+     <widget class="QComboBox" name="resolution_comboBox"/>
+    </item>
+    <item row="1" column="2">
+     <widget class="QSpinBox" name="port_spinBox">
+      <property name="toolTip">
+       <string comment="Port" extracomment="Port für RTSP Streaming uaswählen">Port für RTSP Streaming auswählen (default ist 554)</string>
+      </property>
+      <property name="minimum">
+       <number>0</number>
+      </property>
+      <property name="maximum">
+       <number>10000</number>
+      </property>
+      <property name="value">
+       <number>8554</number>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="3" colspan="2">
+     <widget class="QPushButton" name="startButton">
+      <property name="text">
+       <string>Start Streaming</string>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="0" colspan="6">
+     <widget class="QScrollArea" name="scrollArea">
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAsNeeded</enum>
+      </property>
+      <property name="widgetResizable">
+       <bool>false</bool>
+      </property>
+      <widget class="QWidget" name="scrollAreaWidgetContents">
+       <property name="geometry">
+        <rect>
+         <x>0</x>
+         <y>0</y>
+         <width>397</width>
+         <height>249</height>
+        </rect>
+       </property>
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <widget class="VideoView" name="Picture" native="true">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>511</width>
+          <height>361</height>
+         </rect>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+       </widget>
+      </widget>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_5">
+      <property name="text">
+       <string>Logging:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="3" rowspan="2">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Zuschauer:</string>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="4" rowspan="2">
+     <widget class="QLCDNumber" name="lcdNumber"/>
+    </item>
+    <item row="3" column="5" rowspan="2">
+     <widget class="QPushButton" name="exitButton">
+      <property name="text">
+       <string>Beenden</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
   </widget>
  </widget>
  <layoutdefault spacing="6" margin="11"/>

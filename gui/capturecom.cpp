@@ -53,9 +53,14 @@ void CaptureCom::updateResolution(QComboBox* target, QComboBox* camera)
     }
 }
 
-int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
+void CaptureCom::chooseCurrentCamera(int cameraNr)
 {
     mInterface->setParameter("capture.camera.choose", cameraNr);
+}
+
+int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
+{
+    chooseCurrentCamera(cameraNr);
     QString res;
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
     if(mInterface->start())

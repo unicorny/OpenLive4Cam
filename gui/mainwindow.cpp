@@ -40,6 +40,7 @@ void MainWindow::changeEvent(QEvent *e)
 void MainWindow::on_startButton_clicked()
 {
     static bool toggle = false;
+    QComboBox* res = this->findChild<QComboBox*>("resolution_comboBox");
     if(!toggle)
         this->findChild<QPushButton *>("startButton")->setText("Stop Streaming");
     else
@@ -48,7 +49,6 @@ void MainWindow::on_startButton_clicked()
     if(!toggle)
     {
         QComboBox* source =  this->findChild<QComboBox*>("source_comboBox");
-        QComboBox* res = this->findChild<QComboBox*>("resolution_comboBox");
         int source_index = source->currentIndex();
         int res_index = res->currentIndex();
 
@@ -57,12 +57,14 @@ void MainWindow::on_startButton_clicked()
             mTimer.start(34);
             mStreamingRunning = true;
         }
+        res->setEnabled(false);
     }
     else
     {
         mTimer.stop();
         mCapture->stopStream();
         mStreamingRunning = false;
+        res->setEnabled(true);
     }
     toggle = !toggle;
 }
@@ -70,20 +72,6 @@ void MainWindow::on_startButton_clicked()
 void MainWindow::on_source_comboBox_currentIndexChanged(int index)
 {
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"), this->findChild<QComboBox*>("source_comboBox"));
-    if(mStreamingRunning)
-    {
-         mTimer.stop();
-         mCapture->stopStream();
+    mCapture->chooseCurrentCamera(index);
 
-         QComboBox* source =  this->findChild<QComboBox*>("source_comboBox");
-         QComboBox* res = this->findChild<QComboBox*>("resolution_comboBox");
-         int source_index = source->currentIndex();
-         int res_index = res->currentIndex();
-
-         if(!mCapture->startStreaming(source->itemData(source_index).toInt(), res->itemData(res_index).toInt()))
-         {
-             mTimer.start(34);
-             mStreamingRunning = true;
-         }
-    }
 }

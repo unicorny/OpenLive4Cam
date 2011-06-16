@@ -67,8 +67,34 @@ void setParameter(const char* name, int value)
     if(string(name) == string("capture.camera.choose"))
     {
       //  printf("Kamera Nummer: %d ausgewaehlt\n", value);
+        if(g_run && value != g_cfg.cameraNr)
+        {
+            g_run = false;
+            if(g_capture.isOpened())
+                g_capture.release();
+            g_capture.open(value);
+            if(!g_capture.isOpened())
+            {
+                g_capture.open(g_cfg.cameraNr);
+                g_run = true;
+                return;
+            }
+            g_run = true;
+        }
         g_cfg.cameraNr = value;
+        g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
+        g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
     }
+    if(!g_run)
+    {
+        if(string(name) == string("capture.resolution.x") || 
+        string(name) == string("capture.resolution.width"))
+            g_cfg.width = value;
+        else if(string(name) == string("capture.resolution.y")||
+                string(name) == string("capture.resolution.height"))
+            g_cfg.height = value;
+    }
+        
 }
 
 int getParameter(const char* name)
@@ -105,19 +131,21 @@ int getParameter(const char* name)
 
 int start()
 {
+    
+    
     g_capture.open(g_cfg.cameraNr);    
+    g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
+    g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
     if(!g_capture.isOpened())  // check if we succeeded
         return -1;
-    /*
+    
+    
     Mat temp;
     g_capture >> temp;
-    double width = g_capture.get(CV_CAP_PROP_FRAME_WIDTH);
-    double height = g_capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+    g_cfg.width = temp.cols;
+    g_cfg.height = temp.rows;
     
-    g_rgbPicture.width = g_yuvPicture.width;
-    g_rgbPicture.height = g_yuvPicture.height;
-     * */
-    
+    g_run = true;
     printf("start called\n");
 
    // namedWindow("LIVE",1);
@@ -127,6 +155,8 @@ int start()
 
 int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
 {
+    if(!g_run || !g_capture.isOpened()) return 0;
+    
     Mat m, m2, m3;
     if(!removeFrame)
         g_capture.retrieve(m);
@@ -144,10 +174,10 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
     {        
         
         IplImage src = m;
-        IplImage* scaled = cvCreateImage(cvSize(320, 240), IPL_DEPTH_8U, 3);
+        IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
         cvResize( &src, scaled, CV_INTER_LINEAR );
         //imshow("LIVE", scaled);
-        split(m, matrices);
+        split(scaled, matrices);
         matrices[3] = matrices[0].clone();
         matrices[3] = Scalar(255);
         merge(matrices, 4, m2);
@@ -222,6 +252,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
 }
 int stop()
 {
+    g_run = false;
     g_capture.release();
     return 0;
 }
