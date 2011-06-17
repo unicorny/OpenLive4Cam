@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL), mTimer(this), mStreamingRunning(false)
+    QMainWindow(parent), ui(new Ui::MainWindow), mChooseKamera(NULL), mCapture(NULL), mTimer(this), mStreamingRunning(false)
 {
     if(!mInterface.init())
         QCoreApplication::exit();
@@ -11,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 #ifdef _WIN32
     //Bedienung an Windows anpassen
+    QGroupBox* group = this->findChild<QGroupBox*>("group_box");
+    QPushButton* button = this->findChild<QPushButton*>("chooseKam");
+    group->setEnabled(false);
+    button->setEnabled(true);
 
 #endif
 
@@ -80,4 +84,9 @@ void MainWindow::on_source_comboBox_currentIndexChanged(int index)
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"), this->findChild<QComboBox*>("source_comboBox"));
     mCapture->chooseCurrentCamera(index);
 
+}
+
+void MainWindow::on_chooseKam_clicked()
+{
+    mCapture->chooseCurrentCamera(-1);
 }

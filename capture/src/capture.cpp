@@ -68,8 +68,9 @@ void setParameter(const char* name, int value)
     if(string(name) == string("capture.camera.choose"))
     {
       //  printf("Kamera Nummer: %d ausgewaehlt\n", value);
-        if(g_run && value != g_cfg.cameraNr)
+        if(g_run && (value != g_cfg.cameraNr || value == -1))
         {
+            printf("value: %d", value);
             g_run = false;
             if(g_capture.isOpened())
                 g_capture.release();

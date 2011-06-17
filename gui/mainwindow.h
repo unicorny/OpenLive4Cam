@@ -22,6 +22,9 @@ protected:
 
 private:
     Ui::MainWindow *ui;
+#ifdef _WIN32
+    QPushButton*   mChooseKamera;
+#endif
     CInterface     mInterface;
     CaptureCom     *mCapture;
 
@@ -29,6 +32,7 @@ private:
     bool            mStreamingRunning;
 
 private slots:
+    void on_chooseKam_clicked();
     void on_source_comboBox_currentIndexChanged(int index);
     void on_startButton_clicked();
 
