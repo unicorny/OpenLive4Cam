@@ -7,16 +7,21 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 #endif(COMMAND cmake_policy)
 
 
-#FIND_PACKAGE( OpenCV REQUIRED )
+add_definitions(-std=gnu99)
 
-SET(EncoderSrc encoder ../../interface/picture.c ../../interface/interface.c)
+SET(EncoderSrc encoder x264 ../../interface/picture.c ../../interface/interface.c
+               input sdp raw_input rtp_output timecode_input socket
+               ../filters/filters.c ../filters/video/cache.c ../filters/video/crop.c ../filters/video/depth.c 
+               ../filters/video/fix_vfr_pts.c ../filters/video/internal.c ../filters/video/resize.c ../filters/video/select_every.c
+               ../filters/video/source.c ../filters/video/video.c)
 #IF(WIN32)
-SET(EncoderSrc ${EncoderSrc} ../include/encoder.h ../../interface/picture.h ../../interface/interface.h)
+SET(EncoderSrc ${EncoderSrc} ../include/x264.h ../include/encoder.h ../../interface/picture.h ../../interface/interface.h
+                             ../include/input.h)
 #ENDIF(WIN32)
 
-#SET(PA x264/)
-#find_library(SDL_LIB SDL PATHS ${PA})
-SET(264_LIB  x264)
+SET(PA ../x264/)
+find_library(X264_LIB x264 PATHS ${PA})
+#SET(X264_LIB  x264)
 
 
 

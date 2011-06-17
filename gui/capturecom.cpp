@@ -1,7 +1,7 @@
 #include "capturecom.h"
 
 CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL), mImage(NULL), mLogger(logger)
+    QObject(parent), mInterface(in), getPictureFunc(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
 {
 }
 
@@ -76,6 +76,15 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
         qDebug("Fehler, Capture konnte nicht gestartet werden!");
         return -1;
     }
+   /* if(!generateSDP)
+        generateSDP = (const char*(*)())mInterface->getParameter("encoder.generateSDPFunc");
+    if(!generateSDP)
+    {
+        qDebug("CaptureCom::startStreaming() encoder.generateSDPFunc fehlgeschlagen!\n");
+        return -1;
+    }
+    */
+
     mLogger->append("Der Stream wurde gestartet!");
     return 0;
 }
@@ -92,7 +101,7 @@ void CaptureCom::nextFrame()
         getPictureFunc = (int (*)(bool, bool))mInterface->getParameter("capture.getPictureFunc");
     if(!getPictureFunc)
     {
-        qDebug("CaptureCom::nextFrame()  getPictureFunc fehlgeschlagen!\n");
+        qDebug("CaptureCom::nextFrame()  capture.getPictureFunc fehlgeschlagen!\n");
         return;
     }
 

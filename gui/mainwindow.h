@@ -22,9 +22,6 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-#ifdef _WIN32
-    QPushButton*   mChooseKamera;
-#endif
     CInterface     mInterface;
     CaptureCom     *mCapture;
 

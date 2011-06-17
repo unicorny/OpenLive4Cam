@@ -122,6 +122,13 @@ int getParameter(const char* name)
             return camera_getParameter(&g_Parameters[2]);
     else if(g_Parameters[1] == string("getPictureFunc") )
         return (int)getPicture;
+    else if(string(name) == string("capture.resolution.x") ||
+            string(name) == string("capture.resolution.width"))
+        return g_cfg.width;
+    else if(string(name) == string("capture.resolution.y") ||
+            string(name) == string("capture.resolution.height"))
+        return g_cfg.height;      
+        
     
     for(int i = 0; i < MAX_PARAMETER_COUNT; i++)
     {
@@ -176,7 +183,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         IplImage src = m;
         IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
         cvResize( &src, scaled, CV_INTER_LINEAR );
-        imshow("LIVE", scaled);
+        //imshow("LIVE", scaled);
         split(scaled, matrices);
         matrices[3] = matrices[0].clone();
         matrices[3] = Scalar(255);

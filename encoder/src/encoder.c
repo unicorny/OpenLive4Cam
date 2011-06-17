@@ -27,9 +27,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 }
 #endif //_WIN32
 
-std::string g_Parameters[MAX_PARAMETER_COUNT];
 SInterface* capture;
-bool g_run = false;
+int g_run = 0;
 
 
 int init()
@@ -54,7 +53,8 @@ int init()
 
 void ende()
 {
-    capture->ende();
+    if(capture)
+        capture->ende();
     interface_close(capture);
     printf("Encoder Modul ende\n");
 }
@@ -68,17 +68,16 @@ void setParameter(const char* name, int value)
   
     char * pch;
     pch = strtok (buffer, ".\0");
-    int count = 0;
+    /*int count = 0;
     while (pch != NULL)
     {
         g_Parameters[count++] = pch;
         pch = strtok (NULL, ".\0");
         
     }
-    //if(g_Parameters[0] != string(g_modulname))
-            //TODO: weiterleiten
-    
-    
+        */
+    if(strcmp(pch, g_modulname) != 0 && capture)
+            capture->setParameter(name, value); //TODO: weiterleiten    
         
 }
 
@@ -89,16 +88,24 @@ int getParameter(const char* name)
   
     char * pch;
     pch = strtok (buffer, ".\0");
-    int count = 0;
+   /* int count = 0;
     while (pch != NULL)
     {
         g_Parameters[count++] = pch;
         pch = strtok (NULL, ".\0");
         
+    }*/
+    if(strcmp(pch, g_modulname) != 0)
+    {
+       printf("pch: %s\n", pch); 
+        if(capture)
+            return capture->getParameter(name);
+        //TODO: weiterleiten
+        return 0;
     }
-    if(g_Parameters[0] != string(g_modulname))
-            //TODO: weiterleiten
-            return 0;
+    else if(strcmp(name, "encoder.generateSDPFunc") == 0)
+        return (int)generateSDP;
+        
     
     return 0;
   
@@ -106,11 +113,34 @@ int getParameter(const char* name)
 
 int start()
 {
-   
+    //char resolution[256];
+    //sprintf(resolution, "--input-res %dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
+    char* argv[5];
+    const char progname[] = "encoder";
+    const char profile[] = "--profile baseline";
+    const char resolution[] = "--input-res 360x192";
+    const char output[] = "-o rtp://192.168.1.51:5004";
+    const char input[] = "/media/Videos/jumper.yuv";
+    
+    argv[0] = progname;
+    argv[1] = input;    
+    argv[2] = output; 
+    argv[3] = resolution;    
+    argv[4] = profile;
+    
+    if(capture) capture->start();
+    
+    start_x264(3, argv);
     return 0;
 }
 
 int stop()
 {
+    if(capture) capture->stop();
     return 0;
+}
+
+const char* generateSDP()
+{
+    return "SDP";
 }

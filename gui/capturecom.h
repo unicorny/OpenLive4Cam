@@ -32,6 +32,7 @@ public slots:
 private:
     CInterface* mInterface;
     int (*getPictureFunc)(bool,bool);
+    const char* (*generateSDP)();
     QImage* mImage;
     QTextEdit*   mLogger;
 

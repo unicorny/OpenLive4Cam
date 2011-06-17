@@ -2,12 +2,12 @@
 #define __OPEN_LIVE_4_CAM_ENCODER_LIB__
 
 #include "../../interface/interface.h"
-#include <iostream>
+
+#include <stdint.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
-
-using namespace std;
+#include "x264.h"
 
 
 #define MAX_PARAMETER_COUNT 8
@@ -39,6 +39,8 @@ ENCODER_API int  getParameter(const char* name);
 ENCODER_API int start();
 //ENCODER_API int getPicture(bool rgb = false, bool removeFrame = true);
 ENCODER_API int stop();
+
+ENCODER_API const char* generateSDP();
 
 
 #ifdef __cplusplus

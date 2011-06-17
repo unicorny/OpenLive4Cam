@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mChooseKamera(NULL), mCapture(NULL), mTimer(this), mStreamingRunning(false)
+    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL), mTimer(this), mStreamingRunning(false)
 {
     if(!mInterface.init())
         QCoreApplication::exit();
