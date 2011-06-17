@@ -18,6 +18,7 @@ void CaptureCom::updateCamera(QComboBox* target)
 {
     //QMessageBox::warning(NULL, QString("OpenLive4Cam"), QString("udpateCam"), QMessageBox::Abort);
     //Kameras
+#ifndef _WIN32
     int count = mInterface->getParameter("capture.camera.count");
     for(int i = 0; i < count; i++)
     {
@@ -29,11 +30,13 @@ void CaptureCom::updateCamera(QComboBox* target)
         target->addItem(QString("Keine Kamera gefunden!"), QVariant(-1));
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), trUtf8("Es konnte leider keine Kamera gefunden werden. Bitte überprüfen sie die Anschlüsse!"), QMessageBox::Abort);
     }
+#endif
 }
 
 void CaptureCom::updateResolution(QComboBox* target, QComboBox* camera)
 {
     //Auflösung
+#ifndef _WIN32
     QString getCount;
     int choosenKamera = camera->itemData(camera->currentIndex()).toInt();
     getCount.sprintf("capture.camera.%d.resolution.count", choosenKamera);
@@ -51,6 +54,7 @@ void CaptureCom::updateResolution(QComboBox* target, QComboBox* camera)
         target->addItem(trUtf8("Keine Auflösung!"), QVariant(-1));
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), trUtf8("Es existiert keine Auflösung!"), QMessageBox::Abort);
     }
+#endif
 }
 
 void CaptureCom::chooseCurrentCamera(int cameraNr)
@@ -64,7 +68,9 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 {
     chooseCurrentCamera(cameraNr);
     QString res;
+#ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
+#endif
     if(mInterface->start())
     {
         qDebug("Fehler, Capture konnte nicht gestartet werden!");

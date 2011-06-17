@@ -28,7 +28,7 @@ CInterface::~CInterface()
 int CInterface::init()
 {
 #ifdef _WIN32
-    QString name = "libcapture.dll";
+    QString name = "capture.dll";
     mCapture = interface_loadDll(qPrintable(name));
     qDebug(qPrintable(name));
 #else
