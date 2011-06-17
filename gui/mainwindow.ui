@@ -48,6 +48,9 @@
     </item>
     <item row="1" column="2">
      <widget class="QSpinBox" name="port_spinBox">
+      <property name="enabled">
+       <bool>true</bool>
+      </property>
       <property name="toolTip">
        <string comment="Port" extracomment="Port für RTSP Streaming uaswählen">Port für RTSP Streaming auswählen (default ist 554)</string>
       </property>

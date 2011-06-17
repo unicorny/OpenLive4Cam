@@ -84,6 +84,11 @@ void CaptureCom::nextFrame()
 {
     if(!getPictureFunc)
         getPictureFunc = (int (*)(bool, bool))mInterface->getParameter("capture.getPictureFunc");
+    if(!getPictureFunc)
+    {
+        qDebug("CaptureCom::nextFrame()  getPictureFunc fehlgeschlagen!\n");
+        return;
+    }
 
     SPicture* pic = (SPicture*)getPictureFunc(true, true);
     if(!pic) return;

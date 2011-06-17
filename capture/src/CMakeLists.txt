@@ -9,7 +9,7 @@ endif(COMMAND cmake_policy)
 
 FIND_PACKAGE( OpenCV REQUIRED )
 
-SET(CaptureSrc main camera ../../interface/picture.c)
+SET(CaptureSrc capture camera ../../interface/picture.c)
 #IF(WIN32)
 SET(CaptureSrc ${CaptureSrc} ../include/capture.h ../include/camera.h ../../interface/picture.h ../../interface/interface.h)
 #ENDIF(WIN32)

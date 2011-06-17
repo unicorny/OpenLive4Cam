@@ -48,6 +48,7 @@ int init()
     picture_init(&g_yuvPicture);
     g_rgbPicture.rgb = 1;
     g_yuvPicture.rgb = 0;
+    printf("Capture Modul init!\n");
     
     return 42;
 }
@@ -132,10 +133,11 @@ int getParameter(const char* name)
 int start()
 {
     g_capture.open(g_cfg.cameraNr);    
-    g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
-    g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
     if(!g_capture.isOpened())  // check if we succeeded
         return -1;
+    
+    g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
+    g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
     
     Mat temp;
     g_capture >> temp;

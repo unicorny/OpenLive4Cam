@@ -152,7 +152,7 @@ $(SONAME): .depend $(OBJS) $(OBJASM) $(OBJSO)
 	$(LD)$@ $(OBJS) $(OBJASM) $(OBJSO) $(SOFLAGS) $(LDFLAGS)
 
 x264$(EXE): .depend $(OBJCLI) $(CLI_LIBX264)
-	$(LD)$@ $(OBJCLI) $(CLI_LIBX264) $(LDFLAGSCLI) $(LDFLAGS)  -lws2_32
+	$(LD)$@ $(OBJCLI) $(CLI_LIBX264) $(LDFLAGSCLI) $(LDFLAGS)  #-lws2_32
 
 checkasm: tools/checkasm.o $(LIBX264)
 	$(LD)$@ $+ $(LDFLAGS)
