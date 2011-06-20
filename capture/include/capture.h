@@ -10,6 +10,8 @@
 #include <iostream>
 #include <ctype.h>
 
+#include "../../interface/picture.h"
+
 using namespace cv;
 using namespace std;
 
@@ -51,7 +53,7 @@ CAPTURE_API void setParameter(const char* name, int value);
 CAPTURE_API int  getParameter(const char* name);
 //return 0 okay, -1 camera not open
 CAPTURE_API int start();
-CAPTURE_API int getPicture(bool rgb = false, bool removeFrame = true);
+CAPTURE_API SPicture* getPicture(int rgb = 0, int removeFrame = 1);
 CAPTURE_API int stop();
 
 

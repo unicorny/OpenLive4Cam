@@ -41,6 +41,7 @@ ENCODER_API int start();
 ENCODER_API int stop();
 
 ENCODER_API const char* generateSDP();
+ENCODER_API 
 
 
 #ifdef __cplusplus

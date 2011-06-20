@@ -163,7 +163,7 @@ static const cli_pulldown_t pulldown_values[] =
 // indexed by pic_struct enum
 static const float pulldown_frame_duration[10] = { 0.0, 1, 0.5, 0.5, 1, 1, 1.5, 1.5, 2, 3 };
 
-static int  parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt );
+static int  parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt, char* resolution );
 static int  encode( x264_param_t *param, cli_opt_t *opt );
 
 /* logging and printing for within the cli system */
@@ -200,7 +200,7 @@ void x264_cli_log( const char *name, int i_level, const char *fmt, ... )
 
 
 
-int start_x264(int argc, char* argv[])
+int start_x264(int argc, char* argv[], char* resolution)
 {
     x264_param_t param;
     cli_opt_t opt = {0};
@@ -214,11 +214,12 @@ int start_x264(int argc, char* argv[])
 #endif
 
     /* Parse command line */
-    if( parse( argc, argv, &param, &opt ) < 0 )
+    if( parse( argc, argv, &param, &opt, resolution ) < 0 )
         ret = -1;
 
     /* Control-C handler */
     signal( SIGINT, sigint_handler );
+    printf("encode::x264 ret: %d\n", ret);
 
     if( !ret )
         ret = encode( &param, &opt );
@@ -355,7 +356,7 @@ static int init_vid_filters( char *sequence, hnd_t *handle, video_info_t *info, 
 }
 
 
-static int parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt )
+static int parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt, char* resolution )
 {
     char *input_filename = NULL;
     const char *demuxer = demuxer_names[0];
@@ -374,13 +375,13 @@ static int parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt )
     memset( &output_opt, 0, sizeof(cli_output_opt_t) );
     input_opt.bit_depth = 8;
     opt->b_progress = 1;
-
-
+   
+    
     if( x264_param_default_preset( param, NULL, NULL ) < 0 )
         return -1;
     
     profile = "baseline";
-    input_opt.resolution = "360x192";
+    input_opt.resolution = resolution;    
     output_filename = "rtp://192.168.1.51:5004";
     input_filename = "/media/Videos/jumper.yuv";
 
@@ -412,9 +413,11 @@ static int parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt )
 
     if( select_input( demuxer, demuxername, input_filename, &opt->hin, &info, &input_opt ) )
         return -1;
+        
 
     FAIL_IF_ERROR( !opt->hin && input.open_file( input_filename, &opt->hin, &info, &input_opt ),
                    "could not open input file `%s'\n", input_filename )
+    
 
     x264_reduce_fraction( &info.sar_width, &info.sar_height );
     x264_reduce_fraction( &info.fps_num, &info.fps_den );
@@ -426,9 +429,11 @@ static int parse( int argc, char **argv, x264_param_t *param, cli_opt_t *opt )
     info.timebase_num = info.fps_den;
     info.timebase_den = info.fps_num;
        
-
+    
     if( init_vid_filters( vid_filters, &opt->hin, &info, param ) )
         return -1;
+    
+    
 
     /* set param flags from the post-filtered video */
     param->b_vfr_input = info.vfr;
@@ -609,7 +614,6 @@ static int encode( x264_param_t *param, cli_opt_t *opt )
     ticks_per_frame = (int64_t)param->i_timebase_den * param->i_fps_den / param->i_timebase_num / param->i_fps_num;
     FAIL_IF_ERROR2( ticks_per_frame < 1 && !param->b_vfr_input, "ticks_per_frame invalid: %"PRId64"\n", ticks_per_frame )
     ticks_per_frame = X264_MAX( ticks_per_frame, 1 );
-
     if( !param->b_repeat_headers )
     {
         // Write SPS/PPS/SEI
@@ -683,13 +687,13 @@ static int encode( x264_param_t *param, cli_opt_t *opt )
             i_previous = print_status( i_start, i_previous, i_frame_output, param->i_frame_total, i_file, param, 2 * last_dts - prev_dts - first_dts );
     }
     /* Flush delayed frames */
-    while( !b_ctrl_c && x264_encoder_delayed_frames( h ) )
+   /* while( !b_ctrl_c && x264_encoder_delayed_frames( h ) )
     {
         prev_dts = last_dts;
         i_frame_size = encode_frame( h, opt->hout, NULL, &last_dts );
         if( i_frame_size < 0 )
         {
-            b_ctrl_c = 1; /* lie to exit the loop */
+            b_ctrl_c = 1; // lie to exit the loop 
             retval = -1;
         }
         else if( i_frame_size )
@@ -702,11 +706,12 @@ static int encode( x264_param_t *param, cli_opt_t *opt )
         if( opt->b_progress && i_frame_output )
             i_previous = print_status( i_start, i_previous, i_frame_output, param->i_frame_total, i_file, param, 2 * last_dts - prev_dts - first_dts );
     }
+    */
 fail:
     if( pts_warning_cnt >= MAX_PTS_WARNING && cli_log_level < X264_LOG_DEBUG )
         x264_cli_log( "x264", X264_LOG_WARNING, "%d suppressed nonmonotonic pts warnings\n", pts_warning_cnt-MAX_PTS_WARNING );
 
-    /* duration algorithm fails when only 1 frame is output */
+   /* // duration algorithm fails when only 1 frame is output 
     if( i_frame_output == 1 )
         duration = (double)param->i_fps_den / param->i_fps_num;
     else if( b_ctrl_c )
@@ -715,19 +720,20 @@ fail:
         duration = (double)(2 * largest_pts - second_largest_pts) * param->i_timebase_num / param->i_timebase_den;
 
     i_end = x264_mdate();
-    /* Erase progress indicator before printing encoding stats. */
-    if( opt->b_progress )
-        fprintf( stderr, "                                                                               \r" );
+    */
+    // Erase progress indicator before printing encoding stats. 
+    //if( opt->b_progress )
+      //  fprintf( stderr, "                                                                               \r" );
     if( h )
         x264_encoder_close( h );
-    fprintf( stderr, "\n" );
+    //fprintf( stderr, "\n" );
 
-    if( b_ctrl_c )
-        fprintf( stderr, "aborted at input frame %d, output frame %d\n", opt->i_seek + i_frame, i_frame_output );
+    //if( b_ctrl_c )
+      //  fprintf( stderr, "aborted at input frame %d, output frame %d\n", opt->i_seek + i_frame, i_frame_output );
 
     output.close_file( opt->hout, largest_pts, second_largest_pts );
     opt->hout = NULL;
-
+/*
     if( i_frame_output > 0 )
     {
         double fps = (double)i_frame_output * (double)1000000 /
@@ -736,6 +742,7 @@ fail:
         fprintf( stderr, "encoded %d frames, %.2f fps, %.2f kb/s\n", i_frame_output, fps,
                  (double) i_file * 8 / ( 1000 * duration ) );
     }
+ //*/
 
     return retval;
 }

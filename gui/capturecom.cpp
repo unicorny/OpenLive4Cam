@@ -98,14 +98,14 @@ void CaptureCom::stopStream()
 void CaptureCom::nextFrame()
 {
     if(!getPictureFunc)
-        getPictureFunc = (int (*)(bool, bool))mInterface->getParameter("capture.getPictureFunc");
+        getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
     if(!getPictureFunc)
     {
         qDebug("CaptureCom::nextFrame()  capture.getPictureFunc fehlgeschlagen!\n");
         return;
     }
 
-    SPicture* pic = (SPicture*)getPictureFunc(true, true);
+    SPicture* pic = getPictureFunc(1, 1);
     if(!pic) return;
 
     if(mImage &&(mImage->width() != pic->width || mImage->height() != pic->height))
@@ -129,6 +129,7 @@ void CaptureCom::nextFrame()
     }
     else
     {
+
         qDebug("Fehler, falsches Imageformat von capture Komponente\n");
     }
     //mImage.*/

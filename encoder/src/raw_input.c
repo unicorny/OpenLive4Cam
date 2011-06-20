@@ -26,6 +26,7 @@
  *****************************************************************************/
 
 #include "input.h"
+#include "../../interface/picture.h"
 #define FAIL_IF_ERROR( cond, ... ) FAIL_IF_ERR( cond, "raw", __VA_ARGS__ )
 
 typedef struct
@@ -39,6 +40,7 @@ typedef struct
 
 static int open_file( char *psz_filename, hnd_t *p_handle, video_info_t *info, cli_input_opt_t *opt )
 {
+   
     raw_hnd_t *h = calloc( 1, sizeof(raw_hnd_t) );
     if( !h )
         return -1;
@@ -53,6 +55,7 @@ static int open_file( char *psz_filename, hnd_t *p_handle, video_info_t *info, c
     else
         sscanf( opt->resolution, "%dx%d", &info->width, &info->height );
     FAIL_IF_ERROR( !info->width || !info->height, "raw input requires a resolution.\n" )
+   
     if( opt->colorspace )
     {
         for( info->csp = X264_CSP_CLI_MAX-1; x264_cli_csps[info->csp].name && strcasecmp( x264_cli_csps[info->csp].name, opt->colorspace ); )
@@ -67,12 +70,13 @@ static int open_file( char *psz_filename, hnd_t *p_handle, video_info_t *info, c
     if( h->bit_depth > 8 )
         info->csp |= X264_CSP_HIGH_DEPTH;
 
-    if( !strcmp( psz_filename, "-" ) )
+    /*if( !strcmp( psz_filename, "-" ) )
         h->fh = stdin;
     else
         h->fh = fopen( psz_filename, "rb" );
     if( h->fh == NULL )
         return -1;
+     * */
 
     info->thread_safe = 1;
     info->num_frames  = 0;
@@ -87,15 +91,17 @@ static int open_file( char *psz_filename, hnd_t *p_handle, video_info_t *info, c
         h->plane_size[i] /= x264_cli_csp_depth_factor( info->csp );
     }
 
-    if( x264_is_regular_file( h->fh ) )
+  /*  if( x264_is_regular_file( h->fh ) )
     {
         fseek( h->fh, 0, SEEK_END );
         uint64_t size = ftell( h->fh );
         fseek( h->fh, 0, SEEK_SET );
         info->num_frames = size / h->frame_size;
     }
+   * */
 
     *p_handle = h;
+    
     return 0;
 }
 
@@ -103,9 +109,34 @@ static int read_frame_internal( cli_pic_t *pic, raw_hnd_t *h )
 {
     int error = 0;
     int pixel_depth = x264_cli_csp_depth_factor( pic->img.csp );
+    
+  //  FILE* f = fopen("log2.txt", "at");
+ //   fprintf(f, "encoder.raw_input::read_frame_internal: Plane Count: %d, plane.0.size: %d, plane.1.size: %d, plane.2.size: %d, plane.3.size: %d \
+//pixel-depth: %d\n",
+        //        pic->img.planes, (int)h->plane_size[0], (int)h->plane_size[1], (int)h->plane_size[2], (int)h->plane_size[3],
+          //      (int)pixel_depth);
+   // fflush(f);
+    
+        
+    SPicture* picture = getPictureFunc(0, 1);
+    if(!picture) return 1;
+    int picture_size = picture_getSize(picture);
+   // fprintf(f, "picture_size: %d, half: %d\n", picture_size, picture_size/2);
+    if( picture_size      != (int)h->plane_size[0] ||
+       (picture_size / 4) != (int)h->plane_size[1] ||
+       (picture_size / 4) != (int)h->plane_size[2])
+    {
+        printf("encoder.raw_input::read_frame_internal: picture size isn't as expected!\n");
+        return 1;
+    }
     for( int i = 0; i < pic->img.planes && !error; i++ )
     {
-        error |= fread( pic->img.plane[i], pixel_depth, h->plane_size[i], h->fh ) != h->plane_size[i];
+      //  error |= fread( pic->img.plane[i], pixel_depth, h->plane_size[i], h->fh ) != h->plane_size[i];
+     //   fprintf(f, "ptr: %d, size: %d, count: %d, stream: %d\n", (int)pic->img.plane[i], pixel_depth, (int)h->plane_size[i], (int)h->fh);
+       // fflush(f);
+        
+        memcpy(pic->img.plane[i], picture->channel[i], pixel_depth*h->plane_size[i]);
+        
         if( h->bit_depth & 7 )
         {
             /* upconvert non 16bit high depth planes to 16bit using the same
@@ -118,6 +149,7 @@ static int read_frame_internal( cli_pic_t *pic, raw_hnd_t *h )
                 plane[j] = (plane[j] << lshift) + (plane[j] >> rshift);
         }
     }
+  //  fclose(f);
     return error;
 }
 
@@ -127,9 +159,9 @@ static int read_frame( cli_pic_t *pic, hnd_t handle, int i_frame )
 
     if( i_frame > h->next_frame )
     {
-        if( x264_is_regular_file( h->fh ) )
+       /* if( x264_is_regular_file( h->fh ) )
             fseek( h->fh, i_frame * h->frame_size, SEEK_SET );
-        else
+        else*/
             while( i_frame > h->next_frame )
             {
                 if( read_frame_internal( pic, h ) )
@@ -148,9 +180,9 @@ static int read_frame( cli_pic_t *pic, hnd_t handle, int i_frame )
 static int close_file( hnd_t handle )
 {
     raw_hnd_t *h = handle;
-    if( !h || !h->fh )
+    if( !h)// || !h->fh )
         return 0;
-    fclose( h->fh );
+    //fclose( h->fh );
     free( h );
     return 0;
 }

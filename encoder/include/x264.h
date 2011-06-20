@@ -44,6 +44,7 @@
 #undef HAVE_THREAD
 #endif
 
+#include "../../interface/picture.h"
 
 #define X264_BUILD 115
 
@@ -52,7 +53,8 @@
 typedef struct x264_t x264_t;
 
 
-int start_x264(int argc, char* argv[]);
+int start_x264(int argc, char* argv[], char* resolution);
+extern SPicture* (*getPictureFunc)(int,int);
 
 /****************************************************************************
  * NAL structure and functions

@@ -68,13 +68,14 @@ int picture_create(SPicture* data, int width, int height, int pixelsize)
     }
     else
     {
-        size_t sizeHalf = sizeof(unsigned char)*picture_getSize(data)/2;
+        size_t sizeHalf = sizeof(unsigned char)*picture_getSize(data)/4;
         data->channel2 = (unsigned char*)malloc(sizeHalf);
         data->channel3 = (unsigned char*)malloc(sizeHalf);
         memset(data->channel2, 0, sizeHalf);
         memset(data->channel3, 0, sizeHalf);
         if(!data->channel2) return -4;
         if(!data->channel3) return -5;
+        printf("channel 2+3: %d bytes allociert\n", sizeHalf);
     }
     return 0;
         

@@ -28,6 +28,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 #endif //_WIN32
 
 SInterface* capture;
+SPicture* (*getPictureFunc)(int,int);
 int g_run = 0;
 
 
@@ -40,13 +41,19 @@ int init()
 #endif
     if(!capture)
     {
-        printf("Fehler beim laden des Capture Modules\n");
+        printf("encoder::init Fehler beim laden des Capture Modules\n");
         return -1;
     }
     if(capture->init() < 0)
     {
-        printf("Fehler beim initalisieren von Capture!\n");
+        printf("encoder::init Fehler beim initalisieren von Capture!\n");
         return -2;
+    }
+    getPictureFunc = (SPicture* (*)(int, int))capture->getParameter("capture.getPictureFunc");
+    if(!getPictureFunc)
+    {
+        printf("encoder::init Fehler, bei Aufruf von capture.getPictureFunc!\n");
+        return -3;
     }
     return 42;
 }
@@ -113,12 +120,11 @@ int getParameter(const char* name)
 
 int start()
 {
-    //char resolution[256];
-    //sprintf(resolution, "--input-res %dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
+    char resolution[256];
     char* argv[5];
     const char progname[] = "encoder";
     const char profile[] = "--profile baseline";
-    const char resolution[] = "--input-res 360x192";
+    //const char resolution[] = "--input-res 360x192";
     const char output[] = "-o rtp://192.168.1.51:5004";
     const char input[] = "/media/Videos/jumper.yuv";
     
@@ -129,8 +135,10 @@ int start()
     argv[4] = profile;
     
     if(capture) capture->start();
+    sprintf(resolution, "%dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
     
-    start_x264(3, argv);
+    int r = start_x264(3, argv, resolution);
+    printf("encoder::start return von start: %d\n", r);
     return 0;
 }
 

@@ -40,9 +40,15 @@ typedef struct SInterface{
  */
 typedef struct SPicture{
     int rgb;
-    unsigned char* channel1;
-    unsigned char* channel2;
-    unsigned char* channel3;
+    union
+    {
+        struct {
+            unsigned char* channel1;
+            unsigned char* channel2;
+            unsigned char* channel3;
+        };
+        unsigned char* channel[3];
+    };
     int width;
     int height;
     int pixelsize;    

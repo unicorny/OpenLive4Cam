@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 #include "../../interface/interface.h"
-#include "../../interface/picture.h"
+//#include "../../interface/picture.h"
 
 
 
@@ -160,7 +160,7 @@ int start()
     return 0;
 }
 
-int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
+SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
     if(!g_run || !g_capture.isOpened()) return 0;
     
@@ -200,7 +200,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
                 printf("Fehler beim speicher reservieren in getPicture rgb!\n");
-                return 0;
+                return NULL;
             }
         }
         
@@ -210,7 +210,7 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
  
         cvReleaseImage(&scaled);
         
-        return (int)&g_rgbPicture;
+        return &g_rgbPicture;
         
     }
     else
@@ -245,17 +245,17 @@ int getPicture(bool rgb/* = false*/, bool removeFrame/* = true*/)
         //return 0;
         size_t size = m2.cols*m2.rows;
         memcpy(g_yuvPicture.channel1, matrices[0].data, size);
-        memcpy(g_yuvPicture.channel2, U->imageData, size/2);
-        memcpy(g_yuvPicture.channel3, V->imageData, size/2);
+        memcpy(g_yuvPicture.channel2, V->imageData, size/4);
+        memcpy(g_yuvPicture.channel3, U->imageData, size/4);
         
         cvReleaseImage(&U);
         cvReleaseImage(&V);
         
-        return (int)&g_yuvPicture;
+        return &g_yuvPicture;
 
         
     }
-    return 0;
+    return NULL;
 }
 int stop()
 {
