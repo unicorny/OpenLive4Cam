@@ -17,7 +17,12 @@ CInterface::~CInterface()
         interface_close(mCapture);
     }
    if(mServer)
-    interface_close(mServer);
+    {
+       if(mServer->ende)
+           mServer->ende();
+       interface_close(mServer);
+
+    }
    if(mEncoder)
    {
         if(mEncoder->ende)
@@ -42,11 +47,12 @@ int CInterface::init()
     qDebug(qPrintable(name));
 #else
  //  mCapture = interface_loadDll("libcapture.so");
-   mEncoder = interface_loadDll("libencoder.so");
+   //mEncoder = interface_loadDll("libencoder.so");
+   mServer = interface_loadDll("libserver.so");
 #endif
 
    // mServer = interface_loadDll("OpenLive4Cam_server");
-    if(!mEncoder)
+    if(! mServer)
     {
         QString error;
 
@@ -61,8 +67,8 @@ int CInterface::init()
         QMessageBox::critical(NULL, QString("OpenLive4Cam"), error, QMessageBox::Abort);
         return false;
     }
-   // int ret = mCapture->init();
-    int ret = mEncoder->init();
+    int ret = mServer->init();
+    //ret = mEncoder->init();
 
     return ret;
     //return true;
@@ -71,20 +77,20 @@ int CInterface::init()
 
 int CInterface::getParameter(QString name)
 {
-    return mEncoder->getParameter(qPrintable(name));
+    return mServer->getParameter(qPrintable(name));
 }
 
 void CInterface::setParameter(QString name, int parameter)
 {
-    mEncoder->setParameter(qPrintable(name), parameter);
+    mServer->setParameter(qPrintable(name), parameter);
 }
 
 int CInterface::start()
 {
-    return mEncoder->start();
+    return mServer->start();
 }
 
 void CInterface::stop()
 {
-    mEncoder->stop();
+    mServer->stop();
 }
