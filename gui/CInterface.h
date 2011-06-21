@@ -18,6 +18,8 @@ public:
     int start();
     void stop();
 
+    void restart();
+
 private:
     SInterface* mCapture;
     SInterface* mServer;

@@ -29,6 +29,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 SInterface* capture;
 SPicture* (*getPictureFunc)(int,int);
+encoder_datas en_data;
 int g_run = 0;
 
 
@@ -55,6 +56,7 @@ int init()
         printf("encoder::init Fehler, bei Aufruf von capture.getPictureFunc!\n");
         return -3;
     }
+    en_data.h = NULL;
     return 42;
 }
 
@@ -112,7 +114,8 @@ int getParameter(const char* name)
     }
     else if(strcmp(name, "encoder.generateSDPFunc") == 0)
         return (int)generateSDP;
-        
+    else if(strcmp(name, "encoder.getFrameFunc") == 0)
+        return (int)getFrame;        
     
     return 0;
   
@@ -136,14 +139,36 @@ int start()
     
     if(capture) capture->start();
     sprintf(resolution, "%dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
+    printf("resolution: %s\n", resolution);
+    
+    //reset capture data
+    en_data.last_dts = 0;
+    en_data.prev_dts = 0;
+    en_data.first_dts = 0;
+    en_data.i_frame = 0;
+    en_data.i_frame_size;
+    en_data.i_end, en_data.i_previous = 0, en_data.i_start = 0;
+    en_data.i_file = 0;
+    en_data.largest_pts = -1;
+    en_data.second_largest_pts = -1;
+    en_data.pts_warning_cnt = 0;
+    en_data.i_frame_output = 0;
     
     int r = start_x264(3, argv, resolution);
     printf("encoder::start return von start: %d\n", r);
-    return 0;
+    return r;
 }
 
 int stop()
 {
+    encoder_stop_frames();
+    /*printf("en_data.h: %d\n", (int)en_data.h);
+     if( en_data.h )
+     {
+        x264_encoder_close( en_data.h );
+        en_data.h = NULL;
+     }
+     * */
     if(capture) capture->stop();
     return 0;
 }

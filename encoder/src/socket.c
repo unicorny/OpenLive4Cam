@@ -366,6 +366,13 @@ int sendFrame(rtp_out_handle* p, uint8_t *p_nalu, int i_size, x264_picture_t *p_
     int packet_size = 0;
     int first = 1;
     int last = 0;
+    
+    if(!p)
+    {
+        printf("encoder.socket::sendFrame Fehler, handle ist zero\n");
+        return 0;
+    }
+    
     p->timestamp = (unsigned long)((90000ULL * clock()) / CLOCKS_PER_SEC);
 
     while(!last)
@@ -379,7 +386,7 @@ int sendFrame(rtp_out_handle* p, uint8_t *p_nalu, int i_size, x264_picture_t *p_
       {
           packet_size = MAX_RTP_PAYLOAD_SIZE;
       }
-
+      
       sendRTPPacket(p, p_nalu+offset, packet_size, first, last, p_nalu[0]);
       first = 0;
 
@@ -387,9 +394,9 @@ int sendFrame(rtp_out_handle* p, uint8_t *p_nalu, int i_size, x264_picture_t *p_
     }
 
 #ifdef __WIN32
-        Sleep(30);
+  //      Sleep(30);
 #else
-	usleep(50000);
+//	usleep(50000);
 #endif	
     return 0;
 }

@@ -25,6 +25,7 @@
  * For more information, contact us at licensing@x264.com.
  *****************************************************************************/
 
+
 #ifndef X264_X264_H
 #define X264_X264_H
 
@@ -52,9 +53,31 @@
  *      opaque handler for encoder */
 typedef struct x264_t x264_t;
 
+#   define  MAX_PTS_WARNING 3 /* arbitrary */
+
+/* struct for data for parsing, to save state between to frames*/
+typedef struct 
+{
+    int64_t last_dts;
+    int64_t prev_dts;
+    int64_t first_dts;
+    int     i_frame;
+    int     i_frame_size;
+    int64_t i_end, i_previous, i_start;
+    int64_t i_file;
+    int64_t largest_pts;
+    int64_t second_largest_pts;
+    int64_t ticks_per_frame;
+    int     i_frame_output;
+    int     pts_warning_cnt;
+    x264_t *h;
+} encoder_datas;
+
 
 int start_x264(int argc, char* argv[], char* resolution);
 extern SPicture* (*getPictureFunc)(int,int);
+int encoder_stop_frames();
+extern encoder_datas en_data;
 
 /****************************************************************************
  * NAL structure and functions
@@ -103,6 +126,8 @@ typedef struct
      * This size is the size used in mp4/similar muxing; it is equal to i_payload-4 */
     uint8_t *p_payload;
 } x264_nal_t;
+
+
 
 /****************************************************************************
  * Encoder parameters

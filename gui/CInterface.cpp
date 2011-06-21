@@ -33,6 +33,7 @@ CInterface::~CInterface()
 }
 
 
+
 int CInterface::init()
 {
 #ifdef _WIN32

@@ -37,12 +37,10 @@ ENCODER_API void setParameter(const char* name, int value);
 ENCODER_API int  getParameter(const char* name);
 //return 0 okay, -1 camera not open
 ENCODER_API int start();
-//ENCODER_API int getPicture(bool rgb = false, bool removeFrame = true);
 ENCODER_API int stop();
 
 ENCODER_API const char* generateSDP();
-ENCODER_API 
-
+ENCODER_API int getFrame();
 
 #ifdef __cplusplus
 }

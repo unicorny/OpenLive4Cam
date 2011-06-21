@@ -177,12 +177,12 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     }
     //m.convertTo(m2, )
     Mat matrices[4];    
+    IplImage src = m;
+    IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
+    cvResize( &src, scaled, CV_INTER_LINEAR );
+    
     if(rgb)
     {        
-        
-        IplImage src = m;
-        IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
-        cvResize( &src, scaled, CV_INTER_LINEAR );
         //imshow("LIVE", scaled);
         split(scaled, matrices);
         matrices[3] = matrices[0].clone();
@@ -215,22 +215,22 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     }
     else
     {
-        cvtColor(m, m2, CV_BGR2YCrCb);
+        cvtColor(scaled, m2, CV_BGR2YCrCb);
         split(m2, matrices);
         
-        IplImage* U = cvCreateImage(cvSize(m.cols/2, m.rows/2), IPL_DEPTH_8U, 1);
-        IplImage* V = cvCreateImage(cvSize(m.cols/2, m.rows/2), IPL_DEPTH_8U, 1);
+        IplImage* U = cvCreateImage(cvSize(scaled->width/2, scaled->height/2), IPL_DEPTH_8U, 1);
+        IplImage* V = cvCreateImage(cvSize(scaled->width/2, scaled->height/2), IPL_DEPTH_8U, 1);
         IplImage uSrc = matrices[1];
         IplImage vSrc = matrices[2];
         cvResize(&uSrc, U, CV_INTER_LINEAR);
         cvResize( &vSrc, V, CV_INTER_LINEAR );
-        imshow("Y", matrices[0]);
-        imshow("U", U);
-        imshow("V", V);
+    //  imshow("Y", matrices[0]);
+      //imshow("U", U);
+      //imshow("V", V);
         
         int oldSize = picture_getSize(&g_yuvPicture);
-        g_yuvPicture.width = m.cols;
-        g_yuvPicture.height = m.rows;
+        g_yuvPicture.width = scaled->width;
+        g_yuvPicture.height = scaled->height;
         int newSize = picture_getSize(&g_yuvPicture);
 
         if(oldSize != newSize)

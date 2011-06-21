@@ -51,6 +51,8 @@ struct cli_vid_filter_t
     int (*release_frame)( hnd_t handle, cli_pic_t *pic, int frame );
     /* free: run filter cleanup procedures. */
     void (*free)( hnd_t handle );
+    
+    void (*printf)(const char* text, ...);
     /* next registered filter, unused by filters themselves */
     cli_vid_filter_t *next;
 };

@@ -84,7 +84,8 @@ void x264_free_string_array( char **array )
 {
     if( !array )
         return;
-    for( int i = 0; array[i] != NULL; i++ )
+    int i = 0;
+    for(i = 0; array[i] != NULL; i++ )
         free( array[i] );
     free( array );
 }

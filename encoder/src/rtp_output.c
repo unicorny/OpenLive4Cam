@@ -88,6 +88,8 @@ static int open_file( char *psz_target, hnd_t *p_handle )
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
 	p->log = fopen("log.txt", "wt");
+        fprintf(p->log, "log oeffnet, open_file called\n");
+        fflush(p->log);
 	p->socket = openSocket(server, port);
 	if(p->socket <= 0)
 	{
@@ -186,14 +188,30 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
 static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_t *p_picture )
 {
 	rtp_out_handle* p = handle;
-	
-	//printf("write_frame: size: %d\n", i_size);
+        //printf("write_frame: size: %d\n", i_size);
 	//! TODO compiler warning: unknow conversion type
 	//fprintf(p->log, "write_frame: size: %6d, type: %c, pts: %6ld, dts: %6ld, nalu: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n", i_size, g_slice_types[p_picture->i_type], (long int)p_picture->i_pts, (long int)p_picture->i_dts, p_nalu[0], p_nalu[1], p_nalu[2], p_nalu[3], p_nalu[4], p_nalu[5]);
+        if(!p_nalu)
+        {
+            fprintf(p->log, "encoder.rtp_output::write_frame: p_nalu is zero\n");
+            return 0;
+        }
+        if(!p_picture)
+        {
+            fprintf(p->log, "encoder.rtp_output::write_frame: p_picture is zero\n");
+            return 0;
+        }
+        if(i_size < 4)
+        {
+            fprintf(p->log, "encoder.rtp_output::write_frame: i_size is < 4\n");
+            return 0;
+        }
 	if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
+       
 //    if( fwrite( p_nalu, i_size, 1, (FILE*)handle ) )
   //      return i_size;
     //return -1;
+       
     return i_size;
 }
 
@@ -205,6 +223,7 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
         return 0;
 	
     //return 0;
+    fprintf(p->log, "Ende, close from handle and log-file\n");
     int ret = fclose(p->log);
 	
     closeSocket(p->socket);
@@ -226,6 +245,7 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
     sequenznummer = p->sequenznummer;
 	
     free(p);
+    p = NULL;
 
 
     return ret;
