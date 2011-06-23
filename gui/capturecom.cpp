@@ -1,7 +1,7 @@
 #include "capturecom.h"
 
 CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL), getFrame(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
+    QObject(parent), mInterface(in), getPictureFunc(NULL), getFrameFunc(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
 {
 }
 
@@ -112,15 +112,17 @@ void CaptureCom::nextFrame()
 
     if(!getPictureFunc)
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
-    if(!getFrame)
-        getFrame = (int (*)())mInterface->getParameter("encoder.getFrameFunc");
+    if(!getFrameFunc)
+        getFrameFunc = (unsigned char* (*)(int*))mInterface->getParameter("encoder.getFrameFunc");
 
-    if(!getPictureFunc || !getFrame)
+    if(!getPictureFunc || !getFrameFunc)
     {
         qDebug("CaptureCom::nextFrame()  capture.getPictureFunc oder encoder.getFrameFunc oder server.getTickFunc fehlgeschlagen!\n");
         return;
     }
-    getFrame();
+    int size = 0;
+    //getFrameFunc(&size);
+    //qDebug("current_Frame: %d\n", size);
     SPicture* pic = getPictureFunc(1, 0);
     if(!pic) return;
 

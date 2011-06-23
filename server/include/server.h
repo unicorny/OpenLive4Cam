@@ -11,6 +11,9 @@
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
 
+#include "EncoderDeviceSource.hh"
+#include "H264VideoEncoderServerMediaSubsession.h"
+
 using namespace std;
 #define MAX_PARAMETER_COUNT 8
 const char g_modulname[] = "server";
@@ -40,6 +43,8 @@ SERVER_API int  getParameter(const char* name);
 SERVER_API int start();
 SERVER_API int stop();
 SERVER_API int run();
+
+unsigned char* (*getFrameFunc)(int*);
 
  
 

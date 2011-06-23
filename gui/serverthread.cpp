@@ -1,7 +1,7 @@
 #include "serverthread.h"
 
-ServerThread::ServerThread(int (*tick)(), QObject *parent) :
-    QThread(parent), tickFunc(tick)
+ServerThread::ServerThread(CInterface* interface, QObject *parent) :
+    QThread(parent), mInterface(interface)
 {
 
 }
@@ -18,12 +18,15 @@ ServerThread::~ServerThread()
 
 void ServerThread::run()
 {
-    if(!tickFunc) return;
-    forever {
+    int (*tick)();
+            
+    //forever {
         mutex.lock();
-        for(int i = 0; i < 100; i++)
-               tickFunc();
+
+        tick = (int (*)())mInterface->getParameter("server.getTickFunc");
+        if(tick) tick();
+
         mutex.unlock();
-        usleep(10);
-    }
+        usleep(1000);
+    //}
 }

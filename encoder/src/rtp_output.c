@@ -27,6 +27,7 @@
 #include "output.h"
 #include "socket.h"
 
+
 //tools
 //! \brief gibt die x264 Parameter aus
 void print_x264_param(x264_param_t* p_param)
@@ -177,6 +178,8 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
     // the first 4 bytes are the NAL size in bytes. skip this
     if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
     if(sendFrame(p, p_nal[1].p_payload+4, p_nal[1].i_payload-4, NULL) < 0)  return -1;
+    g_FrameBuffer = stack_init(p_nal[0].p_payload, p_nal[0].i_payload);
+    frame_to_stack(g_FrameBuffer, p_nal[1].p_payload, p_nal[1].i_payload);
 
     assert( p_nal[2].i_type == NAL_SEI );
 	
@@ -206,7 +209,9 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
             fprintf(p->log, "encoder.rtp_output::write_frame: i_size is < 4\n");
             return 0;
         }
-	if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
+	if(sendFrame(p, p_nalu, i_size, p_picture) < 0)  return -1;
+        if(g_FrameBuffer)
+         frame_to_stack(g_FrameBuffer, p_nalu, i_size);
        
 //    if( fwrite( p_nalu, i_size, 1, (FILE*)handle ) )
   //      return i_size;

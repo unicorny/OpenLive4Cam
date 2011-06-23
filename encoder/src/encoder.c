@@ -30,6 +30,7 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 SInterface* capture;
 SPicture* (*getPictureFunc)(int,int);
 encoder_datas en_data;
+SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
 
 
@@ -62,6 +63,11 @@ int init()
 
 void ende()
 {
+    stop();
+    //löschen des letzten Frames
+    getFrame(NULL);
+ 
+    clear_stack(g_FrameBuffer);
     if(capture)
         capture->ende();
     interface_close(capture);
@@ -112,8 +118,6 @@ int getParameter(const char* name)
         //TODO: weiterleiten
         return 0;
     }
-    else if(strcmp(name, "encoder.generateSDPFunc") == 0)
-        return (int)generateSDP;
     else if(strcmp(name, "encoder.getFrameFunc") == 0)
         return (int)getFrame;        
     
@@ -173,7 +177,4 @@ int stop()
     return 0;
 }
 
-const char* generateSDP()
-{
-    return "SDP";
-}
+

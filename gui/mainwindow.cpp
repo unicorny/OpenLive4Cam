@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     button->setEnabled(true);
 
 #endif
-    mServer = new ServerThread((int (*)())mInterface.getParameter("server.getTickFunc"), this);
+    mServer = new ServerThread(&mInterface, this);
     mCapture = new CaptureCom(&mInterface, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
@@ -31,6 +31,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    mServer->quit();
     if(mServer)
     {
         delete mServer;

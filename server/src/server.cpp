@@ -41,6 +41,9 @@ UsageEnvironment* env = NULL;
 TaskScheduler* scheduler = NULL;
 RTSPServer* rtspServer = NULL;
 UserAuthenticationDatabase* authDB = NULL;
+
+bool g_run = false;
+char g_watch = 1;
 #ifdef ACCESS_CONTROL
   // To implement client access control to the RTSP server, do the following:
   authDB = new UserAuthenticationDatabase;
@@ -68,7 +71,14 @@ int init()
         printf("server::init Fehler beim initalisieren von Capture!\n");
         return -2;
     }
-    
+    //getFrame function holen von encoder
+    getFrameFunc = (unsigned char* (*)(int*))encoder->getParameter("encoder.getFrameFunc");
+    if(!getFrameFunc)
+    {
+        g_Messages.push(string("Error, encoder.getFrameFunc didn't work as exceptet!"));
+        return -4;
+    }
+ //return 0;    
     //live starten
     scheduler = BasicTaskScheduler::createNew();
     env = BasicUsageEnvironment::createNew(*scheduler);
@@ -82,18 +92,20 @@ int init()
 
 int run()
 {
-    env->taskScheduler().doEventLoop();
+    if(env)
+    {
+        env->taskScheduler().doEventLoop(&g_watch);
+        //((BasicTaskScheduler0)env->taskScheduler()).SingleStep();
+    }
 }
 
 void ende()
 {
-//    SAVE_DELETE(env);
-    env->reclaim();
-    SAVE_DELETE(scheduler);
-    env = NULL;
-    
+    g_run = false;
+//    SAVE_DELETE(env);    
     if(encoder)
         encoder->ende();
+  //  return;
     interface_close(encoder);
     printf("Server Modul ende\n");
 }
@@ -167,12 +179,11 @@ int getParameter(const char* name)
     return 0;
 }
 static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms,
-			   char const* streamName, char const* inputFileName) {
+			   char const* streamName) {
   char* url = rtspServer->rtspURL(sms);
   string a;
   a += streamName;
-  a += "\" stream, from the file \"";
-  a += inputFileName;
+  a += "\" stream, from camera \"";
   a += "\"\n";
   a += "Play this stream using the URL \"";
   a += url;
@@ -194,6 +205,7 @@ int start()
            return ret;
        }
     }
+    return 0;
     
     RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
@@ -208,14 +220,21 @@ int start()
   {
     char const* streamName = "h264";
     char const* inputFileName = "/media/Videos/test.264";
+    
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
-    sms->addSubsession(H264VideoFileServerMediaSubsession
+    EncoderDeviceSource* eds = 
+            EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
+    sms->addSubsession(H264VideoEncoderServerMediaSubsession
+		       ::createNew(*env, eds, reuseFirstSource));
+    //*/
+  /*  sms->addSubsession(H264VideoFileServerMediaSubsession
 		       ::createNew(*env, inputFileName, reuseFirstSource));
+   //*/
     rtspServer->addServerMediaSession(sms);
 
-    announceStream(rtspServer, sms, streamName, inputFileName);
+    announceStream(rtspServer, sms, streamName);
   }
 
  
@@ -233,12 +252,15 @@ int start()
       sprintf(t, "(RTSP-over-HTTP tunneling is not available.)");
   }
     g_Messages.push(string(t));
+    g_run = true;
   
     return 0;
 }
 int stop()
 {
-    rtspServer->close(*env, "h264");
+    g_run = false;
+    g_watch = 0;
+   // rtspServer->close(*env, "h264");
     if(encoder)
         encoder->stop();
     return 0;

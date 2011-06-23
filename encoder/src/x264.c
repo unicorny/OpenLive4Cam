@@ -574,17 +574,35 @@ static int encode_frames(cli_opt_t *opt)
      
         return retval;
 }
-
+unsigned char* getFrame(int *size)
+{
+    static SFrame* current = NULL;
+    if(current) delete_frame(current);
+    current = NULL;
+    if(size)
+    {
+        if(encode_frames(&opt))
+        {
+            printf("encoder: Fehler bei encode_frames\n");
+            return 0;
+        }
+        if(!g_FrameBuffer) return 0;
+        stack_pop(g_FrameBuffer, &current);
+        *size = current->size;
+        return current;
+    }
+    return 0;
+}
+/*
 int getFrame()
 {
-    
     return encode_frames(&opt);
 }
-
+*/
 int encoder_stop_frames()
 {
     ///* clean up handles 
-   if( filter.free ){
+   if( filter.free && opt.hin){
         filter.free( opt.hin );
         opt.hin = NULL;
    }

@@ -4,12 +4,13 @@
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
+#include "CInterface.h"
 
 class ServerThread : public QThread
 {
 Q_OBJECT
 public:
-    explicit ServerThread(int (*tick)(), QObject *parent = 0);
+    explicit ServerThread(CInterface* interface, QObject *parent = 0);
     ~ServerThread();
 
 signals:
@@ -22,7 +23,8 @@ protected:
 private:
     QMutex mutex;
     QWaitCondition condition;
-   int (*tickFunc)();
+   //int (*tickFunc)();
+    CInterface* mInterface;
 
 };
 

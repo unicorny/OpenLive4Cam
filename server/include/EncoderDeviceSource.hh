@@ -29,22 +29,29 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #endif
 
 // The following class can be used to define specific encoder parameters
-class DeviceParameters {
+class EncoderDeviceParameters {
   //%%% TO BE WRITTEN %%%
 public:
-    int(*getFrame)();
+    EncoderDeviceParameters(unsigned char*(*getFrameFunc)(int*), bool* run)
+    : getFrame(getFrameFunc), running(run), tempSize(0), tempData(NULL){}
+    
+    unsigned char*(*getFrame)(int*);
+    bool* running;
+    
+    int tempSize;
+    unsigned char* tempData;
 };
 
 class EncoderDeviceSource: public FramedSource {
 public:
   static EncoderDeviceSource* createNew(UsageEnvironment& env,
-				 DeviceParameters params);
+				 EncoderDeviceParameters params);
 
 public:
   static EventTriggerId eventTriggerId;
 
 protected:
-  EncoderDeviceSource(UsageEnvironment& env, DeviceParameters params);
+  EncoderDeviceSource(UsageEnvironment& env, EncoderDeviceParameters params);
   // called only by createNew(), or by subclass constructors
   virtual ~EncoderDeviceSource();
 
@@ -58,7 +65,7 @@ private:
 
 private:
   static unsigned referenceCount; // used to count how many instances of this class currently exist
-  DeviceParameters fParams;
+  EncoderDeviceParameters fParams;
 };
 
 #endif

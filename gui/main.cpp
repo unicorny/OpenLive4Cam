@@ -9,6 +9,6 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
     a.exec();
-    qDebug("Programm Ende..\n");
+    qDebug("gui.main Programm Ende..\n");
     return 0;
 }

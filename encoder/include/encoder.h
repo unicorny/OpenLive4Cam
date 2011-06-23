@@ -2,6 +2,7 @@
 #define __OPEN_LIVE_4_CAM_ENCODER_LIB__
 
 #include "../../interface/interface.h"
+#include "../../interface/frame.h"
 
 #include <stdint.h>
 #include <ctype.h>
@@ -39,8 +40,7 @@ ENCODER_API int  getParameter(const char* name);
 ENCODER_API int start();
 ENCODER_API int stop();
 
-ENCODER_API const char* generateSDP();
-ENCODER_API int getFrame();
+ENCODER_API unsigned char* getFrame(int *size);
 
 #ifdef __cplusplus
 }

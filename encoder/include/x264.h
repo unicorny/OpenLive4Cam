@@ -46,6 +46,7 @@
 #endif
 
 #include "../../interface/picture.h"
+#include "../../interface/frame.h"
 
 #define X264_BUILD 115
 
@@ -76,6 +77,8 @@ typedef struct
 
 int start_x264(int argc, char* argv[], char* resolution);
 extern SPicture* (*getPictureFunc)(int,int);
+extern SFrame_stack* g_FrameBuffer;
+
 int encoder_stop_frames();
 extern encoder_datas en_data;
 

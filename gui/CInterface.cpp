@@ -16,6 +16,7 @@ CInterface::~CInterface()
              mCapture->ende();
         interface_close(mCapture);
     }
+    qDebug("capture shutdown!\n");
    if(mServer)
     {
        if(mServer->ende)
@@ -23,12 +24,14 @@ CInterface::~CInterface()
        interface_close(mServer);
 
     }
+   qDebug("Server shutdown!\n");
    if(mEncoder)
    {
         if(mEncoder->ende)
             mEncoder->ende();
         interface_close(mEncoder);
     }
+   qDebug("Encoder shutdown!\n");
 
    mCapture = NULL;
    mServer = NULL;
