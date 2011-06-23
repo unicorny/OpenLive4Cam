@@ -9,11 +9,13 @@ SOURCES += main.cpp \
     ../interface/picture.c \
     CInterface.cpp \
     capturecom.cpp \
-    videoview.cpp
+    videoview.cpp \
+    serverthread.cpp
 HEADERS += mainwindow.h \
     ../interface/interface.h \
     ../interface/picture.h \
     CInterface.h \
     capturecom.h \
-    videoview.h
+    videoview.h \
+    serverthread.h
 FORMS += mainwindow.ui

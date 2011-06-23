@@ -7,7 +7,7 @@
 #include <dlfcn.h>
 #endif //_WIN32
 
-
+#define SAVE_DELETE(X) if(X) {delete X; X = 0;}
 
 #ifdef __cplusplus
 extern "C"

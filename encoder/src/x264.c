@@ -219,7 +219,10 @@ int start_x264(int argc, char* argv[], char* resolution)
 
     /* Parse command line */
     if( parse( &param, &opt, resolution ) < 0 )
+    {
+        printf("capture: parser error");
         ret = -1;
+    }
     
     /* Control-C handler */
     //signal( SIGINT, sigint_handler );

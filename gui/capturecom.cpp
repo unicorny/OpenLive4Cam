@@ -71,9 +71,16 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 #ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
 #endif
-    if(mInterface->start())
+    int ret = 0;
+    if((ret = mInterface->start()))
     {
-        qDebug("Fehler, Capture konnte nicht gestartet werden!");
+        mLogger->append(res.sprintf("Fehler, Server konnte nicht gestartet werden!, Fehler nummer: %d", ret));
+        char* m = NULL;
+        while((m = (char*)mInterface->getParameter("getLastMessage")) != NULL)
+        {
+            mLogger->append(m);
+        }
+        stopStream();
         return -1;
     }
    /* if(!generateSDP)
@@ -97,16 +104,22 @@ void CaptureCom::stopStream()
 
 void CaptureCom::nextFrame()
 {
+    char* m = NULL;
+    while((m = (char*)mInterface->getParameter("getLastMessage")) != NULL)
+    {
+        mLogger->append(m);
+    }
+
     if(!getPictureFunc)
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
     if(!getFrame)
         getFrame = (int (*)())mInterface->getParameter("encoder.getFrameFunc");
+
     if(!getPictureFunc || !getFrame)
     {
-        qDebug("CaptureCom::nextFrame()  capture.getPictureFunc oder capture.getFrameFunc fehlgeschlagen!\n");
+        qDebug("CaptureCom::nextFrame()  capture.getPictureFunc oder encoder.getFrameFunc oder server.getTickFunc fehlgeschlagen!\n");
         return;
     }
-
     getFrame();
     SPicture* pic = getPictureFunc(1, 0);
     if(!pic) return;
@@ -137,5 +150,7 @@ void CaptureCom::nextFrame()
     }
     //mImage.*/
     emit setPicture(mImage);
+
+
     
 }

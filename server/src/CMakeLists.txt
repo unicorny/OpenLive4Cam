@@ -4,18 +4,18 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 
 
-SET(ServerSrc server OnDemandRTSPServer.cpp
+SET(ServerSrc server H264VideoEncoderServerMediaSubsession EncoderDeviceSource
 			  ../../interface/interface.c)
 #IF(WIN32)
-SET(ServerSrc ${ServerSrc} ../include/server.h ../../interface/interface.h)
+SET(ServerSrc ${ServerSrc} ../include/server.h ../include/H264VideoEncoderServerMediaSubsession.h ../include/EncoderDeviceSource.hh ../../interface/interface.h)
 #ENDIF(WIN32)
 
 SET(PA ../lib)
-find_library(BASIC_USAGE_ENV BasicUsageEnvironment PATHS ${PA} REQUIRED)
 find_library(USAGE_ENV UsageEnvironment PATHS ${PA} REQUIRED)
-find_library(GROUP_SOCK groupsock PATHS ${PA} REQUIRED)
+find_library(BASIC_USAGE_ENV BasicUsageEnvironment PATHS ${PA} REQUIRED)
 find_library(LIVE_MEDIA liveMedia PATHS ${PA} REQUIRED)
-SET(LIBS ${LIBS} ${BASIC_USAGE_ENV} ${USAGE_ENV} ${GROUP_SOCK} ${LIVE_MEDIA})
+find_library(GROUP_SOCK groupsock PATHS ${PA} REQUIRED)
+SET(LIBS ${LIBS} ${LIVE_MEDIA}  ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
 
 
 # Declare the target (an executable)

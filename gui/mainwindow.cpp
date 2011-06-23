@@ -2,7 +2,7 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL), mTimer(this), mStreamingRunning(false)
+    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL),mServer(NULL), mTimer(this), mStreamingRunning(false)
 {
     if(!mInterface.init())
         QCoreApplication::exit();
@@ -17,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent) :
     button->setEnabled(true);
 
 #endif
-
+    mServer = new ServerThread((int (*)())mInterface.getParameter("server.getTickFunc"), this);
     mCapture = new CaptureCom(&mInterface, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
@@ -26,10 +26,16 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mTimer, SIGNAL(timeout()), mCapture, SLOT(nextFrame()));
     connect(mCapture, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
 
+    mServer->start();
 }
 
 MainWindow::~MainWindow()
 {
+    if(mServer)
+    {
+        delete mServer;
+        mServer = NULL;
+    }
     delete ui;
     if(mCapture)
         delete mCapture;
@@ -51,6 +57,8 @@ void MainWindow::on_startButton_clicked()
 {
     static bool toggle = false;
     QComboBox* res = this->findChild<QComboBox*>("resolution_comboBox");
+    QSpinBox*  port   = this->findChild<QSpinBox*>("port_spinBox");
+
     if(!toggle)
         this->findChild<QPushButton *>("startButton")->setText("Stop Streaming");
     else
@@ -64,17 +72,26 @@ void MainWindow::on_startButton_clicked()
 
         if(!mCapture->startStreaming(source->itemData(source_index).toInt(), res->itemData(res_index).toInt()))
         {
-            mTimer.start(34);
+            //Start Stream
+            mTimer.start(30);
             mStreamingRunning = true;
+            res->setEnabled(false);
+            port->setEnabled(false);
         }
-        res->setEnabled(false);
+        else
+        {
+            this->findChild<QPushButton *>("startButton")->setText("Start Streaming");
+            toggle = !toggle;
+        }
+
     }
-    else
+    else //Stop Stream
     {
         mTimer.stop();
         mCapture->stopStream();
         mStreamingRunning = false;
         res->setEnabled(true);
+        port->setEnabled(true);
     }
     toggle = !toggle;
 }
@@ -89,4 +106,9 @@ void MainWindow::on_source_comboBox_currentIndexChanged(int index)
 void MainWindow::on_chooseKam_clicked()
 {
     mCapture->chooseCurrentCamera(-1);
+}
+
+void MainWindow::on_port_spinBox_valueChanged(int value)
+{
+    mInterface.setParameter("server.port", value);
 }

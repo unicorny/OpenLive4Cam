@@ -1,6 +1,7 @@
 #include "capture.h"
 #include "camera.h"
 #include <stdio.h>
+#include <stack>
 
 #include "../../interface/interface.h"
 //#include "../../interface/picture.h"
@@ -35,7 +36,10 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 #endif //_WIN32
 
 std::string g_Parameters[MAX_PARAMETER_COUNT];
+std::stack<std::string> g_Messages;
+char g_MessagesBuffer[256];
 bool g_run = false;
+
 Config g_cfg;
 VideoCapture g_capture;
 SPicture g_rgbPicture;
@@ -101,7 +105,7 @@ void setParameter(const char* name, int value)
 
 int getParameter(const char* name)
 {
-    printf("Name: %s\n", name);
+   // printf("Name: %s\n", name);
     char buffer[256];
     sprintf(buffer, "%s", name);
     
@@ -115,7 +119,20 @@ int getParameter(const char* name)
         pch = strtok (NULL, ".\0");
         
     }
-    if(g_Parameters[0] != string(g_modulname))
+    if(g_Parameters[0] == string("getLastMessage"))
+    {
+        if(g_Messages.size())
+        {
+          sprintf(g_MessagesBuffer,"capture: %s", g_Messages.top().data());
+          g_Messages.pop();
+          return (int)g_MessagesBuffer;  
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    else if(g_Parameters[0] != string(g_modulname))
             //TODO: weiterleiten
             return 0;
     if(g_Parameters[1] == string("camera"))
@@ -130,10 +147,10 @@ int getParameter(const char* name)
         return g_cfg.height;      
         
     
-    for(int i = 0; i < MAX_PARAMETER_COUNT; i++)
+  /*  for(int i = 0; i < MAX_PARAMETER_COUNT; i++)
     {
         printf("%d: %s\n", i, g_Parameters[i].data());
-    }
+    }*/
     return 0;
   
 }
@@ -142,7 +159,11 @@ int start()
 {
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
-        return -1;
+    {
+        //printf("Kamera konnte nicht geöffnet werden!");
+        g_Messages.push(string("Fehler, Kamera konnte nicht geoeffnet werden!"));
+        return -7;
+    }
     
     g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
     g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
@@ -162,7 +183,15 @@ int start()
 
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
-    if(!g_run || !g_capture.isOpened()) return 0;
+    if(!g_run)
+    {
+        return 0;
+    }
+    else if(!g_capture.isOpened())
+    {
+         g_Messages.push(string("getPicture error, weil keine Kamera geoeffnet ist!"));
+         return 0;
+    }
     
     Mat m, m2, m3;
     if(!removeFrame)

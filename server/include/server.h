@@ -4,9 +4,12 @@
 #include <iostream>
 #include <ctype.h>
 #include <cstring>
+#include <stack>
 #include <stdio.h>
 
 #include "interface.h"
+#include "liveMedia.hh"
+#include "BasicUsageEnvironment.hh"
 
 using namespace std;
 #define MAX_PARAMETER_COUNT 8
@@ -36,6 +39,7 @@ SERVER_API void setParameter(const char* name, int value);
 SERVER_API int  getParameter(const char* name);
 SERVER_API int start();
 SERVER_API int stop();
+SERVER_API int run();
 
  
 

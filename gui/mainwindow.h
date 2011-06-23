@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <CInterface.h>
 #include <capturecom.h>
+#include <serverthread.h>
 
 
 namespace Ui {
@@ -24,11 +25,13 @@ private:
     Ui::MainWindow *ui;
     CInterface     mInterface;
     CaptureCom     *mCapture;
+    ServerThread   *mServer;
 
     QTimer          mTimer;
     bool            mStreamingRunning;
 
 private slots:
+    void on_port_spinBox_valueChanged(int );
     void on_chooseKam_clicked();
     void on_source_comboBox_currentIndexChanged(int index);
     void on_startButton_clicked();

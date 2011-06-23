@@ -106,7 +106,7 @@ int getParameter(const char* name)
     }*/
     if(strcmp(pch, g_modulname) != 0)
     {
-       printf("pch: %s\n", pch); 
+      // printf("pch: %s\n", pch); 
         if(capture)
             return capture->getParameter(name);
         //TODO: weiterleiten
