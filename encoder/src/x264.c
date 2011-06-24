@@ -577,7 +577,7 @@ static int encode_frames(cli_opt_t *opt)
 unsigned char* getFrame(int *size)
 {
     static SFrame* current = NULL;
-    if(current) delete_frame(current);
+    //if(current) delete_frame(current);
     current = NULL;
     if(size)
     {
@@ -586,10 +586,14 @@ unsigned char* getFrame(int *size)
             printf("encoder: Fehler bei encode_frames\n");
             return 0;
         }
-        if(!g_FrameBuffer) return 0;
+        if(!g_FrameBuffer || g_FrameBuffer->count < 12) return 0;
         stack_pop(g_FrameBuffer, &current);
+        //return 0;
+        //printf("encoder.x264::getFrame stack-count: %d, current. %d\n", g_FrameBuffer->count, (int)current);
+        if(!current) return 0;
+        
         *size = current->size;
-        return current;
+        return current->data;
     }
     return 0;
 }

@@ -89,6 +89,7 @@ static int open_file( char *psz_target, hnd_t *p_handle )
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
 	p->log = fopen("log.txt", "wt");
+        p->binaryOut = fopen("raw_video.264", "w+b");
         fprintf(p->log, "log oeffnet, open_file called\n");
         fflush(p->log);
 	p->socket = openSocket(server, port);
@@ -175,11 +176,17 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
     }
     printf("\n");
     
+    /*
+     fwrite( p_nal[0].p_payload, size, 1, p->binaryOut );
+     if(g_FrameBuffer) clear_stack(g_FrameBuffer);
+     g_FrameBuffer = stack_init(p_nal[0].p_payload, size);
+      //*/   
     // the first 4 bytes are the NAL size in bytes. skip this
     if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
     if(sendFrame(p, p_nal[1].p_payload+4, p_nal[1].i_payload-4, NULL) < 0)  return -1;
-    g_FrameBuffer = stack_init(p_nal[0].p_payload, p_nal[0].i_payload);
-    frame_to_stack(g_FrameBuffer, p_nal[1].p_payload, p_nal[1].i_payload);
+    //g_FrameBuffer = stack_init(p_nal[0].p_payload, p_nal[0].i_payload);
+    //frame_to_stack(g_FrameBuffer, p_nal[1].p_payload, p_nal[1].i_payload);
+     //if( fwrite( p_nal[0].p_payload, size, 1, (FILE*)handle ) )  
 
     assert( p_nal[2].i_type == NAL_SEI );
 	
@@ -209,9 +216,15 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
             fprintf(p->log, "encoder.rtp_output::write_frame: i_size is < 4\n");
             return 0;
         }
-	if(sendFrame(p, p_nalu, i_size, p_picture) < 0)  return -1;
+        
+       /* fwrite( p_nalu, i_size, 1, p->binaryOut );
         if(g_FrameBuffer)
          frame_to_stack(g_FrameBuffer, p_nalu, i_size);
+        else
+            printf("encoder.out frameBuffer is zero\n");
+        //*/
+	if(sendFrame(p, p_nalu, i_size, p_picture) < 0)  return -1;
+        
        
 //    if( fwrite( p_nalu, i_size, 1, (FILE*)handle ) )
   //      return i_size;
@@ -230,6 +243,7 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
     //return 0;
     fprintf(p->log, "Ende, close from handle and log-file\n");
     int ret = fclose(p->log);
+    fclose(p->binaryOut);
 	
     closeSocket(p->socket);
     p->socket = 0;

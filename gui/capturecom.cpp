@@ -1,4 +1,5 @@
 #include "capturecom.h"
+#include <stdio.h>
 
 CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
     QObject(parent), mInterface(in), getPictureFunc(NULL), getFrameFunc(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
@@ -93,6 +94,10 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
     */
 
     mLogger->append("Der Stream wurde gestartet!");
+
+    FILE* f = fopen("video.264", "wb");
+    if(f)
+        fclose(f);
     return 0;
 }
 
@@ -121,7 +126,19 @@ void CaptureCom::nextFrame()
         return;
     }
     int size = 0;
-    //getFrameFunc(&size);
+    unsigned char* data = getFrameFunc(&size);
+
+    FILE* f = NULL;//fopen("video.264", "ab");
+    if(f && data)
+    {
+        fwrite(data, size, 1, f);
+        fclose(f);
+     //   qDebug("write frame, size: %d", size);
+    }
+    else if(!data)
+    {
+       // qDebug("data is zero, size: %d", size);
+    }
     //qDebug("current_Frame: %d\n", size);
     SPicture* pic = getPictureFunc(1, 0);
     if(!pic) return;
@@ -134,7 +151,7 @@ void CaptureCom::nextFrame()
     if(!mImage)
     {
         mImage = new QImage(pic->width, pic->height, QImage::Format_RGB32);
-        qDebug("Size for memcpy: %d, adress: %d\n", pic->width*pic->height*4, pic->channel1);
+        qDebug("gui.CaptureCom::nextFrame Size for memcpy: %d, adress: %d\n", pic->width*pic->height*4, pic->channel1);
     }
    // qDebug("StepSize: %d\n", pic->pixelsize);
     if(pic->pixelsize == 4)

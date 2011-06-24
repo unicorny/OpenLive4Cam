@@ -4,6 +4,7 @@
 typedef struct 
 {
 	FILE* log;
+        FILE* binaryOut;
 	//SOCKET socket;
 	int  socket;
 	

@@ -26,7 +26,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(&mTimer, SIGNAL(timeout()), mCapture, SLOT(nextFrame()));
     connect(mCapture, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
 
-    mServer->start();
+   // mServer->start();
 }
 
 MainWindow::~MainWindow()
