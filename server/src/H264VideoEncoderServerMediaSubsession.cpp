@@ -91,6 +91,10 @@ FramedSource* H264VideoEncoderServerMediaSubsession::createNewStreamSource(unsig
   estBitrate = 500; // kbps, estimate
 
   // Create the video source:
+   //ByteStreamFileSource* fileSource = ByteStreamFileSource::createNew(envir(), "_video.264");
+   //if (fileSource == NULL) return NULL;
+           //fFileSize = fileSource->fileSize();
+
   
   // Create a framer for the Video Elementary Stream:
   return H264VideoStreamFramer::createNew(envir(), source);

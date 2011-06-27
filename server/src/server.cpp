@@ -43,7 +43,7 @@ RTSPServer* rtspServer = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
 bool g_run = false;
-char g_watch = 1;
+char g_watch = 0;
 #ifdef ACCESS_CONTROL
   // To implement client access control to the RTSP server, do the following:
   authDB = new UserAuthenticationDatabase;
@@ -94,6 +94,9 @@ int run()
 {
     if(env)
     {
+        g_watch = 0;
+        printf("g_watch: %d\n", (int)g_watch);
+        
         env->taskScheduler().doEventLoop(&g_watch);
         //((BasicTaskScheduler0)env->taskScheduler()).SingleStep();
     }
@@ -102,6 +105,7 @@ int run()
 void ende()
 {
     g_run = false;
+    g_watch = 1;
 //    SAVE_DELETE(env);    
     if(encoder)
         encoder->ende();
@@ -205,7 +209,7 @@ int start()
            return ret;
        }
     }
-    return 0;
+    //return 0;
     
     RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
@@ -219,7 +223,7 @@ int start()
     // A H.264 video elementary stream:
   {
     char const* streamName = "h264";
-    char const* inputFileName = "/media/Videos/test.264";
+    char const* inputFileName = "/media/Videos/raw_video.264";
     
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
@@ -229,8 +233,8 @@ int start()
     sms->addSubsession(H264VideoEncoderServerMediaSubsession
 		       ::createNew(*env, eds, reuseFirstSource));
     //*/
-  /*  sms->addSubsession(H264VideoFileServerMediaSubsession
-		       ::createNew(*env, inputFileName, reuseFirstSource));
+//    sms->addSubsession(H264VideoFileServerMediaSubsession
+//		       ::createNew(*env, inputFileName, reuseFirstSource));
    //*/
     rtspServer->addServerMediaSession(sms);
 
@@ -259,9 +263,10 @@ int start()
 int stop()
 {
     g_run = false;
-    g_watch = 0;
    // rtspServer->close(*env, "h264");
     if(encoder)
         encoder->stop();
+    
+     g_watch = 1;
     return 0;
 }

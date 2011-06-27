@@ -576,8 +576,10 @@ static int encode_frames(cli_opt_t *opt)
 }
 unsigned char* getFrame(int *size)
 {
+  //  encode_frames(&opt);
+   // return NULL;
     static SFrame* current = NULL;
-    //if(current) delete_frame(current);
+    if(current) delete_frame(current);
     current = NULL;
     if(size)
     {
@@ -592,6 +594,7 @@ unsigned char* getFrame(int *size)
         //printf("encoder.x264::getFrame stack-count: %d, current. %d\n", g_FrameBuffer->count, (int)current);
         if(!current) return 0;
         
+        //return NULL;
         *size = current->size;
         return current->data;
     }

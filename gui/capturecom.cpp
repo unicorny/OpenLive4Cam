@@ -114,6 +114,7 @@ void CaptureCom::nextFrame()
     {
         mLogger->append(m);
     }
+//    return;
 
     if(!getPictureFunc)
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
@@ -126,9 +127,9 @@ void CaptureCom::nextFrame()
         return;
     }
     int size = 0;
-    unsigned char* data = getFrameFunc(&size);
+    unsigned char* data = NULL;//getFrameFunc(&size);
 
-    FILE* f = NULL;//fopen("video.264", "ab");
+    FILE* f = fopen("video.264", "ab");
     if(f && data)
     {
         fwrite(data, size, 1, f);

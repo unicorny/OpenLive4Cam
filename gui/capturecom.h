@@ -36,8 +36,6 @@ private:
     const char* (*generateSDP)();
     QImage* mImage;
     QTextEdit*   mLogger;
-
-
 };
 
 #endif // CAPTURECOM_H

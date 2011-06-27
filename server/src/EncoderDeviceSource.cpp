@@ -45,6 +45,11 @@ EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
 
   // Any instance-specific initialization of the device would be done here:
   //%%% TO BE WRITTEN %%%
+  FILE* f = fopen("IwasHere.txt", "wt");
+  FILE* f2 = fopen("viddeo.264", "wb");
+  fprintf(f, "Constructor!\n");
+  fclose(f);
+  fclose(f2);
 
   // We arrange here for our "deliverFrame" member function to be called
   // whenever the next frame of data becomes available from the device.
@@ -78,18 +83,30 @@ EncoderDeviceSource::~EncoderDeviceSource() {
 void EncoderDeviceSource::doGetNextFrame() {
   // This function is called (by our 'downstream' object) when it asks for new data.
   // Note: If, for some reason, the source device stops being readable (e.g., it gets closed), then you do the following:
-  if (0){//!fParams.running /* the source stops being readable */ /*%%% TO BE WRITTEN %%%*/) {
+  if (!*fParams.running){//!fParams.running /* the source stops being readable */ /*%%% TO BE WRITTEN %%%*/) {
     handleClosure(this);
     return;
   }
+  FILE* f = fopen("IwasHere.txt", "at");
+  FILE* f2 = fopen("viddeo.264", "ab");
+  fprintf(f, "Hallo!\n");
+  fflush(f);
+  //printf("\n\ndoGetNextFrame\n\n");
   do {
         fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
+        fprintf(f, "frameSize: %d\n", fParams.tempSize);
+        fflush(f);
   } while(!fParams.tempSize);
+  fwrite(fParams.tempData, fParams.tempSize, 1, f2);
+  
+  fclose(f2);
+  fclose(f);
   
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
-    //deliverFrame();
+    deliverFrame();
   }
+  
 
   // No new data is immediately available to be delivered.  We don't do anything more here.
   // Instead, our event trigger must be called (e.g., from a separate thread) when new data becomes available.
@@ -124,7 +141,7 @@ void EncoderDeviceSource::deliverFrame() {
    
   if (!isCurrentlyAwaitingData()) return; // we're not ready for the data yet
         
-   int newFrameSize = fParams.tempSize; //%%% TO BE WRITTEN %%%
+   int newFrameSize = 0;//fParams.tempSize; //%%% TO BE WRITTEN %%%
    unsigned char* newFrameDataStart = fParams.tempData;
   
 

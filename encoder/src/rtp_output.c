@@ -218,10 +218,11 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
         }
         
         fwrite( p_nalu, i_size, 1, p->binaryOut );
-        if(g_FrameBuffer)
-         frame_to_stack(g_FrameBuffer, p_nalu, i_size);
+        if(!g_FrameBuffer) 
+            g_FrameBuffer = stack_init(p_nalu, i_size);
         else
-            printf("encoder.out frameBuffer is zero\n");
+           frame_to_stack(g_FrameBuffer, p_nalu, i_size);
+        
         //*/
 	if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
         
