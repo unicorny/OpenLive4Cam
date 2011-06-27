@@ -217,13 +217,13 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
             return 0;
         }
         
-       /* fwrite( p_nalu, i_size, 1, p->binaryOut );
+        fwrite( p_nalu, i_size, 1, p->binaryOut );
         if(g_FrameBuffer)
          frame_to_stack(g_FrameBuffer, p_nalu, i_size);
         else
             printf("encoder.out frameBuffer is zero\n");
         //*/
-	if(sendFrame(p, p_nalu, i_size, p_picture) < 0)  return -1;
+	if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
         
        
 //    if( fwrite( p_nalu, i_size, 1, (FILE*)handle ) )
