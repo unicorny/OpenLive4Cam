@@ -55,7 +55,7 @@ struct SInterface* interface_loadDll(const char* dllname)
         if(!in->setParameter)
             in->setParameter = (void (*)(const char*,int))(interface_loadFunction(in->dll, "setParameter"));
         if(!in->getParameter)
-            in->getParameter = (int* (*)(const char*))(interface_loadFunction(in->dll, "getParameter"));
+            in->getParameter = (int (*)(const char*))(interface_loadFunction(in->dll, "getParameter"));
 
         if(!in->init || !in->ende || !in->start || !in->stop || !in->getParameter || !in->setParameter)
         {

@@ -75,7 +75,7 @@ typedef struct
 } encoder_datas;
 
 
-int start_x264(int argc, char* argv[], char* resolution);
+int start_x264(char* resolution);
 extern SPicture* (*getPictureFunc)(int,int);
 extern SFrame_stack* g_FrameBuffer;
 

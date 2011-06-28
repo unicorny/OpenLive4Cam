@@ -3,6 +3,7 @@
 
 #include <QThread>
 #include <QMutex>
+#include <QTextEdit>
 #include <QWaitCondition>
 #include "CInterface.h"
 

@@ -10,7 +10,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 add_definitions(-std=gnu99)
 
 SET(EncoderSrc cencode encoder x264 ../../interface/picture.c ../../interface/interface.c ../../interface/frame.c
-               input sdp raw_input rtp_output timecode_input socket
+               input raw_input rtp_output timecode_input socket
                ../filters/filters.c ../filters/video/cache.c ../filters/video/crop.c ../filters/video/depth.c 
                ../filters/video/fix_vfr_pts.c ../filters/video/internal.c ../filters/video/resize.c ../filters/video/select_every.c
                ../filters/video/source.c ../filters/video/video.c)

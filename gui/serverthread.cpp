@@ -1,7 +1,7 @@
 #include "serverthread.h"
 
 ServerThread::ServerThread(CInterface* interface, QObject *parent) :
-    QThread(parent), mInterface(interface),mLogger(NULL)
+    QThread(parent), mLogger(NULL), mInterface(interface)
 {
 
 }

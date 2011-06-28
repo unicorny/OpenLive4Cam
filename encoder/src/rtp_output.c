@@ -64,7 +64,7 @@ const char g_slice_types[] = {'a', 'I', 'i', 'p', 'B', 'b', 'k'};
 //! \param p_handle zeiger auf den socket
 //! \return 0 wenn alles okay, bei Fehler -1
 static short sequenznummer;
-static int open_file( char *psz_target, hnd_t *p_handle )
+static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
 {
     static int loop;
     static int ssrc;

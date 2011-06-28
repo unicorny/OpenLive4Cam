@@ -13,6 +13,8 @@
 #else
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
+#include <arpa/inet.h>
 #include <netdb.h>
 #endif
 
@@ -126,7 +128,7 @@ void printInfos(struct addrinfo* p)
 		case AF_INET:
 			printf("AF_INET (IPv4)\n");
 			sockaddr_ipv4 = (struct sockaddr_in *) p->ai_addr;
-			printf("\tIPv4 address %d\n",
+			printf("\tIPv4 address %s\n",
 				inet_ntoa(sockaddr_ipv4->sin_addr) );
 			break;
 		case AF_INET6:

@@ -128,19 +128,7 @@ int getParameter(const char* name)
 int start()
 {
     char resolution[256];
-    char* argv[5];
-    const char progname[] = "encoder";
-    const char profile[] = "--profile baseline";
-    //const char resolution[] = "--input-res 360x192";
-    const char output[] = "-o rtp://192.168.1.51:5004";
-    const char input[] = "/media/Videos/jumper.yuv";
-    
-    argv[0] = progname;
-    argv[1] = input;    
-    argv[2] = output; 
-    argv[3] = resolution;    
-    argv[4] = profile;
-    
+     
     if(capture) capture->start();
     sprintf(resolution, "%dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
     printf("resolution: %s\n", resolution);
@@ -158,7 +146,7 @@ int start()
     en_data.pts_warning_cnt = 0;
     en_data.i_frame_output = 0;
     
-    int r = start_x264(3, argv, resolution);
+    int r = start_x264(resolution);
     printf("encoder::start return von start: %d\n", r);
     return r;
 }

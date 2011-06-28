@@ -204,7 +204,7 @@ void x264_cli_log( const char *name, int i_level, const char *fmt, ... )
 
 
 
-int start_x264(int argc, char* argv[], char* resolution)
+int start_x264(char* resolution)
 {
     x264_param_t param;
     
@@ -243,13 +243,13 @@ static int select_output( const char *muxer, char *filename, x264_param_t *param
     if( !strcmp( filename, "-" ) || strcasecmp( muxer, "auto" ) )
         ext = muxer;
     
-    if(!strcasecmp( ext, "sdp" ))
+    /*if(!strcasecmp( ext, "sdp" ))
     {
             output = sdp_output;
             param->b_annexb = 0;
             param->b_repeat_headers = 0;
     }
-    else if(strstr(filename, "rtp://"))
+    else*/ if(strstr(filename, "rtp://"))
     {
             output = rtp_output;
     //	printf("rtp output choosen\n");

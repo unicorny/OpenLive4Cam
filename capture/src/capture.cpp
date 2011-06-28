@@ -2,6 +2,7 @@
 #include "camera.h"
 #include <stdio.h>
 #include <stack>
+#include <pthread.h> 
 
 #include "../../interface/interface.h"
 //#include "../../interface/picture.h"
@@ -37,6 +38,9 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 
 std::string g_Parameters[MAX_PARAMETER_COUNT];
 std::stack<std::string> g_Messages;
+
+pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+
 char g_MessagesBuffer[256];
 bool g_run = false;
 
@@ -53,6 +57,12 @@ int init()
     g_rgbPicture.rgb = 1;
     g_yuvPicture.rgb = 0;
     printf("Capture Modul init!\n");
+    if(pthread_mutex_init(&mutex, NULL))
+    {
+        printf("capture.init fehler bei mutex init");
+        return -2;
+    }
+
     
     return 42;
 }
@@ -62,12 +72,14 @@ void ende()
     picture_release(&g_rgbPicture);
     picture_release(&g_yuvPicture);
     printf("capture.ende: called\n");
+    pthread_mutex_destroy(&mutex);
 }
 
 
 
 void setParameter(const char* name, int value)
 {
+    pthread_mutex_lock(&mutex);
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
     {
@@ -83,6 +95,7 @@ void setParameter(const char* name, int value)
             {
                 g_capture.open(g_cfg.cameraNr);
                 g_run = true;
+                pthread_mutex_unlock(&mutex);
                 return;
             }
             g_run = true;
@@ -100,6 +113,7 @@ void setParameter(const char* name, int value)
                 string(name) == string("capture.resolution.height"))
             g_cfg.height = value;
     }
+    pthread_mutex_unlock(&mutex);
         
 }
 
@@ -157,11 +171,13 @@ int getParameter(const char* name)
 
 int start()
 {
+    pthread_mutex_lock(&mutex);
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
     {
         //printf("Kamera konnte nicht geöffnet werden!");
         g_Messages.push(string("Fehler, Kamera konnte nicht geoeffnet werden!"));
+        pthread_mutex_unlock(&mutex);
         return -7;
     }
     
@@ -177,19 +193,22 @@ int start()
     printf("start called\n");
 
    // namedWindow("LIVE",1);
- 
+    pthread_mutex_unlock(&mutex);
     return 0;
 }
 
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
+    pthread_mutex_lock(&mutex);    
     if(!g_run)
     {
+        pthread_mutex_unlock(&mutex);
         return 0;
     }
     else if(!g_capture.isOpened())
     {
          g_Messages.push(string("getPicture error, weil keine Kamera geoeffnet ist!"));
+         pthread_mutex_unlock(&mutex);
          return 0;
     }
     
@@ -202,6 +221,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     if(m.depth() != CV_8U)
     {
         printf("Error, depth != unsigned char\n");
+        pthread_mutex_unlock(&mutex);
         return 0;
     }
     //m.convertTo(m2, )
@@ -229,6 +249,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
                 printf("Fehler beim speicher reservieren in getPicture rgb!\n");
+                pthread_mutex_unlock(&mutex);
                 return NULL;
             }
         }
@@ -239,6 +260,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
  
         cvReleaseImage(&scaled);
         
+        pthread_mutex_unlock(&mutex);
         return &g_rgbPicture;
         
     }
@@ -268,6 +290,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_yuvPicture, m2.cols, m2.rows, 1))
             {
                 printf("Fehler beim speicher reservieren in getPicture yuv!\n");
+                pthread_mutex_unlock(&mutex);
                 return 0;
             }
         }
@@ -280,16 +303,20 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         cvReleaseImage(&U);
         cvReleaseImage(&V);
         
+        pthread_mutex_unlock(&mutex);
         return &g_yuvPicture;
 
         
     }
+    pthread_mutex_unlock(&mutex);
     return NULL;
 }
 int stop()
 {
+    pthread_mutex_lock(&mutex);
     g_run = false;
     g_capture.release();
+    pthread_mutex_unlock(&mutex);
     return 0;
 }
 

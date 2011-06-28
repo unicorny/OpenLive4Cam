@@ -93,6 +93,10 @@ void EncoderDeviceSource::doGetNextFrame() {
   fflush(f);
   //printf("\n\ndoGetNextFrame\n\n");
   do {
+      //memcpy
+      unsigned char* temp = (unsigned char*)fParams.getFrame(&fParams.tempSize); 
+      fParams.tempData = (unsigned char*)malloc(fParams.tempSize);
+      memcpy(fParams.tempData, temp, fParams.tempSize);
         fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
         fprintf(f, "frameSize: %d\n", fParams.tempSize);
         fflush(f);
@@ -155,6 +159,7 @@ void EncoderDeviceSource::deliverFrame() {
   gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
   memmove(fTo, newFrameDataStart, fFrameSize);
+  free(fParams.tempData);
 
   // After delivering the data, inform the reader that it is now available:
   FramedSource::afterGetting(this);

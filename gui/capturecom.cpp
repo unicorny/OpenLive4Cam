@@ -114,7 +114,7 @@ void CaptureCom::nextFrame()
     {
         mLogger->append(m);
     }
-//    return;
+  //  return;
 
     if(!getPictureFunc)
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
@@ -152,7 +152,7 @@ void CaptureCom::nextFrame()
     if(!mImage)
     {
         mImage = new QImage(pic->width, pic->height, QImage::Format_RGB32);
-        qDebug("gui.CaptureCom::nextFrame Size for memcpy: %d, adress: %d\n", pic->width*pic->height*4, pic->channel1);
+        qDebug("gui.CaptureCom::nextFrame Size for memcpy: %d, adress: %d\n", pic->width*pic->height*4, (int)pic->channel1);
     }
    // qDebug("StepSize: %d\n", pic->pixelsize);
     if(pic->pixelsize == 4)
