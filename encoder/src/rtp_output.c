@@ -184,7 +184,7 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
     // the first 4 bytes are the NAL size in bytes. skip this
     if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
     if(sendFrame(p, p_nal[1].p_payload+4, p_nal[1].i_payload-4, NULL) < 0)  return -1;
-    //g_FrameBuffer = stack_init(p_nal[0].p_payload, p_nal[0].i_payload);
+   //g_FrameBuffer = stack_init(p_nal[0].p_payload+4, p_nal[0].i_payload-4);
     //frame_to_stack(g_FrameBuffer, p_nal[1].p_payload, p_nal[1].i_payload);
      //if( fwrite( p_nal[0].p_payload, size, 1, (FILE*)handle ) )  
 
@@ -218,6 +218,10 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
         }
         
         fwrite( p_nalu, i_size, 1, p->binaryOut );
+        unsigned* tag = (unsigned*)p_nalu;
+        size_t s = i_size/sizeof(unsigned);
+        fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
+        fflush(p->log);
         if(!g_FrameBuffer) 
             g_FrameBuffer = stack_init(p_nalu, i_size);
         else

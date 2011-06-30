@@ -584,11 +584,12 @@ unsigned char* getFrame(int *size)
     if(size)
     {
         
-        if(!g_FrameBuffer || g_FrameBuffer->count < 12) return 0;
+        if(!g_FrameBuffer || g_FrameBuffer->count < 2) return 0;
         stack_pop(g_FrameBuffer, &current);
         //return 0;
         //printf("encoder.x264::getFrame stack-count: %d, current. %d\n", g_FrameBuffer->count, (int)current);
         if(!current) return 0;
+ 
         
         //return NULL;
         *size = current->size;

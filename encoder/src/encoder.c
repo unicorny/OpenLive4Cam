@@ -38,7 +38,7 @@ pthread_mutex_t mutex;
 int lock()
 {
     int ret = pthread_mutex_lock(&mutex);
-    printf("encoder.lock\n");
+   // printf("encoder.lock\n");
     if(ret)
         printf("encoder.lock fehler bei lock mutex\n");
     return ret;        
@@ -47,7 +47,7 @@ int lock()
 int unlock()
 {
     int ret = pthread_mutex_unlock(&mutex);
-    printf("encoder.unlock\n");
+   // printf("encoder.unlock\n");
     if(ret)
         printf("encoder.unlock fehler bei unlock mutex\n");
     return ret;

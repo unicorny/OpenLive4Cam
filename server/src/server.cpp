@@ -234,7 +234,7 @@ int start()
     // A H.264 video elementary stream:
   {
     char const* streamName = "h264";
-    char const* inputFileName = "/media/Videos/raw_video.264";
+    char const* inputFileName = "./jumper2.h264";
     
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
@@ -244,8 +244,8 @@ int start()
     sms->addSubsession(H264VideoEncoderServerMediaSubsession
 		       ::createNew(*env, eds, reuseFirstSource));
     //*/
-//    sms->addSubsession(H264VideoFileServerMediaSubsession
-//		       ::createNew(*env, inputFileName, reuseFirstSource));
+   // sms->addSubsession(H264VideoFileServerMediaSubsession
+	//	       ::createNew(*env, inputFileName, reuseFirstSource));
    //*/
     rtspServer->addServerMediaSession(sms);
 

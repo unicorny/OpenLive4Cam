@@ -32,7 +32,7 @@ SFrame_stack* stack_init(unsigned char* data, int size)
 	s->top->frame = (SFrame*)malloc(sizeof(SFrame));	
         s->top->frame->size = size;
         s->top->frame->data = (unsigned char*)malloc(size);
-        memcpy(s->top->frame->data, data, size);
+        memmove(s->top->frame->data, data, size);
         s->count = 1;
         stack_unlock(&s->mutex);
         
@@ -96,7 +96,7 @@ void frame_to_stack(SFrame_stack* s, unsigned char* data, int size)
     f->size = size;
     f->data = (unsigned char*)malloc(size);
     if(f->data)
-      memcpy(f->data, data, size);
+      memmove(f->data, data, size);
     
    stack_push(s, f); 	
 }

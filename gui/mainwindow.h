@@ -8,8 +8,6 @@
 #include <serverthread.h>
 #include <encoderthread.h>
 
-#define SAVE_DELETE(x) {if(x){delete x; x = NULL;}}
-#define SAVE_DELETE_ARRAY(x) {if(x){delete [] x; x = NULL;}}
 
 namespace Ui {
     class MainWindow;

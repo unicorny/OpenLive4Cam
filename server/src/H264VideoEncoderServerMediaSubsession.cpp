@@ -84,6 +84,9 @@ char const* H264VideoEncoderServerMediaSubsession::getAuxSDPLine(RTPSink* rtpSin
   envir().taskScheduler().doEventLoop(&fDoneFlag);
 
   char const* auxSDPLine = fDummyRTPSink->auxSDPLine();
+  FILE* f = fopen("sdp_out", "wt");
+  fprintf(f, "auxSDPLine: %s\n", auxSDPLine);
+  fclose(f);
   return auxSDPLine;
 }
 
@@ -91,13 +94,14 @@ FramedSource* H264VideoEncoderServerMediaSubsession::createNewStreamSource(unsig
   estBitrate = 500; // kbps, estimate
 
   // Create the video source:
-   //ByteStreamFileSource* fileSource = ByteStreamFileSource::createNew(envir(), "_video.264");
+   //ByteStreamFileSource* fileSource = ByteStreamFileSource::createNew(envir(), "jumper2.h264");
    //if (fileSource == NULL) return NULL;
-           //fFileSize = fileSource->fileSize();
+   //fFileSize = fileSource->fileSize();
 
   
   // Create a framer for the Video Elementary Stream:
-  return H264VideoStreamFramer::createNew(envir(), source);
+  //return H264VideoStreamFramer::createNew(envir(), source);
+   return H264VideoStreamFramer::createNew(envir(), source);
 }
 
 RTPSink* H264VideoEncoderServerMediaSubsession

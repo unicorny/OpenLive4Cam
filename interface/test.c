@@ -47,6 +47,16 @@ int main(int argc, char* argv[])
     if(frame)
         printf("leerer Eintrag: %d, %s\n",frame->size, frame->data );
     printf("stack count 0 erwartet: %d\n", stack->count);
+    
+    printf("\n--- malloc test ---\n");
+    SFrame f;
+    f.size = 30925;
+    f.data = (unsigned char*)malloc(f.size);
+    memset(f.data,0 ,f.size);
+    unsigned* mem = (unsigned*)f.data;
+    size_t s_mem = f.size/sizeof(unsigned);
+    printf("anfang memory block: %d%d%d%d\n", mem[0], mem[1], mem[2], mem[3]);
+    printf("ende memory block: %d%d%d%d\n", mem[s_mem-4], mem[s_mem-3], mem[s_mem-2], mem[s_mem-1]);
   
     clear_stack(stack);
     return 0;

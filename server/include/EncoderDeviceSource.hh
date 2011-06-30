@@ -32,13 +32,38 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 class EncoderDeviceParameters {
   //%%% TO BE WRITTEN %%%
 public:
+    
     EncoderDeviceParameters(unsigned char*(*getFrameFunc)(int*), bool* run)
-    : getFrame(getFrameFunc), running(run), tempSize(0), tempData(NULL){}
+    : getFrame(getFrameFunc), running(run), tempSize(0), used(false), tempData(NULL){}
+    
+    ~EncoderDeviceParameters()
+    {
+        clear();            
+    }    
+    
+    void setData(const unsigned char* data, const int size)
+    {
+        clear();
+        if(!data || !size) return;
+        tempData = (unsigned char*)malloc(size);
+        memmove(tempData, data, size);
+        tempSize = size;
+        used = true;
+    }
+    
+    void clear()
+    {
+        if(used && tempData) free(tempData);
+        tempData = NULL;
+        tempSize = 0;
+        used = false;
+    }
     
     unsigned char*(*getFrame)(int*);
     bool* running;
     
     int tempSize;
+    bool used;
     unsigned char* tempData;
 };
 
@@ -66,6 +91,8 @@ private:
 private:
   static unsigned referenceCount; // used to count how many instances of this class currently exist
   EncoderDeviceParameters fParams;
+  unsigned fLastPlayTime;
+  FILE* bin;
 };
 
 #endif

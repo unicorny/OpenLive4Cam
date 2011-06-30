@@ -36,7 +36,7 @@ unsigned EncoderDeviceSource::referenceCount = 0;
 
 EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
 			   EncoderDeviceParameters params)
-  : FramedSource(env), fParams(params) {
+  : FramedSource(env), fParams(params), fLastPlayTime(0), bin(NULL) {
   if (referenceCount == 0) {
     // Any global initialization of the device would be done here:
     //%%% TO BE WRITTEN %%%
@@ -47,9 +47,12 @@ EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
   //%%% TO BE WRITTEN %%%
   FILE* f = fopen("IwasHere.txt", "wt");
   FILE* f2 = fopen("viddeo.264", "wb");
+  FILE* f3 = fopen("vidddeo.264", "wb");
+  bin = fopen("jumper2.h264", "rb");
   fprintf(f, "Constructor!\n");
   fclose(f);
   fclose(f2);
+  fclose(f3);
 
   // We arrange here for our "deliverFrame" member function to be called
   // whenever the next frame of data becomes available from the device.
@@ -78,6 +81,7 @@ EncoderDeviceSource::~EncoderDeviceSource() {
     envir().taskScheduler().deleteEventTrigger(eventTriggerId);
     eventTriggerId = 0;
   }
+  fclose(bin);
 }
 
 void EncoderDeviceSource::doGetNextFrame() {
@@ -88,24 +92,42 @@ void EncoderDeviceSource::doGetNextFrame() {
     return;
   }
   FILE* f = fopen("IwasHere.txt", "at");
-  FILE* f2 = fopen("viddeo.264", "ab");
-  fprintf(f, "Hallo!\n");
-  fflush(f);
+  FILE* f2 = fopen("vidddeo.264", "ab");
+ 
   //printf("\n\ndoGetNextFrame\n\n");
-  do {
-      //memcpy
-      unsigned char* temp = (unsigned char*)fParams.getFrame(&fParams.tempSize); 
-      fParams.tempData = (unsigned char*)malloc(fParams.tempSize);
-      memcpy(fParams.tempData, temp, fParams.tempSize);
-      //  fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
-        fprintf(f, "frameSize: %d\n", fParams.tempSize);
-        fflush(f);
-  } while(!fParams.tempSize);
-  fwrite(fParams.tempData, fParams.tempSize, 1, f2);
-  
-  fclose(f2);
+  if(!fParams.used)
+  {
+      do {
+          //memcpy
+          int temp_size = 0;
+          unsigned char* temp = (unsigned char*)fParams.getFrame(&temp_size); 
+          //fprintf(f, "temp: %d, size: %d\n", (int)temp, temp_size);
+         
+          if(temp)
+          {
+            //fParams.tempData = (unsigned char*)malloc(fParams.tempSize);
+            fParams.setData(temp, temp_size);
+          //fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize); 
+            //memmove(fParams.tempData, temp, fParams.tempSize);
+          //  fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
+          }
+          else
+          {
+              //fParams.tempData = NULL;
+              //fParams.tempSize = 0;
+              fParams.clear();
+          }
+          if(!fParams.tempData && fParams.tempSize)
+          {
+              printf("sehr ungewohnlich: size: %d, pointer: %d\n", fParams.tempSize, (int)fParams.tempData);
+              fParams.tempSize = 0;
+          }
+      } while(!fParams.tempSize || !fParams.tempData);
+      fwrite(fParams.tempData, fParams.tempSize, 1, f2);
+      
+  }
   fclose(f);
-  
+  fclose(f2);
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
     deliverFrame();
@@ -144,11 +166,23 @@ void EncoderDeviceSource::deliverFrame() {
   // Note the code below.
    
   if (!isCurrentlyAwaitingData()) return; // we're not ready for the data yet
+  
+  FILE* f = fopen("IwasHere.txt", "at");
+  FILE* f2 = fopen("viddeo.264", "ab");
+  fprintf(f, "Hallo!\n");
+  fflush(f);
         
+  fprintf(f, "frameSize1: %d, maxSize: %d\n", fParams.tempSize, fMaxSize);
+  fflush(f);  
+  
    int newFrameSize = fParams.tempSize; //%%% TO BE WRITTEN %%%
    unsigned char* newFrameDataStart = fParams.tempData;
+   if(!newFrameDataStart) 
+   {
+       printf("server.encoderDeviceSource::deliverFrame newFrameDataStart NULL-Pointer\n");
+       return;
+   }  
   
-
   // Deliver the data here:
   if (newFrameSize > fMaxSize) {
     fFrameSize = fMaxSize;
@@ -156,10 +190,50 @@ void EncoderDeviceSource::deliverFrame() {
   } else {
     fFrameSize = newFrameSize;
   }
-  gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
+   if(fFrameSize != newFrameSize)
+   {
+       fprintf(f, "newFrameSize: %d, frameSize: %d\n", newFrameSize, fFrameSize);
+       fflush(f);
+   }
+   fprintf(f, "fMaxSize: %d, fFrameSize: %d\n", fMaxSize, fFrameSize);
+   fflush(f);
+   
+  gettimeofday(&fPresentationTime, NULL);
+  //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
-  memmove(fTo, newFrameDataStart, fFrameSize);
-  free(fParams.tempData);
+  //memmove(fTo, newFrameDataStart, fFrameSize);
+  
+  fwrite(newFrameDataStart, fFrameSize, 1, f2);
+  fclose(f2);
+  
+  if(fNumTruncatedBytes)
+  {
+        unsigned char* truncatedBuffer = (unsigned char*)malloc(fNumTruncatedBytes);
+        memmove(truncatedBuffer, &newFrameDataStart[fFrameSize], fNumTruncatedBytes);
+        fParams.setData(truncatedBuffer, fNumTruncatedBytes);
+  }
+  else
+  {
+        fParams.clear();
+  }
+  unsigned* tag = (unsigned*)newFrameDataStart;
+  size_t s = fFrameSize / sizeof(unsigned);
+  fprintf(f, "size: %d: short: %d%d%d%d\n", fFrameSize, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
+  //fprintf(f, "frameSize2: %d, p: %d\n", fFrameSize, (int)newFrameDataStart);
+  fflush(f);
+  
+  fFrameSize = fread(fTo, 1, fMaxSize, bin);
+  if(fMaxSize != fFrameSize)
+  {
+      fprintf(f, "Fehler, weniger bytes gelesen als erwartet: %d, %d\n", fMaxSize, fFrameSize);
+      fflush(f);
+  }
+  
+  //fprintf(f, "frame wrote\n");
+  //fflush(f);
+  
+  
+  fclose(f);
 
   // After delivering the data, inform the reader that it is now available:
   FramedSource::afterGetting(this);
@@ -169,6 +243,7 @@ void EncoderDeviceSource::deliverFrame() {
 // The following code would be called to signal that a new frame of data has become available.
 // This (unlike other "LIVE555 Streaming Media" library code) may be called from a separate thread.
 void signalNewFrameData() {
+    printf("singnalNewFrameData\n");
   TaskScheduler* ourScheduler = NULL; //%%% TO BE WRITTEN %%%
   EncoderDeviceSource* ourDevice  = NULL; //%%% TO BE WRITTEN %%%
 
