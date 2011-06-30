@@ -1,4 +1,5 @@
 #include "encoder.h"
+#include <pthread.h>
 
 #ifdef _WIN32
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -32,6 +33,25 @@ SPicture* (*getPictureFunc)(int,int);
 encoder_datas en_data;
 SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
+pthread_mutex_t mutex; 
+
+int lock()
+{
+    int ret = pthread_mutex_lock(&mutex);
+    printf("encoder.lock\n");
+    if(ret)
+        printf("encoder.lock fehler bei lock mutex\n");
+    return ret;        
+}
+
+int unlock()
+{
+    int ret = pthread_mutex_unlock(&mutex);
+    printf("encoder.unlock\n");
+    if(ret)
+        printf("encoder.unlock fehler bei unlock mutex\n");
+    return ret;
+}
 
 
 int init()
@@ -58,19 +78,28 @@ int init()
         return -3;
     }
     en_data.h = NULL;
+    pthread_mutex_init(&mutex, NULL);
     return 42;
 }
 
 void ende()
 {
+    lock();
+    g_run = 0;
+    unlock();
     stop();
+    lock();
     //löschen des letzten Frames
     getFrame(NULL);
+    unlock();
  
     clear_stack(g_FrameBuffer);
     if(capture)
+    {
         capture->ende();
-    interface_close(capture);
+        interface_close(capture);
+    }
+    capture = NULL;
     printf("Encoder Modul ende\n");
 }
 
@@ -100,6 +129,7 @@ int getParameter(const char* name)
 {
     char buffer[256];
     sprintf(buffer, "%s", name);    
+ //   printf("encoder.getParameter: name = %s\n", name);
   
     char * pch;
     pch = strtok (buffer, ".\0");
@@ -119,7 +149,9 @@ int getParameter(const char* name)
         return 0;
     }
     else if(strcmp(name, "encoder.getFrameFunc") == 0)
-        return (int)getFrame;        
+        return (int)getFrame;    
+    else if(strcmp(name, "encoder.EncodeFrameFunc") == 0)
+        return (int)encodeFrame;
     
     return 0;
   
@@ -133,6 +165,7 @@ int start()
     sprintf(resolution, "%dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
     printf("resolution: %s\n", resolution);
     
+    lock();
     //reset capture data
     en_data.last_dts = 0;
     en_data.prev_dts = 0;
@@ -145,15 +178,37 @@ int start()
     en_data.second_largest_pts = -1;
     en_data.pts_warning_cnt = 0;
     en_data.i_frame_output = 0;
-    
+   
     int r = start_x264(resolution);
+    g_run = 1;
+    unlock();
     printf("encoder::start return von start: %d\n", r);
     return r;
+}
+int encodeFrame()
+{
+    lock();
+    if(!g_run)
+    {
+        unlock();
+        return 1;
+    }
+    if(encode_frames())
+    {
+        printf("encoder: Fehler bei encode_frames\n");
+        unlock();
+        return -1;
+    }
+    unlock();
+    return 0;
 }
 
 int stop()
 {
+    lock();
+    g_run = 0;
     encoder_stop_frames();
+    unlock();
     /*printf("en_data.h: %d\n", (int)en_data.h);
      if( en_data.h )
      {

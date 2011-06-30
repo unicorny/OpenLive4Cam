@@ -79,6 +79,7 @@ int start_x264(char* resolution);
 extern SPicture* (*getPictureFunc)(int,int);
 extern SFrame_stack* g_FrameBuffer;
 
+int encode_frames();
 int encoder_stop_frames();
 extern encoder_datas en_data;
 

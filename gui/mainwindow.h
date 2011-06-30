@@ -6,7 +6,10 @@
 #include <CInterface.h>
 #include <capturecom.h>
 #include <serverthread.h>
+#include <encoderthread.h>
 
+#define SAVE_DELETE(x) {if(x){delete x; x = NULL;}}
+#define SAVE_DELETE_ARRAY(x) {if(x){delete [] x; x = NULL;}}
 
 namespace Ui {
     class MainWindow;
@@ -23,9 +26,10 @@ protected:
 
 private:
     Ui::MainWindow *ui;
-    CInterface     mInterface;
+    CInterface     *mInterface;
     CaptureCom     *mCapture;
     ServerThread   *mServer;
+    EncoderThread  *mEncoderThread;
 
     QTimer          mTimer;
     bool            mStreamingRunning;

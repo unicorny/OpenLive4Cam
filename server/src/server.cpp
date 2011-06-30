@@ -63,7 +63,15 @@ int init()
 #endif
     if(!encoder)
     {
-        printf("server::init Fehler beim laden des Capture Modules\n");
+        printf("server::init Fehler beim laden des Encoder Modules\n");
+#ifndef _WIN32
+        printf("Fehler beim laden einer Bibliothek (*.so)\n%s\n",  dlerror());
+#else
+        if(GetLastError() == 126)
+            printf("Fehler beim laden einer dll\nDLL wurde nicht gefunden. ");
+        else
+            printf("Fehler beim laden einer dll\nerror nr: %d ", (int)GetLastError());
+#endif
         return -1;
     }
     if(encoder->init() < 0)
@@ -75,7 +83,7 @@ int init()
     getFrameFunc = (unsigned char* (*)(int*))encoder->getParameter("encoder.getFrameFunc");
     if(!getFrameFunc)
     {
-        g_Messages.push(string("Error, encoder.getFrameFunc didn't work as exceptet!"));
+        printf("Error, encoder.getFrameFunc didn't work as exceptet!");
         return -4;
     }
  //return 0;    
@@ -98,19 +106,21 @@ int run()
         printf("g_watch: %d\n", (int)g_watch);
         
         env->taskScheduler().doEventLoop(&g_watch);
-        //((BasicTaskScheduler0)env->taskScheduler()).SingleStep();
+        //((BasicTaskScheduler0)env->taskScheduler()).SingleStep(0);
     }
 }
 
 void ende()
 {
-    g_run = false;
+    g_run = 0;
     g_watch = 1;
 //    SAVE_DELETE(env);    
     if(encoder)
+    {
         encoder->ende();
-  //  return;
-    interface_close(encoder);
+        interface_close(encoder);
+    }
+    encoder = NULL;
     printf("Server Modul ende\n");
 }
 
@@ -139,7 +149,8 @@ void setParameter(const char* name, int value)
 int getParameter(const char* name)
 {
     char buffer[256];
-    sprintf(buffer, "%s", name);    
+    sprintf(buffer, "%s", name);   
+  //  printf("server.getParameter: name = %s\n", name);
   
     char * pch;
     pch = strtok (buffer, ".\0");
@@ -267,6 +278,6 @@ int stop()
     if(encoder)
         encoder->stop();
     
-     g_watch = 1;
+     //g_watch = 1;
     return 0;
 }

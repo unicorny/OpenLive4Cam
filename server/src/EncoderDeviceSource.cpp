@@ -97,7 +97,7 @@ void EncoderDeviceSource::doGetNextFrame() {
       unsigned char* temp = (unsigned char*)fParams.getFrame(&fParams.tempSize); 
       fParams.tempData = (unsigned char*)malloc(fParams.tempSize);
       memcpy(fParams.tempData, temp, fParams.tempSize);
-        fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
+      //  fParams.tempData = (unsigned char*)fParams.getFrame(&fParams.tempSize);
         fprintf(f, "frameSize: %d\n", fParams.tempSize);
         fflush(f);
   } while(!fParams.tempSize);
@@ -145,7 +145,7 @@ void EncoderDeviceSource::deliverFrame() {
    
   if (!isCurrentlyAwaitingData()) return; // we're not ready for the data yet
         
-   int newFrameSize = 0;//fParams.tempSize; //%%% TO BE WRITTEN %%%
+   int newFrameSize = fParams.tempSize; //%%% TO BE WRITTEN %%%
    unsigned char* newFrameDataStart = fParams.tempData;
   
 

@@ -506,14 +506,14 @@ if( cond )\
     goto fail;\
 }
 
-static int encode_frames(cli_opt_t *opt)
+int encode_frames()
 {
     x264_picture_t pic;
     cli_pic_t cli_pic;
     int     retval = 0;
     encoder_datas* datas = &en_data;
         
-    if( filter.get_frame( opt->hin, &cli_pic, datas->i_frame + opt->i_seek ) )
+    if( filter.get_frame( opt.hin, &cli_pic, datas->i_frame + opt.i_seek ) )
             return -1;
         x264_picture_init( &pic );
         convert_cli_to_lib_pic( &pic, &cli_pic );
@@ -549,7 +549,7 @@ static int encode_frames(cli_opt_t *opt)
         
         datas->prev_dts = datas->last_dts;
         
-        datas->i_frame_size = encode_frame( datas->h, opt->hout, &pic, &datas->last_dts );
+        datas->i_frame_size = encode_frame( datas->h, opt.hout, &pic, &datas->last_dts );
         
         if( datas->i_frame_size < 0 )
         {
@@ -564,7 +564,7 @@ static int encode_frames(cli_opt_t *opt)
                 datas->first_dts = datas->prev_dts = datas->last_dts;
         }
 
-        if( filter.release_frame( opt->hin, &cli_pic, datas->i_frame + opt->i_seek ) )
+        if( filter.release_frame( opt.hin, &cli_pic, datas->i_frame + opt.i_seek ) )
             return -1;
 
         /* update status line (up to 1000 times per input file) */
@@ -583,11 +583,7 @@ unsigned char* getFrame(int *size)
     current = NULL;
     if(size)
     {
-        if(encode_frames(&opt))
-        {
-            printf("encoder: Fehler bei encode_frames\n");
-            return 0;
-        }
+        
         if(!g_FrameBuffer || g_FrameBuffer->count < 12) return 0;
         stack_pop(g_FrameBuffer, &current);
         //return 0;

@@ -9,17 +9,15 @@ ServerThread::ServerThread(CInterface* interface, QObject *parent) :
 ServerThread::~ServerThread()
 {
     quit();
-    mutex.lock();
-    condition.wakeOne();
-    mutex.unlock();
 
     wait();
+    qDebug("ServerThread beendet!");
 }
 
 void ServerThread::run()
 {
     int (*tick)();
-   // mLogger->append(QString("ServerThread::run start!"));
+  //  mLogger->append(QString("ServerThread::run start!"));
             
     //forever {
         mutex.lock();
@@ -29,7 +27,6 @@ void ServerThread::run()
 
         mutex.unlock();
         usleep(100);
-        qDebug("Serverthread ende");
-      //  mLogger->append(QString("ServerThread::run ende!"));
+//        mLogger->append(QString("ServerThread::run ende!"));
     //}
 }

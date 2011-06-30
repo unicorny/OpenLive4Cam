@@ -17,6 +17,7 @@ public:
     void setParameter(QString name, int parameter);
     int start();
     void stop();
+    void ende();
 
     void restart();
 

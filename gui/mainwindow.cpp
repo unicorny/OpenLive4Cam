@@ -2,10 +2,21 @@
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
-    QMainWindow(parent), ui(new Ui::MainWindow), mCapture(NULL),mServer(NULL), mTimer(this), mStreamingRunning(false)
+    QMainWindow(parent), ui(new Ui::MainWindow), mInterface(NULL), mCapture(NULL),mServer(NULL), mTimer(this), mStreamingRunning(false)
 {
-    if(!mInterface.init())
+    mInterface = new CInterface();
+    int ret = 0;
+    ret = mInterface->init();
+    if(!ret)
+    {
         QCoreApplication::exit();
+    }
+    else if(ret <= 0)
+    {
+        QMessageBox::critical(NULL, QString("OpenLive4Cam"), QString("Fehler beim laden einer Sub-Bibliothek, für mehr Infos schaue auf die Fehlerausgabe auf der Konsole.\n"), QMessageBox::Abort);
+        QCoreApplication::exit();
+    }
+
     ui->setupUi(this);
     QTextEdit* line = this->findChild<QTextEdit*>("textLog");
 
@@ -17,8 +28,9 @@ MainWindow::MainWindow(QWidget *parent) :
     button->setEnabled(true);
 
 #endif
-    mServer = new ServerThread(&mInterface, this);
-    mCapture = new CaptureCom(&mInterface, line, this);
+    mServer = new ServerThread(mInterface, this);
+    mEncoderThread = new EncoderThread(mInterface, this);
+    mCapture = new CaptureCom(mInterface, line, this);
 
     mCapture->updateCamera(this->findChild<QComboBox*>("source_comboBox"));
     mCapture->updateResolution(this->findChild<QComboBox*>("resolution_comboBox"), this->findChild<QComboBox*>("source_comboBox"));
@@ -32,15 +44,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
-    mServer->quit();
-    if(mServer)
-    {
-        delete mServer;
-        mServer = NULL;
-    }
-    delete ui;
-    if(mCapture)
-        delete mCapture;
+
+    SAVE_DELETE(ui);
+    SAVE_DELETE(mCapture);
+    mInterface->ende();
+    SAVE_DELETE(mEncoderThread);
+    SAVE_DELETE(mServer);
+    SAVE_DELETE(mInterface);
 }
 
 void MainWindow::changeEvent(QEvent *e)
@@ -77,6 +87,7 @@ void MainWindow::on_startButton_clicked()
             //Start Stream
             mTimer.start(30);
             mStreamingRunning = true;
+            mEncoderThread->start();
             res->setEnabled(false);
             port->setEnabled(false);
         }
@@ -112,5 +123,5 @@ void MainWindow::on_chooseKam_clicked()
 
 void MainWindow::on_port_spinBox_valueChanged(int value)
 {
-    mInterface.setParameter("server.port", value);
+    mInterface->setParameter("server.port", value);
 }
