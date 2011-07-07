@@ -11,7 +11,7 @@ class ServerThread : public QThread
 {
 Q_OBJECT
 public:
-    explicit ServerThread(CInterface* interface, QObject *parent = 0);
+    explicit ServerThread(CInterface* _interface, QObject *parent = 0);
     void setLogger(QTextEdit* log) {mLogger = log;}
     ~ServerThread();
 

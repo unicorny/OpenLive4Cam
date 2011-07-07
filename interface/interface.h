@@ -59,9 +59,9 @@ typedef struct SFrame{
     int size;
 } SFrame;
 
-//! \return 0 alles okay, -1 bei fehler
-struct SInterface* interface_loadDll(const char* dllname);
-void interface_close(struct SInterface* in);
+//! \return NULL bei Fehler ansonsten Zeiger auf SInterface 
+SInterface* interface_loadDll(const char* dllname);
+void interface_close(SInterface* in);
 
 #ifdef __cplusplus
 }

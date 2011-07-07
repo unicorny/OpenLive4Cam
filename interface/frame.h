@@ -4,7 +4,11 @@
 #include "interface.h"
 #include <malloc.h>
 #include <memory.h>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h> 
+#endif
 
 #ifdef __cplusplus
 extern "C"
@@ -16,7 +20,12 @@ typedef struct SFrame_stack
     struct SFrame_stack_element* top;
     struct SFrame_stack_element* bottom;
     int count;
-    pthread_mutex_t mutex; 
+#ifdef _WIN32
+	void* mutex;
+#else
+    pthread_mutex_t* mutex; 
+#endif
+
 } SFrame_stack;
 
 typedef struct SFrame_stack_element

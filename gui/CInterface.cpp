@@ -45,8 +45,9 @@ CInterface::~CInterface()
 int CInterface::init()
 {
 #ifdef _WIN32
-    QString name = "capture.dll";
-    //mCapture = interface_loadDll(qPrintable(name));
+    QString name = "server.dll";
+    mServer = interface_loadDll(qPrintable(name));
+    //mServer = interface_loadDll("libserver.dll");
     qDebug(qPrintable(name));
 #else
  //  mCapture = interface_loadDll("libcapture.so");
@@ -62,8 +63,11 @@ int CInterface::init()
 #ifndef _WIN32
         error.sprintf("Fehler beim laden einer Bibliothek (*.so)\n%s",  dlerror());
 #else
-        if(GetLastError() == 126)
+        int errornr = GetLastError();
+        if(errornr == 126)
             error.sprintf("Fehler beim laden einer dll\nDLL wurde nicht gefunden. ");
+        else if(errornr == 127)
+            error.sprintf("Eine Funktion in der DLL wurde nicht gefunden!\n");
         else
             error.sprintf("Fehler beim laden einer dll\nerror nr: %d ", (int)GetLastError());
 #endif

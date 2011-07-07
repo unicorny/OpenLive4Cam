@@ -1009,21 +1009,6 @@ static int select_output( const char *muxer, char *filename, x264_param_t *param
         param->b_annexb = 0;
         param->b_repeat_headers = 0;
     }
-    else if(!strcasecmp( ext, "sdp" ))
-	{
-		output = sdp_output;
-		param->b_annexb = 0;
-		param->b_repeat_headers = 0;
-	}
-	else if(strstr(filename, "rtp://"))
-	{
-		output = rtp_output;
-	//	printf("rtp output choosen\n");
-		//! TODO: schauen fï¿œr was die Parameter da sind
-		param->b_annexb = 0;
-       	param->b_repeat_headers = 0;
-        // * */
-	}
     else
         output = raw_output;
     return 0;

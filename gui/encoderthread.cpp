@@ -1,7 +1,7 @@
 #include "encoderthread.h"
 
-EncoderThread::EncoderThread(CInterface* interface, QObject *parent) :
-    QThread(parent), mInterface(interface)
+EncoderThread::EncoderThread(CInterface* _interface, QObject *parent) :
+    QThread(parent), mInterface(_interface)
 {
 }
 

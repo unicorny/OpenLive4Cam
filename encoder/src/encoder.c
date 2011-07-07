@@ -1,5 +1,9 @@
 #include "encoder.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h>
+#endif
 
 #ifdef _WIN32
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -33,23 +37,40 @@ SPicture* (*getPictureFunc)(int,int);
 encoder_datas en_data;
 SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
-pthread_mutex_t mutex; 
+#ifdef _WIN32
+void* mutex = NULL;
+#else
+pthread_mutex_t* mutex; 
+#endif
 
 int lock()
 {
-    int ret = pthread_mutex_lock(&mutex);
-   // printf("encoder.lock\n");
+	int ret = 1;
+#ifdef _WIN32
+	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
+	if(waitResult == WAIT_OBJECT_0)
+		ret = 0;
+	else if(waitResult == WAIT_FAILED)
+		printf("Fehler %d bei lock mutex\n", GetLastError());
+
+#else
+    ret = pthread_mutex_lock(mutex);
+#endif
     if(ret)
-        printf("encoder.lock fehler bei lock mutex\n");
+        printf("capture.lock_mutex fehler bei lock mutex\n");
     return ret;        
 }
 
 int unlock()
 {
-    int ret = pthread_mutex_unlock(&mutex);
-   // printf("encoder.unlock\n");
+#ifdef _WIN32
+	int ret = !ReleaseMutex(mutex);
+#else
+    int ret = pthread_mutex_unlock(mutex);
+#endif
+    
     if(ret)
-        printf("encoder.unlock fehler bei unlock mutex\n");
+        printf("capture.unlock_mutex fehler bei unlock mutex\n");
     return ret;
 }
 
@@ -58,6 +79,7 @@ int init()
 {	
     printf("encoder Modul init\n");
 #ifdef _WIN32
+	capture = interface_loadDll("capture.dll");
 #else
     capture = interface_loadDll("libcapture.so");
 #endif
@@ -78,7 +100,21 @@ int init()
         return -3;
     }
     en_data.h = NULL;
-    pthread_mutex_init(&mutex, NULL);
+#ifdef _WIN32
+	mutex = CreateMutex(NULL, FALSE, NULL);
+	if(mutex == NULL)
+	{
+		printf("encoder.init Fehler: %d bei mutex init\n", GetLastError());
+		return -4;
+	}
+#else
+	mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+    if(pthread_mutex_init(mutex, NULL))
+    {
+        printf("encoder.init fehler bei mutex init\n");
+        return -4;
+    }
+#endif
     return 42;
 }
 
@@ -92,6 +128,12 @@ void ende()
     //löschen des letzten Frames
     getFrame(NULL);
     unlock();
+#ifdef _WIN32
+	CloseHandle(mutex);
+#else
+    pthread_mutex_destroy(mutex);
+	free(mutex);
+#endif
  
     clear_stack(g_FrameBuffer);
     if(capture)

@@ -8,10 +8,15 @@ SFrame_stack* stack;
 
 int main(int argc, char* argv[])
 {
-    printf("Start stack Test\n");
-    char TestBuffer1[] = "Dies wird ein schöner und laaaanger Text.";
-    char TestBuffer2[] = "Dies ist der 2. Testbuffer Text";
-    stack = stack_init(TestBuffer1, strlen(TestBuffer1));
+    unsigned char TestBuffer1[] = "Dies wird ein schoener und laaaanger Text.\0";
+    unsigned char TestBuffer2[] = "Dies ist der 2. Testbuffer Text\0";
+	SFrame* frame = NULL;
+	SFrame f;
+	unsigned* mem = NULL;
+	size_t s_mem = 0;
+
+    stack = stack_init(TestBuffer1, strlen(TestBuffer1)+1);
+	printf("Start stack Test\n");
     printf("stack count 1 erwartet: %d\n", stack->count);
     if(!stack)
         printf("error: stack wurde nicht angelegt!\n");
@@ -19,7 +24,7 @@ int main(int argc, char* argv[])
         printf("error: Nach stack init sind top != bottom\n");
     if(strcmp((char*)stack->top->frame->data, TestBuffer1) != 0)
         printf("error: Daten auf dem Stack sind korruptet!\n");
-    frame_to_stack(stack, TestBuffer2, strlen(TestBuffer2));
+    frame_to_stack(stack, TestBuffer2, strlen(TestBuffer2)+1);
     printf("stack count 2 erwartet: %d\n", stack->count);
     if(strcmp((char*)stack->top->frame->data, TestBuffer2) == 0)
         printf("error: Neue Daten sind an der falschen Stelle gelandet!\n");
@@ -27,17 +32,18 @@ int main(int argc, char* argv[])
         printf("error: Neue Daten sind korrputet!\n");
     if(stack->top == stack->bottom)
         printf("error: nachdem zwei Datensätze auf dem Stack liegen, sind top == bottom");
-    SFrame* frame = NULL;
+    
     stack_pop(stack, &frame);
     printf("stack count 1 erwartet: %d\n", stack->count);
     printf("Daten vom Stack: size: %d, text: %s, vergleichstext: %s\n", frame->size, frame->data, TestBuffer1);
     delete_frame(frame);
-    
     stack_pop(stack, &frame);
+//    return 1;
     delete_frame(frame);
+
     printf("stack count 0 erwartet: %d\n", stack->count);
     
-    frame_to_stack(stack, TestBuffer1, strlen(TestBuffer1));
+    frame_to_stack(stack, TestBuffer1, strlen(TestBuffer1)+1);
     printf("stack count 1 erwartet: %d\n", stack->count);
     
     stack_pop(stack, &frame);
@@ -49,12 +55,12 @@ int main(int argc, char* argv[])
     printf("stack count 0 erwartet: %d\n", stack->count);
     
     printf("\n--- malloc test ---\n");
-    SFrame f;
+
     f.size = 30925;
     f.data = (unsigned char*)malloc(f.size);
     memset(f.data,0 ,f.size);
-    unsigned* mem = (unsigned*)f.data;
-    size_t s_mem = f.size/sizeof(unsigned);
+    mem = (unsigned*)f.data;
+    s_mem = f.size/sizeof(unsigned);
     printf("anfang memory block: %d%d%d%d\n", mem[0], mem[1], mem[2], mem[3]);
     printf("ende memory block: %d%d%d%d\n", mem[s_mem-4], mem[s_mem-3], mem[s_mem-2], mem[s_mem-1]);
   

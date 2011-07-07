@@ -1,6 +1,10 @@
 #ifndef __OPEN_LIVE_4_CAM_SERVER_LIB__
 #define __OPEN_LIVE_4_CAM_SERVER_LIB__
 
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS 1
+#endif
+
 #include <iostream>
 #include <ctype.h>
 #include <cstring>

@@ -1,4 +1,4 @@
-PROJECT(server)
+PROJECT(server CXX)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
@@ -11,11 +11,23 @@ SET(ServerSrc ${ServerSrc} ../include/server.h ../include/H264VideoEncoderServer
 #ENDIF(WIN32)
 
 SET(PA ../lib)
+IF(WIN32)
+find_library(USAGE_ENV libUsageEnvironment.lib PATHS ${PA} REQUIRED)
+find_library(BASIC_USAGE_ENV libBasicUsageEnvironment.lib PATHS ${PA} REQUIRED)
+find_library(LIVE_MEDIA libliveMedia.lib PATHS ${PA} REQUIRED)
+find_library(GROUP_SOCK libgroupsock.lib PATHS ${PA} REQUIRED)
+#find_library(WINMM winmm.lib REQUIRED)
+#find_library(SOCKET ws2_32.lib REQUIRED)
+#SET(LIBS ${WINMM} ${SOCKET} ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+ELSEIF(WIN32)
 find_library(USAGE_ENV UsageEnvironment PATHS ${PA} REQUIRED)
 find_library(BASIC_USAGE_ENV BasicUsageEnvironment PATHS ${PA} REQUIRED)
 find_library(LIVE_MEDIA liveMedia PATHS ${PA} REQUIRED)
 find_library(GROUP_SOCK groupsock PATHS ${PA} REQUIRED)
-SET(LIBS ${LIBS} ${LIVE_MEDIA}  ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+SET(LIBS ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+ENDIF(WIN32)
+SET(LIBS ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+
 
 
 # Declare the target (an executable)

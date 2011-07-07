@@ -58,6 +58,7 @@ int init()
 {
     printf("server Modul init\n");
 #ifdef _WIN32
+	encoder = interface_loadDll("libencoder.dll");
 #else
     encoder = interface_loadDll("libencoder.so");
 #endif
@@ -108,6 +109,7 @@ int run()
         env->taskScheduler().doEventLoop(&g_watch);
         //((BasicTaskScheduler0)env->taskScheduler()).SingleStep(0);
     }
+	return 0;
 }
 
 void ende()
@@ -138,10 +140,10 @@ void setParameter(const char* name, int value)
         pch = strtok (NULL, ".\0");
         
     }
-    if(g_Parameters[0] != string(g_modulname) && encoder)
+    if(g_Parameters[0].compare(string(g_modulname)) != 0 && encoder)
             encoder->setParameter(name, value); //TODO: weiterleiten  
     
-    if(g_Parameters[1] == string("port"))
+	if(g_Parameters[1].compare(string("port")) == 0)
     {
         g_Port = value;
     }
@@ -162,7 +164,7 @@ int getParameter(const char* name)
         
     }
     
-    if(g_Parameters[0] == string("getLastMessage"))
+    if(g_Parameters[0].compare(string("getLastMessage")) == 0)
     {
         if(g_Messages.size())
         {
@@ -176,16 +178,16 @@ int getParameter(const char* name)
             return encoder->getParameter(name);
         }
     }
-    else if(g_Parameters[0] != string(g_modulname) && encoder)
+    else if(g_Parameters[0].compare(string(g_modulname)) != 0 && encoder)
     {
         return encoder->getParameter(name);
     }
     
-    if(g_Parameters[1] == string("port"))
+    if(g_Parameters[1].compare(string("port")) == 0)
     {
         return g_Port;
     }
-    else if(g_Parameters[1] == string("getTickFunc"))
+    else if(g_Parameters[1].compare(string("getTickFunc"))== 0)
     {
         return (int)run;
     }
@@ -224,7 +226,7 @@ int start()
     
     RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
-        g_Messages.push(string("Failed to create RTSP server: ") + env->getResultMsg());
+        g_Messages.push(string("Failed to create RTSP server: ").append(env->getResultMsg()));
         *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
         return -1;
   }    

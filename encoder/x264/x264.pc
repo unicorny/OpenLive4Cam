@@ -5,6 +5,6 @@ includedir=${prefix}/include
 
 Name: x264
 Description: H.264 (MPEG4 AVC) encoder library
-Version: 0.115.21M 30c421e
+Version: 0.115.0+38M 5bc7fcb
 Libs: -L${exec_prefix}/lib -lx264 -lpthread
 Cflags: -I${prefix}/include

@@ -14,7 +14,7 @@
   */
 
 #ifdef _WIN32
-WINBASEAPI FARPROC WINAPI interface_loadFunction(HINSTANCE instance,LPCSTR lpcString)
+/*WINBASEAPI*/ FARPROC WINAPI interface_loadFunction(HINSTANCE instance,LPCSTR lpcString)
 {
     return GetProcAddress(instance, lpcString);
 }
@@ -36,8 +36,8 @@ struct SInterface* interface_loadDll(const char* dllname)
     if(!in->dll)
     {
 #ifdef _WIN32
-        //in->dll = LoadLibraryA(dllname);
-        in->dll = LoadLibrary(L".\\libcapture.dll");
+        in->dll = LoadLibraryA(dllname);
+        //in->dll = LoadLibrary(".\\server.dll");
 #else
         in->dll = dlopen(dllname, RTLD_LAZY);
 #endif
@@ -45,13 +45,13 @@ struct SInterface* interface_loadDll(const char* dllname)
     if(in->dll)
     {
         if(!in->init)
-            in->init = (int (*)())(interface_loadFunction(in->dll, "init"));
+            in->init = (int (*)(void))(interface_loadFunction(in->dll, "init"));
         if(!in->ende)
-            in->ende = (void (*)())(interface_loadFunction(in->dll, "ende"));
+            in->ende = (void (*)(void))(interface_loadFunction(in->dll, "ende"));
         if(!in->start)
-            in->start = (int (*)())(interface_loadFunction(in->dll, "start"));
+            in->start = (int (*)(void))(interface_loadFunction(in->dll, "start"));
         if(!in->stop)
-            in->stop = (int (*)())(interface_loadFunction(in->dll, "stop"));
+            in->stop = (int (*)(void))(interface_loadFunction(in->dll, "stop"));
         if(!in->setParameter)
             in->setParameter = (void (*)(const char*,int))(interface_loadFunction(in->dll, "setParameter"));
         if(!in->getParameter)

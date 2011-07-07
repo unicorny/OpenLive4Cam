@@ -34,11 +34,13 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include <windows.h>
 #include <string.h>
 
+#ifndef _WIN32
 #define closeSocket closesocket
 #define EWOULDBLOCK WSAEWOULDBLOCK
 #define EINPROGRESS WSAEWOULDBLOCK
 #define EAGAIN WSAEWOULDBLOCK
 #define EINTR WSAEINTR
+#endif
 
 #if defined(_WIN32_WCE)
 #define NO_STRSTREAM 1

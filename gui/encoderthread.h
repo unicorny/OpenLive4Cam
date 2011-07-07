@@ -9,7 +9,7 @@ class EncoderThread : public QThread
 {
 Q_OBJECT
 public:
-    explicit EncoderThread(CInterface* interface, QObject *parent = 0);
+    explicit EncoderThread(CInterface* _interface, QObject *parent = 0);
     ~EncoderThread();
 
 signals:

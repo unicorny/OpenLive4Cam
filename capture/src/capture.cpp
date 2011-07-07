@@ -2,7 +2,11 @@
 #include "camera.h"
 #include <stdio.h>
 #include <stack>
+#ifdef _WIN32
+#include <windows.h>
+#else
 #include <pthread.h> 
+#endif
 
 #include "../../interface/interface.h"
 //#include "../../interface/picture.h"
@@ -39,7 +43,11 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 std::string g_Parameters[MAX_PARAMETER_COUNT];
 std::stack<std::string> g_Messages;
 
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER; 
+#ifdef _WIN32
+void* mutex = NULL;
+#else
+pthread_mutex_t* mutex = NULL;//PTHREAD_MUTEX_INITIALIZER; 
+#endif
 
 char g_MessagesBuffer[256];
 bool g_run = false;
@@ -57,11 +65,21 @@ int init()
     g_rgbPicture.rgb = 1;
     g_yuvPicture.rgb = 0;
     printf("Capture Modul init!\n");
-    if(pthread_mutex_init(&mutex, NULL))
+#ifdef _WIN32
+	mutex = CreateMutex(NULL, FALSE, NULL);
+	if(mutex == NULL)
+	{
+		printf("capture.init Fehler: %d bei mutex init\n", GetLastError());
+		return -2;
+	}
+#else
+	mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
+    if(pthread_mutex_init(mutex, NULL))
     {
-        printf("capture.init fehler bei mutex init");
+        printf("capture.init fehler bei mutex init\n");
         return -2;
     }
+#endif
 
     
     return 42;
@@ -72,14 +90,47 @@ void ende()
     picture_release(&g_rgbPicture);
     picture_release(&g_yuvPicture);
     printf("capture.ende: called\n");
-    pthread_mutex_destroy(&mutex);
+#ifdef _WIN32
+	CloseHandle(mutex);
+#else
+    pthread_mutex_destroy(mutex);
+	free(mutex);
+#endif
 }
 
+int lock_mutex(void* mutex)
+{
+	int ret = 1;
+#ifdef _WIN32
+	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
+	if(waitResult == WAIT_OBJECT_0)
+		ret = 0;
+	else if(waitResult == WAIT_FAILED)
+		printf("Fehler %d bei lock mutex\n", GetLastError());
 
+#else
+    ret = pthread_mutex_lock(mutex);
+#endif
+    if(ret)
+        printf("capture.lock_mutex fehler bei lock mutex\n");
+    return ret;        
+}
 
+int unlock_mutex(void* mutex)
+{
+#ifdef _WIN32
+	int ret = !ReleaseMutex(mutex);
+#else
+    int ret = pthread_mutex_unlock(mutex);
+#endif
+    
+    if(ret)
+        printf("capture.unlock_mutex fehler bei unlock mutex\n");
+    return ret;
+}
 void setParameter(const char* name, int value)
 {
-    pthread_mutex_lock(&mutex);
+    lock_mutex(mutex);
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
     {
@@ -95,7 +146,7 @@ void setParameter(const char* name, int value)
             {
                 g_capture.open(g_cfg.cameraNr);
                 g_run = true;
-                pthread_mutex_unlock(&mutex);
+                unlock_mutex(mutex);
                 return;
             }
             g_run = true;
@@ -113,7 +164,7 @@ void setParameter(const char* name, int value)
                 string(name) == string("capture.resolution.height"))
             g_cfg.height = value;
     }
-    pthread_mutex_unlock(&mutex);
+    unlock_mutex(mutex);
         
 }
 
@@ -171,13 +222,13 @@ int getParameter(const char* name)
 
 int start()
 {
-    pthread_mutex_lock(&mutex);
+    lock_mutex(mutex);
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
     {
         //printf("Kamera konnte nicht geöffnet werden!");
         g_Messages.push(string("Fehler, Kamera konnte nicht geoeffnet werden!"));
-        pthread_mutex_unlock(&mutex);
+        unlock_mutex(mutex);
         return -7;
     }
     
@@ -193,22 +244,22 @@ int start()
     printf("start called\n");
 
    // namedWindow("LIVE",1);
-    pthread_mutex_unlock(&mutex);
+    unlock_mutex(mutex);
     return 0;
 }
 
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
-    pthread_mutex_lock(&mutex);    
+    lock_mutex(mutex);    
     if(!g_run)
     {
-        pthread_mutex_unlock(&mutex);
+        unlock_mutex(mutex);
         return 0;
     }
     else if(!g_capture.isOpened())
     {
          g_Messages.push(string("getPicture error, weil keine Kamera geoeffnet ist!"));
-         pthread_mutex_unlock(&mutex);
+         unlock_mutex(mutex);
          return 0;
     }
     
@@ -221,7 +272,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     if(m.depth() != CV_8U)
     {
         printf("Error, depth != unsigned char\n");
-        pthread_mutex_unlock(&mutex);
+        unlock_mutex(mutex);
         return 0;
     }
     //m.convertTo(m2, )
@@ -249,7 +300,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
                 printf("Fehler beim speicher reservieren in getPicture rgb!\n");
-                pthread_mutex_unlock(&mutex);
+                unlock_mutex(mutex);
                 return NULL;
             }
         }
@@ -260,7 +311,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
  
         cvReleaseImage(&scaled);
         
-        pthread_mutex_unlock(&mutex);
+        unlock_mutex(mutex);
         return &g_rgbPicture;
         
     }
@@ -290,7 +341,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_yuvPicture, m2.cols, m2.rows, 1))
             {
                 printf("Fehler beim speicher reservieren in getPicture yuv!\n");
-                pthread_mutex_unlock(&mutex);
+                unlock_mutex(mutex);
                 return 0;
             }
         }
@@ -303,20 +354,20 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         cvReleaseImage(&U);
         cvReleaseImage(&V);
         
-        pthread_mutex_unlock(&mutex);
+        unlock_mutex(mutex);
         return &g_yuvPicture;
 
         
     }
-    pthread_mutex_unlock(&mutex);
+    unlock_mutex(mutex);
     return NULL;
 }
 int stop()
 {
-    pthread_mutex_lock(&mutex);
+    lock_mutex(mutex);
     g_run = false;
     g_capture.release();
-    pthread_mutex_unlock(&mutex);
+    unlock_mutex(mutex);
     return 0;
 }
 
