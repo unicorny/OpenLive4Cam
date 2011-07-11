@@ -14,11 +14,10 @@
 #define MAX_PARAMETER_COUNT 8
 const char g_modulname[] = "encoder";
 
-
 #ifdef _WIN32
     #ifdef BUILD_DLL
         //#define ENCODER_API __declspec(dllexport)
-		#define ENCODER_API extern
+                #define ENCODER_API extern
     #else
         //#define ENCODER_API __declspec(dllimport)
 		#define ENCODER_API

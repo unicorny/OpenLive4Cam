@@ -1,8 +1,8 @@
-PROJECT(test)
+PROJECT(test C)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
-SET(TestSrc test.c frame.c)
+SET(TestSrc test.c frame.c interface.c)
 
 #IF(WIN32)
 SET(TestSrc ${TestSrc} interface.h frame.h)

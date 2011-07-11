@@ -24,15 +24,21 @@ const char g_modulname[] = "server";
 
 
 #ifdef _WIN32
+#define SERVER_API
     #ifdef BUILD_DLL
-        //#define SERVER_API __declspec(dllexport)
+		#undef SERVER_API
 		#define SERVER_API extern
-    #else
-        //#define SERVER_API __declspec(dllimport)
-		#define SERVER_API
-    #endif
+	#endif
+	#ifdef VC_BUILD
+		#undef SERVER_API
+		#define SERVER_API __declspec(dllexport)
+	#endif
 #else
-    #define SERVER_API
+	#ifdef BUILD_DLL
+		#define SERVER_API extern
+	#else	
+		#define SERVER_API
+	#endif
 #endif
 
 #ifdef __cplusplus

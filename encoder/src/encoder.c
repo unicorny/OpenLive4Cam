@@ -79,7 +79,7 @@ int init()
 {	
     printf("encoder Modul init\n");
 #ifdef _WIN32
-	capture = interface_loadDll("capture.dll");
+        capture = interface_loadDll("capture.dll");
 #else
     capture = interface_loadDll("libcapture.so");
 #endif

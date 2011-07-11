@@ -3,6 +3,32 @@
 #include "interface.h"
 #include "frame.h"
 
+void try_load_dll(const char* filename)
+{
+    SInterface* p = interface_loadDll(filename);
+	int errornr = 0;
+    if(!p)  
+    {
+        printf("Fehler beim Laden von %s\n", filename);
+#ifndef _WIN32
+        printf("Fehler beim laden einer Bibliothek (*.so)\n%s\n",  dlerror());
+#else
+        errornr = GetLastError();
+        if(errornr == 126)
+            printf("DLL wurde nicht gefunden. \n");
+        else if(errornr == 127)
+            printf("Eine Funktion in der DLL wurde nicht gefunden!\n");
+        else
+            printf("Fehler beim laden einer dll\nerror nr: %d \n", (int)GetLastError());
+#endif
+    }
+    else
+    {
+        printf("DLL: %s wurde erfolgreich geladen!\n", filename);
+        interface_close(p);
+    }
+    
+}
 
 SFrame_stack* stack;
 
@@ -62,8 +88,17 @@ int main(int argc, char* argv[])
     mem = (unsigned*)f.data;
     s_mem = f.size/sizeof(unsigned);
     printf("anfang memory block: %d%d%d%d\n", mem[0], mem[1], mem[2], mem[3]);
-    printf("ende memory block: %d%d%d%d\n", mem[s_mem-4], mem[s_mem-3], mem[s_mem-2], mem[s_mem-1]);
+    printf("ende memory block: %d%d%d%d\n", mem[s_mem-4], mem[s_mem-3], mem[s_mem-2], mem[s_mem-1]);    
   
     clear_stack(stack);
+    
+    printf("--- ende Stack Test ---\n\n--- Beginn DLL Tests ---\n");
+    
+    
+    try_load_dll("server.dll");    
+    try_load_dll("capture.dll");    
+    try_load_dll("libencoder.dll");
+    try_load_dll("libcapture.dll");
+    
     return 0;
 }

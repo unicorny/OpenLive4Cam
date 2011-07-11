@@ -31,15 +31,21 @@ const char g_modulname[] = "capture";
 
 
 #ifdef _WIN32
+#define CAPTURE_API
     #ifdef BUILD_DLL
-        //#define CAPTURE_API __declspec(dllexport)
+		#undef CAPTURE_API
 		#define CAPTURE_API extern
-    #else
-        //#define CAPTURE_API __declspec(dllimport)
-		#define CAPTURE_API
-    #endif
+	#endif
+	#ifdef VC_BUILD
+		#undef CAPTURE_API
+		#define CAPTURE_API __declspec(dllexport)
+	#endif
 #else
-    #define CAPTURE_API
+	#ifdef BUILD_DLL
+		#define CAPTURE_API extern
+	#else	
+		#define CAPTURE_API
+	#endif
 #endif
 
 #ifdef __cplusplus

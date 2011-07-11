@@ -1,5 +1,5 @@
 #include "CInterface.h"
-
+#include <stdio.h>
 
 CInterface::CInterface()
     : mCapture(NULL), mServer(NULL), mEncoder(NULL)
