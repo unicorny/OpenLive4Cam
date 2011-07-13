@@ -241,13 +241,13 @@ int start()
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
-    EncoderDeviceSource* eds = 
-            EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
-    sms->addSubsession(H264VideoEncoderServerMediaSubsession
-		       ::createNew(*env, eds, reuseFirstSource));
+    //EncoderDeviceSource* eds = 
+     //       EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
+//    sms->addSubsession(H264VideoEncoderServerMediaSubsession
+	//	       ::createNew(*env, eds, reuseFirstSource));
     //*/
-   // sms->addSubsession(H264VideoFileServerMediaSubsession
-	//	       ::createNew(*env, inputFileName, reuseFirstSource));
+    sms->addSubsession(H264VideoFileServerMediaSubsession
+		       ::createNew(*env, inputFileName, reuseFirstSource));
    //*/
     rtspServer->addServerMediaSession(sms);
 

@@ -141,7 +141,7 @@ void CaptureCom::nextFrame()
        // qDebug("data is zero, size: %d", size);
     }
     //qDebug("current_Frame: %d\n", size);
-    SPicture* pic = getPictureFunc(1, 0);
+    SPicture* pic = getPictureFunc(1, 1);
     if(!pic) return;
 
     if(mImage &&(mImage->width() != pic->width || mImage->height() != pic->height))

@@ -104,9 +104,14 @@ int lock_mutex(void* mutex)
 #ifdef _WIN32
 	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
 	if(waitResult == WAIT_OBJECT_0)
+        {
 		ret = 0;
+                printf("capture mutex locked\n");
+        }
 	else if(waitResult == WAIT_FAILED)
+        {
 		printf("Fehler %d bei lock mutex\n", GetLastError());
+        }
 
 #else
     ret = pthread_mutex_lock(mutex);

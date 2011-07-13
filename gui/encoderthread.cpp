@@ -18,6 +18,7 @@ void EncoderThread::run()
 {
     int (*encodeFrame)();
     encodeFrame = (int (*)())mInterface->getParameter("encoder.EncodeFrameFunc");
+ //   return;
     forever
     {
         mutex.lock();

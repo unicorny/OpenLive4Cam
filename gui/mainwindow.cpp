@@ -118,7 +118,7 @@ void MainWindow::on_source_comboBox_currentIndexChanged(int index)
 
 void MainWindow::on_chooseKam_clicked()
 {
-    mCapture->chooseCurrentCamera(-1);
+    mCapture->chooseCurrentCamera(0);
 }
 
 void MainWindow::on_port_spinBox_valueChanged(int value)
