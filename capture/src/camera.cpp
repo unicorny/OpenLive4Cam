@@ -7,8 +7,10 @@
 using namespace cv;
 using namespace std;
 
+//! \brief buffer for camera names
 char gBuffer[256];
 
+//! \brief return camera resolution
 int camera_resolution(string* params, int number)
 {
     if(params[0] == string("count"))
@@ -33,7 +35,7 @@ int camera_resolution(string* params, int number)
     return 0;
     
 }
-
+//! \brief return camera count
 int camera_count()
 {
     int i = 0;
@@ -50,7 +52,7 @@ int camera_count()
 }
 
 
-
+//! \brief return camera name or call camera_resolution()
 int camera_number(int number, string* params)
 {
    /* VideoCapture cap(number); // open the choosen camera
@@ -80,7 +82,7 @@ int camera_number(int number, string* params)
    // cap.release();
     return 0;
 }
-
+//! \brief call camera_count() or camera_number()
 int camera_getParameter(std::string* params)
 {
     printf("Camera get parameter: %s\n", params[0].data());
