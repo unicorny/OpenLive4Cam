@@ -207,6 +207,8 @@ void setParameter(const char* name, int value)
  *  
  * \param name parameter name
  * \param value parameter value (number or pointer)
+ * \return value or pointer to value if succeed
+ * \return NULL if parameter is unknown
  */
 int getParameter(const char* name)
 {

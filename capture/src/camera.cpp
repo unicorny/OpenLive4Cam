@@ -14,12 +14,19 @@ char gBuffer[256];
 int camera_resolution(string* params, int number)
 {
     if(params[0] == string("count"))
+    {
+        unlock_mutex(mutex);
         return 1;
+    }
    //return (int)"null";        
     if(params[0] == string("0")) //resolution number
     {
         VideoCapture cap(number);
-        if(!cap.isOpened()) return 0;
+        if(!cap.isOpened())
+        {
+            unlock_mutex(mutex);
+            return 0;
+        }
         
         double v = 0.0;
         if(params[1] == string("x") || params[1] == string("width"))
@@ -30,8 +37,10 @@ int camera_resolution(string* params, int number)
         cap.release();
             
         sprintf(gBuffer, "%.0f", v);
+        unlock_mutex(mutex);
         return (int)gBuffer;       
     }
+    unlock_mutex(mutex);
     return 0;
     
 }
@@ -43,11 +52,14 @@ int camera_count()
     {
         VideoCapture cap(i); // try to open a camera
         if(!cap.isOpened())  // check if we succeeded
-                return i;
+        {
+            unlock_mutex(mutex);
+            return i;
+        }
         cap.release();
         i++;
     }
-    
+    unlock_mutex(mutex);
     return i;
 }
 
@@ -65,12 +77,14 @@ int camera_number(int number, string* params)
         if(number == 0)
         {
             //cap.release();
+            unlock_mutex(mutex);
             return (int)"0 (default)";
         }
         else 
         {
             sprintf(gBuffer, "%d", number);
            // cap.release();
+            unlock_mutex(mutex);
             return (int)gBuffer;
         }
     }
@@ -80,6 +94,7 @@ int camera_number(int number, string* params)
         return camera_resolution(&params[1], number);
     }
    // cap.release();
+    unlock_mutex(mutex);
     return 0;
 }
 //! \brief call camera_count() or camera_number()

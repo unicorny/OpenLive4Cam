@@ -246,10 +246,12 @@ void setParameter(const char* name, int value)
  * <br>
  *  
  * \param name parameter name
- * \return parameter value (number or pointer)
+ * \return parameter value (number or pointer) if succeed
+ * \return NULL if parameter is unknown
  */
 int getParameter(const char* name)
 {
+    lock_mutex(mutex);
    // printf("Name: %s\n", name);
     char buffer[256];
     sprintf(buffer, "%s", name);
@@ -270,26 +272,46 @@ int getParameter(const char* name)
         {
           sprintf(g_MessagesBuffer,"capture: %s", g_Messages.top().data());
           g_Messages.pop();
+          unlock_mutex(mutex);
           return (int)g_MessagesBuffer;  
         }
         else
         {
+            unlock_mutex(mutex);
             return 0;
         }
     }
     else if(g_Parameters[0] != string(g_modulname))
+    {
             //TODO: weiterleiten
+            unlock_mutex(mutex);
             return 0;
+    }
     if(g_Parameters[1] == string("camera"))
+    {
             return camera_getParameter(&g_Parameters[2]);
+    }
     else if(g_Parameters[1] == string("getPictureFunc") )
+    {   
+        unlock_mutex(mutex);
         return (int)getPicture;
+    }
     else if(string(name) == string("capture.resolution.x") ||
             string(name) == string("capture.resolution.width"))
-        return g_cfg.width;
+    {
+        
+        
+        int width = g_cfg.width;
+        unlock_mutex(mutex);
+        return width;
+    }
     else if(string(name) == string("capture.resolution.y") ||
             string(name) == string("capture.resolution.height"))
-        return g_cfg.height;      
+    {
+        int height = g_cfg.height;    
+        unlock_mutex(mutex);        
+        return height;
+    }
         
     
   /*  for(int i = 0; i < MAX_PARAMETER_COUNT; i++)
