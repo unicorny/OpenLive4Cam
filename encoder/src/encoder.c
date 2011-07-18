@@ -92,6 +92,7 @@ int unlock()
 //! \return -2 if capture.init failed
 //! \return -3 if capture hasn't a getPictureFunc
 //! \return -4 if mutex open failed
+//! \return 42 (no problem)
 int init()
 {	
     printf("encoder Modul init\n");

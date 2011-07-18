@@ -127,7 +127,7 @@ int lock_mutex(void* mutex)
 		printf("Fehler %d bei lock mutex\n", GetLastError());
 
 #else
-    ret = pthread_mutex_lock(mutex);
+    ret = pthread_mutex_lock((pthread_mutex_t*)mutex);
 #endif
     if(ret)
         printf("capture.lock_mutex fehler bei lock mutex\n");
@@ -143,7 +143,7 @@ int unlock_mutex(void* mutex)
 #ifdef _WIN32
 	int ret = !ReleaseMutex(mutex);
 #else
-    int ret = pthread_mutex_unlock(mutex);
+    int ret = pthread_mutex_unlock((pthread_mutex_t*)mutex);
 #endif
     
     if(ret)
@@ -344,7 +344,8 @@ int start()
  */
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
-    lock_mutex(mutex);    
+    lock_mutex(mutex); 
+    static int count = 0;
     // if start wasn't called
     if(!g_run)
     {
@@ -410,7 +411,12 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         //copy picture to buffer
         size_t size = m2.cols*m2.rows*4;
         memcpy(g_rgbPicture.channel1, m2.data, size);
- 
+        
+        //write pictures as jpg for test
+        char filename[256];
+        sprintf(filename, "picture%04d.jpg", count++);
+        imwrite(filename, scaled);
+        
         //free scaled image
         cvReleaseImage(&scaled);
         
