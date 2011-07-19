@@ -32,17 +32,26 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 }
 #endif //_WIN32
 
+//! \brief pointer to capture-modul (shared library)
 SInterface* capture;
+//! \brief pointer to getPictureFunc, used in raw_input
 SPicture* (*getPictureFunc)(int,int);
+//! \brief save datas used for encoding
 encoder_datas en_data;
+//! \brief pointer to stack for saving encoded frames
 SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
+//! brief mutex for threadsafe
 #ifdef _WIN32
 void* mutex = NULL;
 #else
 pthread_mutex_t* mutex; 
 #endif
 
+//! \brief lock mutex of encoder, or wait until it is unlocked and lock it than
+//! \return 0 without error
+//! \return 1 by error in windows
+//! \return return-value of pthread_mutex_lock(pthread_mutex_t*) in linux
 int lock()
 {
 	int ret = 1;
@@ -61,6 +70,10 @@ int lock()
     return ret;        
 }
 
+//! \brief unlock mutex of encoder
+//! \return 0 without error
+//! \return 1 by error in windows
+//! \return return-value of pthread_mutex_unlock(pthread_mutex_t*) in linux
 int unlock()
 {
 #ifdef _WIN32
@@ -74,7 +87,12 @@ int unlock()
     return ret;
 }
 
-
+//! \brief load capture-Modul (Shared Library, *.so or *.dll), init mutex
+//! \return -1 if capture open failed
+//! \return -2 if capture.init failed
+//! \return -3 if capture hasn't a getPictureFunc
+//! \return -4 if mutex open failed
+//! \return 42 (no problem)
 int init()
 {	
     printf("encoder Modul init\n");
@@ -118,6 +136,7 @@ int init()
     return 42;
 }
 
+//! \brief call stop, free mutex, clear stack, free capture-Modul
 void ende()
 {
     lock();
@@ -146,7 +165,13 @@ void ende()
 }
 
 
-
+/*! \brief set parameter for encoder 
+ * 
+ * no parameter to set, only forwarding function-call to capture-Modul
+ *  
+ * \param name parameter name
+ * \param value parameter value (number or pointer)
+ */
 void setParameter(const char* name, int value)
 {
     char buffer[256];
@@ -166,7 +191,25 @@ void setParameter(const char* name, int value)
             capture->setParameter(name, value); //TODO: weiterleiten    
         
 }
-
+/*! \brief get parameter from encoder 
+ * 
+ * <br>
+ * <table><tr><th colspan='3'>Possible Parameters to get:</th></tr>
+ * <tr><th>name</th><th>return</th><th>description</th></tr>
+ * <tr><td>encoder.getFrameFunc</td><td>unsigned char* (*getFrameFunc)(int*)</td><td>
+ *    - return pointer to getFrame()</td></tr>
+ * <tr><td>encoder.EncodeFrameFunc</td><td>int (*encodeFrame)(void)</td><td>
+ *    - return Pointer to encodeFrame()</td></tr>
+ * <tr><td><i>all other</i></td><td><i>type</i></td><td>
+ *    - forwarding to capture </td></tr>
+ * </table>
+ * <br>
+ *  
+ * \param name parameter name
+ * \param value parameter value (number or pointer)
+ * \return value or pointer to value if succeed
+ * \return NULL if parameter is unknown
+ */
 int getParameter(const char* name)
 {
     char buffer[256];
@@ -198,7 +241,8 @@ int getParameter(const char* name)
     return 0;
   
 }
-
+//! \brief startet capture, init data for encoding
+//! \return return-value of start_x264(), threadsafe
 int start()
 {
     char resolution[256];
@@ -227,6 +271,9 @@ int start()
     printf("encoder::start return von start: %d\n", r);
     return r;
 }
+//! \brief encode one frame and safe it to stack, threadsafe
+//! \return 0 for okay
+//! \return -1 if encode_frames() failed
 int encodeFrame()
 {
     lock();
@@ -245,6 +292,8 @@ int encodeFrame()
     return 0;
 }
 
+//! \brief stop encoder and capture
+//! \return 0
 int stop()
 {
     lock();

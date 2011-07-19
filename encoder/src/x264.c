@@ -203,7 +203,9 @@ void x264_cli_log( const char *name, int i_level, const char *fmt, ... )
 }
 
 
-
+//! \brief init encoder
+//! \return -1 by error
+//! \return return-value of encode()
 int start_x264(char* resolution)
 {
     x264_param_t param;
@@ -234,40 +236,6 @@ int start_x264(char* resolution)
     
 
     return ret;
-}
-
-
-static int select_output( const char *muxer, char *filename, x264_param_t *param )
-{
-    const char *ext = get_filename_extension( filename );
-    if( !strcmp( filename, "-" ) || strcasecmp( muxer, "auto" ) )
-        ext = muxer;
-    
-    /*if(!strcasecmp( ext, "sdp" ))
-    {
-            output = sdp_output;
-            param->b_annexb = 0;
-            param->b_repeat_headers = 0;
-    }
-    else*/ if(strstr(filename, "rtp://"))
-    {
-            output = rtp_output;
-    //	printf("rtp output choosen\n");
-            //! TODO: schauen fï¿œr was die Parameter da sind
- //           param->b_annexb = 0;
-   //         param->b_repeat_headers = 0;
-    // * */
-    }
-    
-    return 0;
-}
-
-static int select_input( const char *demuxer, char *used_demuxer, char *filename,
-                         hnd_t *p_handle, video_info_t *info, cli_input_opt_t *opt )
-{
-    input = raw_input;
- 
-    return 0;
 }
 
 static int init_vid_filters( char *sequence, hnd_t *handle, video_info_t *info, x264_param_t *param )
@@ -360,8 +328,9 @@ static int parse( x264_param_t *param, cli_opt_t *opt, char* resolution )
     if( x264_param_apply_profile( param, profile ) < 0 )
         return -1;
 
-    if( select_output( muxer, output_filename, param ) )
-        return -1;
+    /*if( select_output( muxer, output_filename, param ) )
+        return -1;*/
+    output = rtp_output;
     FAIL_IF_ERROR( output.open_file( output_filename, &opt->hout, &output_opt ), "could not open output file `%s'\n", output_filename )
 
     video_info_t info = {0};
@@ -574,6 +543,13 @@ int encode_frames()
      
         return retval;
 }
+//! \brief return oldest frame from stack (FILO)
+//!
+//! get the oldest frame from stack, return pointer to data,<br>
+//! data will delete by next call of getFrame
+//! \param size pointer to var for size of frame, if NULL, only last frame will be deleted
+//! \return pointer to framedata with size write into size, framedate changed after next call
+//! \return 0 by error or if param size is 0
 unsigned char* getFrame(int *size)
 {
   //  encode_frames(&opt);
@@ -603,6 +579,8 @@ int getFrame()
     return encode_frames(&opt);
 }
 */
+//! \brief close filter and file-handles
+//! \return 0
 int encoder_stop_frames()
 {
     ///* clean up handles 
@@ -635,6 +613,7 @@ int encoder_stop_frames()
     return 0;
 }
 
+//! \return 0
 static int encode( x264_param_t *param, cli_opt_t *opt )
 {
         

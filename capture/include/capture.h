@@ -52,9 +52,22 @@ const char g_modulname[] = "capture";
 extern "C"
 {
 #endif
-
+//! \brief init mutex and Picture structures
+//! \return -2 bei mutex init error, else 42 (no problems)
 CAPTURE_API int  init();
+//! \brief release pictures, release mutex (wait if mutex is currently locked)
 CAPTURE_API void ende();
+/*! \brief set parameter for capture 
+ * Possible Parameters to set:
+ * 'capture.camera.choose', value is a int
+ *    value is used to deside which camera will be choosen
+ *    (if they are more then one camera connected to the computer)
+ *    working with stream activated
+ * '
+ * 
+ * \params name name of parameter
+ * \params value of parameter (number or pointer)
+*/
 CAPTURE_API void setParameter(const char* name, int value);
 CAPTURE_API int  getParameter(const char* name);
 //return 0 okay, -1 camera not open
@@ -64,7 +77,19 @@ CAPTURE_API int stop();
 
 
 //CAPTURE_API 
+//! \brief mutex for threadsave working
+#ifdef _WIN32
+extern void* mutex = NULL;
+#else
+extern pthread_mutex_t* mutex;//PTHREAD_MUTEX_INITIALIZER; 
+#endif
 
+//! \brief lock mutex 
+//! \param mutex to lock
+int lock_mutex(void* mutex);
+//! \brief unlock mutex
+//! \param mutex mutex to unlock
+int unlock_mutex(void* mutex);
 
 #ifdef __cplusplus
 }
