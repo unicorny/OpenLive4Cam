@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     }
     else if(ret <= 0)
     {
-        QMessageBox::critical(NULL, QString("OpenLive4Cam"), QString("Fehler beim laden einer Sub-Bibliothek, fÃ¼r mehr Infos schaue auf die Fehlerausgabe auf der Konsole.\n"), QMessageBox::Abort);
+        QMessageBox::critical(NULL, QString("OpenLive4Cam"), QString("Fehler beim laden einer Sub-Bibliothek, für mehr Infos schaue auf die Fehlerausgabe auf der Konsole.\n"), QMessageBox::Abort);
         QCoreApplication::exit();
     }
 
@@ -87,7 +87,7 @@ void MainWindow::on_startButton_clicked()
             //Start Stream
             mTimer.start(30);
             mStreamingRunning = true;
-            mEncoderThread->start();
+           // mEncoderThread->start();
             res->setEnabled(false);
             port->setEnabled(false);
         }

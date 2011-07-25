@@ -79,7 +79,7 @@ CAPTURE_API int stop();
 //CAPTURE_API 
 //! \brief mutex for threadsave working
 #ifdef _WIN32
-extern void* mutex = NULL;
+extern void* mutex;
 #else
 extern pthread_mutex_t* mutex;//PTHREAD_MUTEX_INITIALIZER; 
 #endif

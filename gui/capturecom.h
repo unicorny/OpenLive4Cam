@@ -33,6 +33,7 @@ private:
     CInterface* mInterface;
     SPicture* (*getPictureFunc)(int,int);
     unsigned char* (*getFrameFunc)(int*);
+    int (*encodeFrame)();
     const char* (*generateSDP)();
     QImage* mImage;
     QTextEdit*   mLogger;

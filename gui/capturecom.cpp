@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL), getFrameFunc(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
+    QObject(parent), mInterface(in), getPictureFunc(NULL), getFrameFunc(NULL), encodeFrame(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
 {
 }
 
@@ -120,8 +120,10 @@ void CaptureCom::nextFrame()
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
     if(!getFrameFunc)
         getFrameFunc = (unsigned char* (*)(int*))mInterface->getParameter("encoder.getFrameFunc");
+    if(!encodeFrame)
+        encodeFrame = (int (*)())mInterface->getParameter("encoder.EncodeFrameFunc");
 
-    if(!getPictureFunc || !getFrameFunc)
+    if(!getPictureFunc || !getFrameFunc  || !encodeFrame)
     {
         qDebug("CaptureCom::nextFrame()  capture.getPictureFunc oder encoder.getFrameFunc oder server.getTickFunc fehlgeschlagen!\n");
         return;
@@ -141,7 +143,8 @@ void CaptureCom::nextFrame()
        // qDebug("data is zero, size: %d", size);
     }
     //qDebug("current_Frame: %d\n", size);
-    SPicture* pic = getPictureFunc(1, 1);
+    encodeFrame();
+    SPicture* pic = getPictureFunc(1, 0);
     if(!pic) return;
 
     if(mImage &&(mImage->width() != pic->width || mImage->height() != pic->height))

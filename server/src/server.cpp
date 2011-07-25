@@ -87,7 +87,7 @@ int init()
         printf("Error, encoder.getFrameFunc didn't work as exceptet!");
         return -4;
     }
- //return 0;    
+ return 0;    
     //live starten
     scheduler = BasicTaskScheduler::createNew();
     env = BasicUsageEnvironment::createNew(*scheduler);
