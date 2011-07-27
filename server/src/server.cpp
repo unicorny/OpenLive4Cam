@@ -35,11 +35,14 @@ SInterface* encoder = NULL;
 std::stack<std::string> g_Messages;
 char g_MessagesBuffer[256];
 int g_Port = 8554;
+unsigned char* (*getFrameFunc)(int*) = NULL;
+int (*getStackCount)(void) = NULL;
 
 //live
 UsageEnvironment* env = NULL;
 TaskScheduler* scheduler = NULL;
 RTSPServer* rtspServer = NULL;
+FramedSource* eds = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
 bool g_run = false;
@@ -87,7 +90,13 @@ int init()
         printf("Error, encoder.getFrameFunc didn't work as exceptet!");
         return -4;
     }
- return 0;    
+    getStackCount = (int (*)())encoder->getParameter("encoder.getStackCountFunc");
+    if(!getStackCount)
+    {
+        printf("Error, encoder.getStackCountFunc didn't work as exceptet!");
+        return -5;
+    }
+ //return 0;    
     //live starten
     scheduler = BasicTaskScheduler::createNew();
     env = BasicUsageEnvironment::createNew(*scheduler);
@@ -110,6 +119,12 @@ int run()
         //((BasicTaskScheduler0)env->taskScheduler()).SingleStep(0);
     }
 	return 0;
+}
+
+void checkIfNewDataAvailable()
+{
+    if(getStackCount() >= 2)
+        signalNewFrameData();
 }
 
 void ende()
@@ -191,6 +206,10 @@ int getParameter(const char* name)
     {
         return (int)run;
     }
+    else if(g_Parameters[1].compare(string("checkIfNewDataAvailableFunc")) == 0)
+    {
+        return (int)checkIfNewDataAvailable;
+    }
     
     
     return 0;
@@ -223,6 +242,7 @@ int start()
        }
     }
     //return 0;
+    int encoderPort = encoder->getParameter("encoder.port");
     
     RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
@@ -237,24 +257,44 @@ int start()
   {
     char const* streamName = "h264";
     char const* inputFileName = "./jumper2.h264";
-    
+    char buffer[256];
+    sprintf(buffer, "Packet Buffer Size: %d\n", OutPacketBuffer::maxSize);
+    g_Messages.push(buffer);
+    OutPacketBuffer::maxSize = 100000;
+    //H264VideoRTPSource::maxSize = 100000;
+
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
     //EncoderDeviceSource* eds = 
-     //       EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
-//    sms->addSubsession(H264VideoEncoderServerMediaSubsession
-	//	       ::createNew(*env, eds, reuseFirstSource));
+      //      EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
+ //   H264VideoStreamDiscreteFramer* dF = 
+   //         H264VideoStreamDiscreteFramer::createNew(*env, eds);
+    //Groupsock* gr = new Groupsock(*env, inet_makeaddr(127,1), Port(encoderPort), 0);
+    //gr->changeDestinationParameters()
+    //H264VideoRTPSource* rtp = 
+      //      H264VideoRTPSource::createNew(*env, gr, 96);
+   // sms->addSubsession(H264VideoEncoderServerMediaSubsession
+	//	       ::createNew(*env, dF, reuseFirstSource));
     //*/
-    sms->addSubsession(H264VideoFileServerMediaSubsession
+   /* sms->addSubsession(H264VideoFileServerMediaSubsession
 		       ::createNew(*env, inputFileName, reuseFirstSource));
    //*/
+    //ByteStreamFileSource* fileSource = ByteStreamFileSource::createNew(*env, inputFileName);
+    
+    sms->addSubsession(H264VideoEncoderServerMediaSubsession
+		       ::createNew(*env, &eds, reuseFirstSource));
+    //* */
     rtspServer->addServerMediaSession(sms);
 
     announceStream(rtspServer, sms, streamName);
+    
+     sprintf(buffer, "Packet Buffer Size after: %d\n", OutPacketBuffer::maxSize);
+    g_Messages.push(buffer);
   }
 
  
+    
 
   // Also, attempt to create a HTTP server for RTSP-over-HTTP tunneling.
   // Try first with the default HTTP port (80), and then with the alternative HTTP

@@ -6,11 +6,11 @@ includedir=${prefix}/include
 ARCH=X86
 SYS=LINUX
 CC=gcc
-CFLAGS=-Wshadow -O3 -ffast-math  -Wall -I. -march=i686 -mfpmath=sse -msse -std=gnu99 -I/usr/X11R6/include -fomit-frame-pointer -fno-tree-vectorize
+CFLAGS=-Wshadow -O3 -ffast-math  -Wall -I. -march=i686 -mfpmath=sse -msse -std=gnu99 -fomit-frame-pointer -fno-tree-vectorize
 DEPMM=-MM -g0
 DEPMT=-MT
 LD=gcc -o 
-LDFLAGS=-L/usr/X11R6/lib -lX11  -lm -lpthread
+LDFLAGS= -lm -lpthread
 LIBX264=libx264.a
 AR=ar rc 
 RANLIB=ranlib
@@ -26,11 +26,6 @@ PROF_USE_CC=-fprofile-use
 PROF_USE_LD=-fprofile-use
 default: cli
 install: install-cli
-SOSUFFIX=so
-SONAME=libx264.so.115
-SOFLAGS=-shared -Wl,-soname,$(SONAME)
-default: lib-shared
-install: install-lib-shared
 default: lib-static
 install: install-lib-static
 LDFLAGSCLI = 

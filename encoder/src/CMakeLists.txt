@@ -11,12 +11,12 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 add_definitions(-std=gnu99)
 
 SET(EncoderSrc encoder x264 ../../interface/picture.c ../../interface/interface.c ../../interface/frame.c
-               input raw_input rtp_output timecode_input
+               input raw_input rtp_output timecode_input socket
                ../filters/filters.c ../filters/video/cache.c ../filters/video/crop.c ../filters/video/depth.c 
                ../filters/video/fix_vfr_pts.c ../filters/video/internal.c ../filters/video/resize.c ../filters/video/select_every.c
                ../filters/video/source.c ../filters/video/video.c)
 #IF(WIN32)
-SET(EncoderSrc ${EncoderSrc} ../include/x264.h ../include/encoder.h ../../interface/picture.h ../../interface/interface.h ../../interface/frame.h
+SET(EncoderSrc ${EncoderSrc} ../include/x264.h ../include/encoder.h ../../interface/picture.h ../../interface/interface.h ../../interface/frame.h ../include/socket.h
                              ../include/input.h)
 #ENDIF(WIN32)
 
@@ -25,8 +25,8 @@ find_library(X264_LIB x264 PATHS ${PA})
 #ws2_32
 IF(WIN32)
 SET(ENCODER_LIBS  ${X264_LIB} ws2_32)
-ELSE(WIN32)
-SET(ENCODER_LIBS  ${X264_LIB})
+ELSE()
+SET(ENCODER_LIBS  ${X264_LIB} m pthread)
 ENDIF(WIN32)
 
 

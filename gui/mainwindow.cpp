@@ -87,7 +87,7 @@ void MainWindow::on_startButton_clicked()
             //Start Stream
             mTimer.start(30);
             mStreamingRunning = true;
-           // mEncoderThread->start();
+            mEncoderThread->start();
             res->setEnabled(false);
             port->setEnabled(false);
         }

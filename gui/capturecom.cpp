@@ -2,7 +2,7 @@
 #include <stdio.h>
 
 CaptureCom::CaptureCom(CInterface* in, QTextEdit* logger, QObject *parent) :
-    QObject(parent), mInterface(in), getPictureFunc(NULL), getFrameFunc(NULL), encodeFrame(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
+    QObject(parent), mInterface(in), getPictureFunc(NULL), checkIfNewDataAvailable(NULL), getFrameFunc(NULL), encodeFrame(NULL), generateSDP(NULL), mImage(NULL), mLogger(logger)
 {
 }
 
@@ -72,6 +72,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 #ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
 #endif
+    /*
     int ret = 0;
     if((ret = mInterface->start()))
     {
@@ -84,17 +85,10 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
         stopStream();
         return -1;
     }
-   /* if(!generateSDP)
-        generateSDP = (const char*(*)())mInterface->getParameter("encoder.generateSDPFunc");
-    if(!generateSDP)
-    {
-        qDebug("CaptureCom::startStreaming() encoder.generateSDPFunc fehlgeschlagen!\n");
-        return -1;
-    }
-    */
+
 
     mLogger->append("Der Stream wurde gestartet!");
-
+//*/
     FILE* f = fopen("video.264", "wb");
     if(f)
         fclose(f);
@@ -122,8 +116,10 @@ void CaptureCom::nextFrame()
         getFrameFunc = (unsigned char* (*)(int*))mInterface->getParameter("encoder.getFrameFunc");
     if(!encodeFrame)
         encodeFrame = (int (*)())mInterface->getParameter("encoder.EncodeFrameFunc");
+    if(!checkIfNewDataAvailable)
+        checkIfNewDataAvailable = (void (*)())mInterface->getParameter("server.checkIfNewDataAvailableFunc");
 
-    if(!getPictureFunc || !getFrameFunc  || !encodeFrame)
+    if(!getPictureFunc || !getFrameFunc  || !encodeFrame || !checkIfNewDataAvailable)
     {
         qDebug("CaptureCom::nextFrame()  capture.getPictureFunc oder encoder.getFrameFunc oder server.getTickFunc fehlgeschlagen!\n");
         return;
@@ -144,6 +140,7 @@ void CaptureCom::nextFrame()
     }
     //qDebug("current_Frame: %d\n", size);
     encodeFrame();
+  //  checkIfNewDataAvailable();
     SPicture* pic = getPictureFunc(1, 0);
     if(!pic) return;
 

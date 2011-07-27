@@ -5,7 +5,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 
 SET(ServerSrc server H264VideoEncoderServerMediaSubsession EncoderDeviceSource
-			  ../../interface/interface.c)
+			  ../../interface/interface.cpp)
 #IF(WIN32)
 SET(ServerSrc ${ServerSrc} ../include/server.h ../include/H264VideoEncoderServerMediaSubsession.h ../include/EncoderDeviceSource.hh ../../interface/interface.h)
 #ENDIF(WIN32)
@@ -19,7 +19,7 @@ find_library(GROUP_SOCK libgroupsock.lib PATHS ${PA} REQUIRED)
 #find_library(WINMM winmm.lib REQUIRED)
 #find_library(WS2_32_LIBRARY ws2_32.lib REQUIRED)
 SET(LIBS ws2_32 winmm ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
-ELSEIF(WIN32)
+ELSE ()
 find_library(USAGE_ENV UsageEnvironment PATHS ${PA} REQUIRED)
 find_library(BASIC_USAGE_ENV BasicUsageEnvironment PATHS ${PA} REQUIRED)
 find_library(LIVE_MEDIA liveMedia PATHS ${PA} REQUIRED)

@@ -23,6 +23,7 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 
 #include "../include/EncoderDeviceSource.hh"
 #include <GroupsockHelper.hh> // for "gettimeofday()"
+#include "server.h"
 
 EncoderDeviceSource*
 EncoderDeviceSource::createNew(UsageEnvironment& env,
@@ -36,7 +37,7 @@ unsigned EncoderDeviceSource::referenceCount = 0;
 
 EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
 			   EncoderDeviceParameters params)
-  : FramedSource(env), fParams(params), fLastPlayTime(0), bin(NULL) {
+  : FramedSource(env), fParams(params), fLastPlayTime(0), frameCount(0), bin(NULL) {
   if (referenceCount == 0) {
     // Any global initialization of the device would be done here:
     //%%% TO BE WRITTEN %%%
@@ -97,7 +98,7 @@ void EncoderDeviceSource::doGetNextFrame() {
   //printf("\n\ndoGetNextFrame\n\n");
   if(!fParams.used)
   {
-      do {
+      /*do*/ {
           //memcpy
           int temp_size = 0;
           unsigned char* temp = (unsigned char*)fParams.getFrame(&temp_size); 
@@ -122,9 +123,9 @@ void EncoderDeviceSource::doGetNextFrame() {
               printf("sehr ungewohnlich: size: %d, pointer: %d\n", fParams.tempSize, (int)fParams.tempData);
               fParams.tempSize = 0;
           }
-      } while(!fParams.tempSize || !fParams.tempData);
-      fwrite(fParams.tempData, fParams.tempSize, 1, f2);
-      
+      } //while(!fParams.tempSize || !fParams.tempData);
+      frameCount++;
+      fwrite(fParams.tempData, fParams.tempSize, 1, f2);      
   }
   fclose(f);
   fclose(f2);
@@ -198,7 +199,26 @@ void EncoderDeviceSource::deliverFrame() {
    fprintf(f, "fMaxSize: %d, fFrameSize: %d\n", fMaxSize, fFrameSize);
    fflush(f);
    
-  gettimeofday(&fPresentationTime, NULL);
+          
+   
+           
+   //if(frameCount <= 1)
+   {
+        gettimeofday(&fPresentationTime, NULL);
+   }
+   /*else
+   {
+       fLastPlayTime = frameCount*33333;
+       unsigned uSeconds	= fPresentationTime.tv_usec + fLastPlayTime;
+       fPresentationTime.tv_sec += uSeconds/1000000;
+       fPresentationTime.tv_usec = uSeconds%1000000;
+   
+       fDurationInMicroseconds = fLastPlayTime;
+       fprintf(f, "fLastPlayTime: %d\n", fLastPlayTime);
+       fflush(f);
+   }
+     //*/  
+   
   //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
   //memmove(fTo, newFrameDataStart, fFrameSize);
@@ -222,12 +242,13 @@ void EncoderDeviceSource::deliverFrame() {
   //fprintf(f, "frameSize2: %d, p: %d\n", fFrameSize, (int)newFrameDataStart);
   fflush(f);
   
-  fFrameSize = fread(fTo, 1, fMaxSize, bin);
+  /*fFrameSize = fread(fTo, 1, fMaxSize, bin);
   if(fMaxSize != fFrameSize)
   {
       fprintf(f, "Fehler, weniger bytes gelesen als erwartet: %d, %d\n", fMaxSize, fFrameSize);
       fflush(f);
   }
+   * */
   
   //fprintf(f, "frame wrote\n");
   //fflush(f);
@@ -243,9 +264,9 @@ void EncoderDeviceSource::deliverFrame() {
 // The following code would be called to signal that a new frame of data has become available.
 // This (unlike other "LIVE555 Streaming Media" library code) may be called from a separate thread.
 void signalNewFrameData() {
-    printf("singnalNewFrameData\n");
-  TaskScheduler* ourScheduler = NULL; //%%% TO BE WRITTEN %%%
-  EncoderDeviceSource* ourDevice  = NULL; //%%% TO BE WRITTEN %%%
+    printf("signalNewFrameData\n");
+  TaskScheduler* ourScheduler = scheduler; //%%% TO BE WRITTEN %%%
+  EncoderDeviceSource* ourDevice  = (EncoderDeviceSource*)eds; //%%% TO BE WRITTEN %%%
 
   if (ourScheduler != NULL) { // sanity check
     ourScheduler->triggerEvent(EncoderDeviceSource::eventTriggerId, ourDevice);

@@ -16,6 +16,9 @@ EncoderThread::~EncoderThread()
 
 void EncoderThread::run()
 {
+    mInterface->start();
+    return;
+
     int (*encodeFrame)();
     encodeFrame = (int (*)())mInterface->getParameter("encoder.EncodeFrameFunc");
  //   return;

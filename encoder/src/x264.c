@@ -331,6 +331,7 @@ static int parse( x264_param_t *param, cli_opt_t *opt, char* resolution )
     /*if( select_output( muxer, output_filename, param ) )
         return -1;*/
     output = rtp_output;
+    //param->b_repeat_headers = 0;
     FAIL_IF_ERROR( output.open_file( output_filename, &opt->hout, &output_opt ), "could not open output file `%s'\n", output_filename )
 
     video_info_t info = {0};
@@ -557,6 +558,7 @@ unsigned char* getFrame(int *size)
     static SFrame* current = NULL;
     if(current) delete_frame(current);
     current = NULL;
+
     if(size)
     {
         

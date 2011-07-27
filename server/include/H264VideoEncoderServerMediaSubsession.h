@@ -22,18 +22,14 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #ifndef _H264_VIDEO_ENCODER_SERVER_MEDIA_SUBSESSION_HH
 #define _H264_VIDEO_ENCODER_SERVER_MEDIA_SUBSESSION_HH
 
-#ifndef _ON_DEMAND_SERVER_MEDIA_SUBSESSION_HH
-#include "OnDemandServerMediaSubsession.hh"
+#ifndef _FILE_SERVER_MEDIA_SUBSESSION_HH
+#include "FileServerMediaSubsession.hh"
 #endif
 
-#ifndef _ENCODER_DEVICE_SOURCE_HH
-#include "EncoderDeviceSource.hh"
-#endif
-
-class H264VideoEncoderServerMediaSubsession: public OnDemandServerMediaSubsession{
+class H264VideoEncoderServerMediaSubsession: public FileServerMediaSubsession{
 public:
   static H264VideoEncoderServerMediaSubsession*
-  createNew(UsageEnvironment& env, EncoderDeviceSource* device, Boolean reuseFirstSource);
+  createNew(UsageEnvironment& env, FramedSource** source, Boolean reuseFirstSource);
 
   // Used to implement "getAuxSDPLine()":
   void checkForAuxSDPLine1();
@@ -41,7 +37,7 @@ public:
 
 private:
   H264VideoEncoderServerMediaSubsession(UsageEnvironment& env,
-				      EncoderDeviceSource * device, Boolean reuseFirstSource);
+				      FramedSource** source, Boolean reuseFirstSource);
       // called only by createNew();
   virtual ~H264VideoEncoderServerMediaSubsession();
 
@@ -57,9 +53,11 @@ private: // redefined virtual functions
 				    FramedSource* inputSource);
 
 private:
-  char fDoneFlag; // used when setting up "fSDPLines"
+  char* fAuxSDPLine;
+  char fDoneFlag; // used when setting up "fAuxSDPLine"
   RTPSink* fDummyRTPSink; // ditto
-  EncoderDeviceSource* source;
+  FramedSource** mSource;
+  int mPort;
 };
 
 #endif

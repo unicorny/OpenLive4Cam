@@ -32,6 +32,7 @@ public slots:
 private:
     CInterface* mInterface;
     SPicture* (*getPictureFunc)(int,int);
+    void (*checkIfNewDataAvailable)();
     unsigned char* (*getFrameFunc)(int*);
     int (*encodeFrame)();
     const char* (*generateSDP)();

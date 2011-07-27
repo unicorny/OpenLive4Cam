@@ -32,6 +32,8 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 }
 #endif //_WIN32
 
+int getStackCount();
+
 //! \brief pointer to capture-modul (shared library)
 SInterface* capture;
 //! \brief pointer to getPictureFunc, used in raw_input
@@ -41,6 +43,7 @@ encoder_datas en_data;
 //! \brief pointer to stack for saving encoded frames
 SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
+int port = 0;
 //! brief mutex for threadsafe
 #ifdef _WIN32
 void* mutex = NULL;
@@ -200,6 +203,8 @@ void setParameter(const char* name, int value)
  *    - return pointer to getFrame()</td></tr>
  * <tr><td>encoder.EncodeFrameFunc</td><td>int (*encodeFrame)(void)</td><td>
  *    - return Pointer to encodeFrame()</td></tr>
+ * <tr><td>encoder.getStackCountFunc</td></tr>int (*getStackCount)(void)</td><td>
+ *    - return Frame Count on Frame Stack</td></tr>
  * <tr><td><i>all other</i></td><td><i>type</i></td><td>
  *    - forwarding to capture </td></tr>
  * </table>
@@ -237,6 +242,10 @@ int getParameter(const char* name)
         return (int)getFrame;    
     else if(strcmp(name, "encoder.EncodeFrameFunc") == 0)
         return (int)encodeFrame;
+    else if(strcmp(name, "encoder.getStackCountFunc") == 0)
+        return (int)getStackCount;
+    else if(strcmp(name, "encoder.port") == 0)
+        return port;
     
     return 0;
   
@@ -290,6 +299,12 @@ int encodeFrame()
     }
     unlock();
     return 0;
+}
+
+int getStackCount()
+{
+    if(!g_FrameBuffer) return 0;
+    return g_FrameBuffer->count;
 }
 
 //! \brief stop encoder and capture

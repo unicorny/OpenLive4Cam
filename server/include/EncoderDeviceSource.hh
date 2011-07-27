@@ -66,6 +66,7 @@ public:
     bool used;
     unsigned char* tempData;
 };
+void signalNewFrameData();
 
 class EncoderDeviceSource: public FramedSource {
 public:
@@ -92,6 +93,7 @@ private:
   static unsigned referenceCount; // used to count how many instances of this class currently exist
   EncoderDeviceParameters fParams;
   unsigned fLastPlayTime;
+  unsigned frameCount;
   FILE* bin;
 };
 

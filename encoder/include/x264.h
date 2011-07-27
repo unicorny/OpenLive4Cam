@@ -82,6 +82,7 @@ extern SFrame_stack* g_FrameBuffer;
 int encode_frames();
 int encoder_stop_frames();
 extern encoder_datas en_data;
+extern int port;
 
 /****************************************************************************
  * NAL structure and functions

@@ -24,9 +24,11 @@
  * For more information, contact us at licensing@x264.com.
  *****************************************************************************/
 
+//#include "encoder.h"
 #include "output.h"
-//#include "socket.h"
+#include "socket.h"
 
+/*
 typedef struct 
 {
 	FILE* log;
@@ -43,7 +45,7 @@ typedef struct
 
 	
 } rtp_out_handle;
-
+*/
 
 //tools
 //! \brief gibt die x264 Parameter aus
@@ -85,23 +87,29 @@ static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
 {
     static int loop;
     static int ssrc;
+    char server[] = "localhost";
+    char cport[20];
     printf("oeffne Stream (open_file: %s)\n", psz_target);
 	// get port from string
-	char port[32];
-    char server[256]; memset(server, 0, 256);
-    strcpy(server, get_serverAddress(psz_target));
+	//char port[32];
+    //char server[256]; memset(server, 0, 256);
+    //strcpy(server, get_serverAddress(psz_target));
+    
 	
-	strcpy(port, get_filename_port(server));
+//	strcpy(port, get_filename_port(server));
 	//const char* port_str = get_filename_port(server);
 	//int port = atoi(port_str);
 	// delete port from string
-	char* point = server + strlen(server)-(strlen(port)+1);
-	memset(point, 0, sizeof(char*)*strlen(port));
+//	char* point = server + strlen(server)-(strlen(port)+1);
+//	memset(point, 0, sizeof(char*)*strlen(port));
+        //port = (rand()% 265) + 40844;
+    port = 40844;
+        sprintf(cport, "%d", port);
 	
 	// debug info
-#ifdef __DEBUG
-	printf("adress: %s, port: %s\n", server, port);	
-#endif
+//#ifdef __DEBUG
+	printf("adress: %s, port: %s\n", server, cport);	
+//#endif
 	
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
@@ -109,12 +117,12 @@ static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
         p->binaryOut = fopen("raw_video.264", "w+b");
         fprintf(p->log, "log oeffnet, open_file called\n");
         fflush(p->log);
-	/*p->socket = openSocket(server, port);
+	/*p->socket = openSocket(server, cport);
 	if(p->socket <= 0)
 	{
 		printf("Fehler beim oeffnen des Sockets\n");
 		return -1;
-	}*/
+	}//*/
         srand(time(NULL));
 	p->timestamp = time(NULL);
         if(!loop)
@@ -173,34 +181,35 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
     int size = p_nal[0].i_payload + p_nal[1].i_payload + p_nal[2].i_payload;
 
     assert( p_nal[0].i_type == NAL_SPS );
-    printf("write SPS (%2d bytes) ", p_nal[0].i_payload);//0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n
+    fprintf(p->log, "write SPS (%2d bytes) ", p_nal[0].i_payload);//0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n
     for(int i = 4; i < p_nal[0].i_payload; i++)
     {
         if(i >= p_nal[0].i_payload) break;
-        printf("0x%02x ", p_nal[0].p_payload[i]);
+        fprintf(p->log, "0x%02x ", p_nal[0].p_payload[i]);
     }
-    printf("\n");
+    fprintf(p->log,"\n");
 
     // the first 4 bytes are the NAL size in bytes. skip this
    // if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
 
     assert( p_nal[1].i_type == NAL_PPS );
-    printf("write PPS (%2d bytes) ", p_nal[1].i_payload);//0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n
+    fprintf(p->log,"write PPS (%2d bytes) ", p_nal[1].i_payload);//0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n
     for(int i = 4; i < p_nal[1].i_payload; i++)
     {
         if(i >= p_nal[1].i_payload) break;
-        printf("0x%02x ", p_nal[1].p_payload[i]);
+        fprintf(p->log,"0x%02x ", p_nal[1].p_payload[i]);
     }
-    printf("\n");
+    fprintf(p->log,"\n");
     
     /*
      fwrite( p_nal[0].p_payload, size, 1, p->binaryOut );
      if(g_FrameBuffer) clear_stack(g_FrameBuffer);
-     g_FrameBuffer = stack_init(p_nal[0].p_payload, size);
-      //*/   
+     *  //*/   
+     g_FrameBuffer = stack_init(p_nal[0].p_payload+4, size-4);
+     
     // the first 4 bytes are the NAL size in bytes. skip this
- //   if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
- //   if(sendFrame(p, p_nal[1].p_payload+4, p_nal[1].i_payload-4, NULL) < 0)  return -1;
+  // if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
+//    if(sendFrame(p, p_nal[1].p_payload+4, p_nal[1].i_payload-4, NULL) < 0)  return -1;
    //g_FrameBuffer = stack_init(p_nal[0].p_payload+4, p_nal[0].i_payload-4);
     //frame_to_stack(g_FrameBuffer, p_nal[1].p_payload, p_nal[1].i_payload);
      //if( fwrite( p_nal[0].p_payload, size, 1, (FILE*)handle ) )  
@@ -240,9 +249,9 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
         fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
         fflush(p->log);
         if(!g_FrameBuffer) 
-            g_FrameBuffer = stack_init(p_nalu, i_size);
+            g_FrameBuffer = stack_init(p_nalu+4, i_size-4);
         else
-           frame_to_stack(g_FrameBuffer, p_nalu, i_size);
+           frame_to_stack(g_FrameBuffer, p_nalu+4, i_size-4);
         
         //*/
 	//if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
@@ -267,7 +276,7 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
     int ret = fclose(p->log);
     fclose(p->binaryOut);
 	
-   // closeSocket(p->socket);
+    closeSocket(p->socket);
     p->socket = 0;
 
     // Speicher für pps und sps im Handle wieder freigeben

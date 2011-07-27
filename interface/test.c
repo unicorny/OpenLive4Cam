@@ -96,7 +96,10 @@ int main(int argc, char* argv[])
     
     
     try_load_dll("server.dll");    
-    try_load_dll("capture.dll");    
+    try_load_dll("capture.dll");   
+    try_load_dll("./libserver.so");
+    try_load_dll("./libcapture.so"); 
+    try_load_dll("./libencoder.so"); 
     try_load_dll("libencoder.dll");
     try_load_dll("libcapture.dll");
     
