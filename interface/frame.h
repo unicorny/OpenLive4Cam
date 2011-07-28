@@ -46,6 +46,8 @@ void delete_frame(SFrame* f);
 
 void clear_stack(SFrame_stack* s);
 
+int count_stack(SFrame_stack* s);
+
 #ifdef __cplusplus
 }
 #endif

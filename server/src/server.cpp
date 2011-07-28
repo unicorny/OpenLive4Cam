@@ -257,11 +257,7 @@ int start()
   {
     char const* streamName = "h264";
     char const* inputFileName = "./jumper2.h264";
-    char buffer[256];
-    sprintf(buffer, "Packet Buffer Size: %d\n", OutPacketBuffer::maxSize);
-    g_Messages.push(buffer);
-    OutPacketBuffer::maxSize = 100000;
-    //H264VideoRTPSource::maxSize = 100000;
+    
 
     ServerMediaSession* sms
       = ServerMediaSession::createNew(*env, streamName, streamName,
@@ -288,9 +284,7 @@ int start()
     rtspServer->addServerMediaSession(sms);
 
     announceStream(rtspServer, sms, streamName);
-    
-     sprintf(buffer, "Packet Buffer Size after: %d\n", OutPacketBuffer::maxSize);
-    g_Messages.push(buffer);
+   
   }
 
  

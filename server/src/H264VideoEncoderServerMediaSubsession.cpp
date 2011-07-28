@@ -106,8 +106,8 @@ FramedSource* H264VideoEncoderServerMediaSubsession::createNewStreamSource(unsig
   /*ByteStreamFileSource* fileSource*/ //source = ByteStreamFileSource::createNew(envir(), "./raw_video.264");
   //Groupsock* gr = new Groupsock(envir(), inet_makeaddr(127,1), Port(mPort), 0);
   *mSource = EncoderDeviceSource::createNew(envir(), EncoderDeviceParameters(getFrameFunc, &g_run));
-  //H264VideoStreamDiscreteFramer* dF = 
-    //        H264VideoStreamDiscreteFramer::createNew(envir(), eds);
+  H264VideoStreamDiscreteFramer* dF = 
+            H264VideoStreamDiscreteFramer::createNew(envir(), *mSource);
    // mSource =   eds;
     //gr->changeDestinationParameters()
 //  source = H264VideoRTPSource::createNew(envir(), gr, 96);

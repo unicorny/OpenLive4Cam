@@ -49,7 +49,8 @@ EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
   FILE* f = fopen("IwasHere.txt", "wt");
   FILE* f2 = fopen("viddeo.264", "wb");
   FILE* f3 = fopen("vidddeo.264", "wb");
-  bin = fopen("jumper2.h264", "rb");
+  //bin = fopen("jumper2.h264", "rb");
+  bin = fopen("raw_video2.264", "rb");
   fprintf(f, "Constructor!\n");
   fclose(f);
   fclose(f2);
@@ -93,7 +94,7 @@ void EncoderDeviceSource::doGetNextFrame() {
     return;
   }
   FILE* f = fopen("IwasHere.txt", "at");
-  FILE* f2 = fopen("vidddeo.264", "ab");
+ // FILE* f2 = fopen("vidddeo.264", "ab");
  
   //printf("\n\ndoGetNextFrame\n\n");
   if(!fParams.used)
@@ -125,10 +126,10 @@ void EncoderDeviceSource::doGetNextFrame() {
           }
       } //while(!fParams.tempSize || !fParams.tempData);
       frameCount++;
-      fwrite(fParams.tempData, fParams.tempSize, 1, f2);      
+ //     fwrite(fParams.tempData, fParams.tempSize, 1, f2);      
   }
   fclose(f);
-  fclose(f2);
+  //fclose(f2);
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
     deliverFrame();
@@ -169,7 +170,7 @@ void EncoderDeviceSource::deliverFrame() {
   if (!isCurrentlyAwaitingData()) return; // we're not ready for the data yet
   
   FILE* f = fopen("IwasHere.txt", "at");
-  FILE* f2 = fopen("viddeo.264", "ab");
+//  FILE* f2 = fopen("viddeo.264", "ab");
   fprintf(f, "Hallo!\n");
   fflush(f);
         
@@ -202,11 +203,11 @@ void EncoderDeviceSource::deliverFrame() {
           
    
            
-   //if(frameCount <= 1)
+   if(frameCount <= 1)
    {
         gettimeofday(&fPresentationTime, NULL);
    }
-   /*else
+   else
    {
        fLastPlayTime = frameCount*33333;
        unsigned uSeconds	= fPresentationTime.tv_usec + fLastPlayTime;
@@ -221,10 +222,10 @@ void EncoderDeviceSource::deliverFrame() {
    
   //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
-  //memmove(fTo, newFrameDataStart, fFrameSize);
+  memmove(fTo, newFrameDataStart, fFrameSize);
   
-  fwrite(newFrameDataStart, fFrameSize, 1, f2);
-  fclose(f2);
+//  fwrite(newFrameDataStart, fFrameSize, 1, f2);
+//  fclose(f2);
   
   if(fNumTruncatedBytes)
   {
@@ -236,19 +237,15 @@ void EncoderDeviceSource::deliverFrame() {
   {
         fParams.clear();
   }
-  unsigned* tag = (unsigned*)newFrameDataStart;
-  size_t s = fFrameSize / sizeof(unsigned);
-  fprintf(f, "size: %d: short: %d%d%d%d\n", fFrameSize, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
-  //fprintf(f, "frameSize2: %d, p: %d\n", fFrameSize, (int)newFrameDataStart);
-  fflush(f);
+    
   
-  /*fFrameSize = fread(fTo, 1, fMaxSize, bin);
+/*  fFrameSize = fread(fTo, 1, fMaxSize, bin);
   if(fMaxSize != fFrameSize)
   {
       fprintf(f, "Fehler, weniger bytes gelesen als erwartet: %d, %d\n", fMaxSize, fFrameSize);
       fflush(f);
   }
-   * */
+  // * */
   
   //fprintf(f, "frame wrote\n");
   //fflush(f);

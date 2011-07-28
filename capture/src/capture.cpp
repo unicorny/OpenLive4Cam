@@ -66,7 +66,6 @@ SPicture g_rgbPicture;
 //! \brief buffer for yuv-Picture
 SPicture g_yuvPicture;
 
-FILE* flog = NULL;
 
 //! \brief init mutex and Picture structures
 //! \return -2 bei mutex init error
@@ -95,9 +94,7 @@ int init()
 #endif
 
 
-	flog = fopen("getPicture.log", "wt");
-	fprintf(flog, "init ende\n");	
-	fflush(flog);
+	
     
     return 42;
 }
@@ -116,7 +113,7 @@ void ende()
     pthread_mutex_destroy(mutex);
 	free(mutex);
 #endif
-	fclose(flog);
+	
 }
 //! \brief lock mutex of capture, or wait until it is unlocked and lock it than
 //! \param mutex pointer to mutex (in this case the global var mutex)
@@ -186,8 +183,7 @@ int unlock_mutex(void* mutex)
  */
 void setParameter(const char* name, int value)
 {
-	fprintf(flog, "setParameter\n");
-	fflush(flog);
+
     lock_mutex(mutex);	
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
@@ -265,11 +261,8 @@ void setParameter(const char* name, int value)
  */
 int getParameter(const char* name)
 {
-	fprintf(flog, "getParameter: %s\n", name);
-	fflush(flog);
     lock_mutex(mutex);	
-	fprintf(flog, "getParameter: s, after mutex\n", name);
-	fflush(flog);
+    
    // printf("Name: %s\n", name);
     char buffer[256];
     sprintf(buffer, "%s", name);
@@ -346,8 +339,6 @@ int getParameter(const char* name)
 //! \return -7 if camera not open
 int start()
 {
-	fprintf(flog, "start\n");
-	fflush(flog);
     lock_mutex(mutex);	
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
@@ -371,8 +362,6 @@ int start()
 
    // namedWindow("LIVE",1);
     unlock_mutex(mutex);
-	fprintf(flog, "start ende\n");
-	fflush(flog);
     return 0;
 }
 
@@ -388,17 +377,11 @@ int start()
  */
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
-	fprintf(flog, "capture.getPicture: %d, %d\n", rgb, removeFrame);
-	fflush(flog);
     lock_mutex(mutex); 	
-	fprintf(flog, "capture.getPicture: %d, %d after mutex\n", rgb, removeFrame);
-	fflush(flog);
     
     // if start wasn't called
     if(!g_run)
     {
-		fprintf(flog, "capture.getPicture start wasn't called\n");
-		fflush(flog);
         unlock_mutex(mutex);
         return 0;
     }
@@ -406,29 +389,22 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     else if(!g_capture.isOpened())
     {
          g_Messages.push(string("getPicture error, weil keine Kamera geoeffnet ist!"));
-		 fprintf(flog, "capture.getPicture captur isn't open\n");
-		 fflush(flog);
          unlock_mutex(mutex);
          return 0;
     }
     
-	fprintf(flog, "capture.getPicture bevor picture called\n");
-	fflush(flog);
 
     //get next or last picture
     Mat m, m2, m3;
     if(!removeFrame)
         g_capture.retrieve(m);
     else
-        g_capture >> m; // get a new frame from camera
-	fprintf(flog, "capture.getPicture picture get\n");
-	fflush(flog);
+        g_capture >> m; // get a new frame from camer
+    
     //m = cvLoadImage("test.jpg");
     if(m.depth() != CV_8U)
     {
         printf("Error, depth != unsigned char\n");
-		fprintf(flog, "capture.getPicture depth != CV_8U\n");
-		fflush(flog);
         unlock_mutex(mutex);
         return 0;
     }
@@ -438,8 +414,6 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     IplImage src = m;
     IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
     cvResize( &src, scaled, CV_INTER_LINEAR );
-	fprintf(flog, "capture.getPicture: %d, %d after resize\n", rgb, removeFrame);
-	fflush(flog);
     
     //rgb-output 
     if(rgb)
@@ -527,11 +501,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         cvReleaseImage(&U);
         cvReleaseImage(&V);
     
-		fprintf(flog, "capture.getPicture: %d, %d ende\n", rgb, removeFrame);
-		fflush(flog);
         unlock_mutex(mutex);
-		fprintf(flog, "capture.getPicture: %d, %d ende after mutex unlock\n", rgb, removeFrame);
-		fflush(flog);
         //return pointer to picture buffer
         return &g_yuvPicture;        
     }
