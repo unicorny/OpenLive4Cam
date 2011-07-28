@@ -221,7 +221,7 @@ void EncoderDeviceSource::deliverFrame() {
    
   //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
-  //memmove(fTo, newFrameDataStart, fFrameSize);
+  memmove(fTo, newFrameDataStart, fFrameSize);
   
   fwrite(newFrameDataStart, fFrameSize, 1, f2);
   fclose(f2);

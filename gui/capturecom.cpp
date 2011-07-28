@@ -72,7 +72,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 #ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
 #endif
-    /*
+
     int ret = 0;
     if((ret = mInterface->start()))
     {

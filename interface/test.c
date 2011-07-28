@@ -102,6 +102,7 @@ int main(int argc, char* argv[])
     try_load_dll("./libencoder.so"); 
     try_load_dll("libencoder.dll");
     try_load_dll("libcapture.dll");
-    
+	
+	    
     return 0;
 }
