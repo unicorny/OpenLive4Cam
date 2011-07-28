@@ -303,8 +303,8 @@ int encodeFrame()
 
 int getStackCount()
 {
-    if(!g_FrameBuffer) return 0;
-    return g_FrameBuffer->count;
+    //if(!g_FrameBuffer) return 0;
+    return count_stack(g_FrameBuffer);
 }
 
 //! \brief stop encoder and capture

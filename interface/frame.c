@@ -62,6 +62,14 @@ SFrame_stack* stack_init(unsigned char* data, int size)
         
 	return s;
 }
+int count_stack(SFrame_stack* s)
+{
+    if(!s) return 0;
+    stack_lock(s->mutex);
+    int count = s->count;
+    stack_unlock(s->mutex);
+    return count;
+}
 
 //von unten hinzufügen
 void stack_push(SFrame_stack* s, SFrame* f)

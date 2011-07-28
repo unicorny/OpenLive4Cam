@@ -114,9 +114,9 @@ static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
 	p->log = fopen("log.txt", "wt");
-        p->binaryOut = fopen("raw_video.264", "w+b");
+   //     p->binaryOut = fopen("raw_video.264", "w+b");
+        p->binaryOut = NULL;
         fprintf(p->log, "log oeffnet, open_file called\n");
-        fflush(p->log);
 	/*p->socket = openSocket(server, cport);
 	if(p->socket <= 0)
 	{
@@ -205,7 +205,7 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
      fwrite( p_nal[0].p_payload, size, 1, p->binaryOut );
      if(g_FrameBuffer) clear_stack(g_FrameBuffer);
      *  //*/   
-     g_FrameBuffer = stack_init(p_nal[0].p_payload+4, size-4);
+ //    g_FrameBuffer = stack_init(p_nal[0].p_payload+4, size-4);
      
     // the first 4 bytes are the NAL size in bytes. skip this
   // if(sendFrame(p, p_nal[0].p_payload+4, p_nal[0].i_payload-4, NULL) < 0)  return -1;
@@ -243,15 +243,15 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
             return 0;
         }
         
-        fwrite( p_nalu, i_size, 1, p->binaryOut );
+      //  fwrite( p_nalu, i_size, 1, p->binaryOut );
         unsigned* tag = (unsigned*)p_nalu;
         size_t s = i_size/sizeof(unsigned);
-        fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
-        fflush(p->log);
+       // fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
+     //   fflush(p->log);
         if(!g_FrameBuffer) 
-            g_FrameBuffer = stack_init(p_nalu+4, i_size-4);
+            g_FrameBuffer = stack_init(p_nalu, i_size);
         else
-           frame_to_stack(g_FrameBuffer, p_nalu+4, i_size-4);
+           frame_to_stack(g_FrameBuffer, p_nalu, i_size);
         
         //*/
 	//if(sendFrame(p, p_nalu+4, i_size-4, p_picture) < 0)  return -1;
@@ -274,9 +274,9 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
     //return 0;
     fprintf(p->log, "Ende, close from handle and log-file\n");
     int ret = fclose(p->log);
-    fclose(p->binaryOut);
+   // fclose(p->binaryOut);
 	
-    closeSocket(p->socket);
+   // closeSocket(p->socket);
     p->socket = 0;
 
     // Speicher für pps und sps im Handle wieder freigeben
