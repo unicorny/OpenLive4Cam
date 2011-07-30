@@ -37,9 +37,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(&mTimer, SIGNAL(timeout()), mCapture, SLOT(nextFrame()));
     connect(mCapture, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
+    connect(mEncoderThread, SIGNAL(appendLog(QString)), line, SLOT(append(QString)));
+    connect(mServer, SIGNAL(appendLog(QString)), line, SLOT(append(QString)));
 
-    mServer->setLogger(line);
-    mEncoderThread->setLogger(line);
     mServer->start();
 }
 
@@ -88,7 +88,7 @@ void MainWindow::on_startButton_clicked()
             //Start Stream
             mTimer.start(30);
             mStreamingRunning = true;
-          //  mEncoderThread->start();
+            mEncoderThread->start();
             res->setEnabled(false);
             port->setEnabled(false);
         }
@@ -119,7 +119,7 @@ void MainWindow::on_source_comboBox_currentIndexChanged(int index)
 
 void MainWindow::on_chooseKam_clicked()
 {
-    mCapture->chooseCurrentCamera(0);
+    mCapture->chooseCurrentCamera(-1);
 }
 
 void MainWindow::on_port_spinBox_valueChanged(int value)

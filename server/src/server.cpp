@@ -237,10 +237,11 @@ int start()
        ret = encoder->start();
        if(ret)
        {
-           g_Messages.push(string("Fehler beim starten des Encoders!"));
+           g_Messages.push(string("server.start Fehler beim starten des Encoders!"));
            return ret;
        }
     }
+	g_Messages.push(string("server.start Encoder gestartet"));
  //   return 0;
     int encoderPort = encoder->getParameter("encoder.port");
     

@@ -183,7 +183,6 @@ int unlock_mutex(void* mutex)
  */
 void setParameter(const char* name, int value)
 {
-
     lock_mutex(mutex);	
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
@@ -382,6 +381,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     // if start wasn't called
     if(!g_run)
     {
+		g_Messages.push(string("getPicture error, g_run = false!"));
         unlock_mutex(mutex);
         return 0;
     }
@@ -404,22 +404,32 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     //m = cvLoadImage("test.jpg");
     if(m.depth() != CV_8U)
     {
-        printf("Error, depth != unsigned char\n");
+        g_Messages.push(string("capture.getPicture Error, depth != unsigned char"));
         unlock_mutex(mutex);
         return 0;
     }
     //m.convertTo(m2, )
     //Scale Picture to choosen resolution (if camera didn't support it)
     Mat matrices[4];    
-    IplImage src = m;
-    IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
-    cvResize( &src, scaled, CV_INTER_LINEAR );
+    //IplImage src = m;
+   // IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
+    //cvResize( &src, scaled, CV_INTER_LINEAR );
+	//printf("%dx%d\n", g_cfg.width, g_cfg.height);
+	char buffer[256];
+	sprintf(buffer, "%dx%d\n", g_cfg.width, g_cfg.height);
+	g_Messages.push(string(buffer));
+    
+	m3.create(g_cfg.width, g_cfg.height, m.type());
+	resize( m, m3, Size(g_cfg.width, g_cfg.height));
+	//resize( m, m3, Size(0, 0));
+
+	//return 0;
     
     //rgb-output 
     if(rgb)
     {        
         //imshow("LIVE", scaled);
-        split(scaled, matrices);
+        split(m3, matrices);
         matrices[3] = matrices[0].clone();
         matrices[3] = Scalar(255);
         merge(matrices, 4, m2);
@@ -448,7 +458,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         memcpy(g_rgbPicture.channel1, m2.data, size);
         
         //free scaled image
-        cvReleaseImage(&scaled);
+   //     cvReleaseImage(&scaled);
         
         unlock_mutex(mutex);
         //return pointer to picture buffer
@@ -459,11 +469,11 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     else
     {
         //convert and split picture
-        cvtColor(scaled, m2, CV_BGR2YCrCb);
+        cvtColor(m3, m2, CV_BGR2YCrCb);
         split(m2, matrices);
         
-        IplImage* U = cvCreateImage(cvSize(scaled->width/2, scaled->height/2), IPL_DEPTH_8U, 1);
-        IplImage* V = cvCreateImage(cvSize(scaled->width/2, scaled->height/2), IPL_DEPTH_8U, 1);
+        IplImage* U = cvCreateImage(cvSize(m3.cols/2, m3.rows/2), IPL_DEPTH_8U, 1);
+        IplImage* V = cvCreateImage(cvSize(m3.cols/2, m3.rows/2), IPL_DEPTH_8U, 1);
         IplImage uSrc = matrices[1];
         IplImage vSrc = matrices[2];
         //create resized u and v pictures (half-size)
@@ -475,8 +485,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         
         //get current buffer size and required buffer size
         int oldSize = picture_getSize(&g_yuvPicture);
-        g_yuvPicture.width = scaled->width;
-        g_yuvPicture.height = scaled->height;
+        g_yuvPicture.width = m3.cols;
+        g_yuvPicture.height = m3.rows;
         int newSize = picture_getSize(&g_yuvPicture);
 
         //compare buffer size and picture size, and make new buffer, if picture size differ
@@ -500,7 +510,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         //release u and v pictures
         cvReleaseImage(&U);
         cvReleaseImage(&V);
-        cvReleaseImage(&scaled);
+  //      cvReleaseImage(&scaled);
     
         unlock_mutex(mutex);
         //return pointer to picture buffer

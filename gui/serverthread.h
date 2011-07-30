@@ -12,10 +12,10 @@ class ServerThread : public QThread
 Q_OBJECT
 public:
     explicit ServerThread(CInterface* _interface, QObject *parent = 0);
-    void setLogger(QTextEdit* log) {mLogger = log;}
     ~ServerThread();
 
 signals:
+     void appendLog(QString logText);
 
 public slots:
 
@@ -25,7 +25,6 @@ protected:
 private:
     QMutex mutex;
     QWaitCondition condition;
-    QTextEdit*   mLogger;
    //int (*tickFunc)();
     CInterface* mInterface;
 

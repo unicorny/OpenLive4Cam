@@ -1,7 +1,7 @@
 #include "serverthread.h"
 
 ServerThread::ServerThread(CInterface* _interface, QObject *parent) :
-    QThread(parent), mLogger(NULL), mInterface(_interface)
+    QThread(parent), mInterface(_interface)
 {
 
 }
@@ -17,7 +17,7 @@ ServerThread::~ServerThread()
 void ServerThread::run()
 {
     int (*tick)();
-    mLogger->append(QString("ServerThread::run start!"));
+    emit appendLog(QString("ServerThread::run start!"));
             
     //forever {
         mutex.lock();
@@ -27,6 +27,6 @@ void ServerThread::run()
 
         mutex.unlock();
         usleep(100);
-        mLogger->append(QString("ServerThread::run ende!"));
+        emit appendLog(QString("ServerThread::run ende!"));
     //}
 }
