@@ -11,6 +11,7 @@ Q_OBJECT
 public:
     explicit EncoderThread(CInterface* _interface, QObject *parent = 0);
     ~EncoderThread();
+    void setLogger(QTextEdit* log) {mLogger = log;}
 
 signals:
 
@@ -20,6 +21,7 @@ protected:
 
 private:
      QMutex mutex;
+     QTextEdit*   mLogger;
     CInterface* mInterface;
 };
 

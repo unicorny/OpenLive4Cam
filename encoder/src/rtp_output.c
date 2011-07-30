@@ -179,6 +179,7 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
     }
 	
     int size = p_nal[0].i_payload + p_nal[1].i_payload + p_nal[2].i_payload;
+    return size;
 
     assert( p_nal[0].i_type == NAL_SPS );
     fprintf(p->log, "write SPS (%2d bytes) ", p_nal[0].i_payload);//0x%02x 0x%02x 0x%02x 0x%02x 0x%02x\n
@@ -223,6 +224,7 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
 
 static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_t *p_picture )
 {
+    return i_size;
 	rtp_out_handle* p = handle;
         //printf("write_frame: size: %d\n", i_size);
 	//! TODO compiler warning: unknow conversion type

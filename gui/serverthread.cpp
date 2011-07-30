@@ -17,7 +17,7 @@ ServerThread::~ServerThread()
 void ServerThread::run()
 {
     int (*tick)();
-  //  mLogger->append(QString("ServerThread::run start!"));
+    mLogger->append(QString("ServerThread::run start!"));
             
     //forever {
         mutex.lock();
@@ -27,6 +27,6 @@ void ServerThread::run()
 
         mutex.unlock();
         usleep(100);
-//        mLogger->append(QString("ServerThread::run ende!"));
+        mLogger->append(QString("ServerThread::run ende!"));
     //}
 }

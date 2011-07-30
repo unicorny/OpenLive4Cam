@@ -259,6 +259,7 @@ static int init_vid_filters( char *sequence, hnd_t *handle, video_info_t *info, 
         int name_len = strcspn( p, ":" );
         p[name_len] = 0;
         name_len += name_len != tok_len;
+        printf("encoder.x264 add Filter: %s\n", p);
         if( x264_init_vid_filter( p, handle, &filter, info, param, p + name_len ) )
             return -1;
         p += X264_MIN( tok_len+1, p_len );
@@ -481,13 +482,22 @@ int encode_frames()
     x264_picture_t pic;
     cli_pic_t cli_pic;
     int     retval = 0;
+    int     b_ctrl_c = 0;
     encoder_datas* datas = &en_data;
         
     if( filter.get_frame( opt.hin, &cli_pic, datas->i_frame + opt.i_seek ) )
-            return -1;
+         return -1;
+    
+ 
+    if( filter.release_frame( opt.hin, &cli_pic, datas->i_frame + opt.i_seek ) )
+         return -1;
+    datas->i_frame++;
+    return 0;   
+     
         x264_picture_init( &pic );
         convert_cli_to_lib_pic( &pic, &cli_pic );
         
+     
 
      //   if( !param->b_vfr_input )
             pic.i_pts = datas->i_frame;
@@ -520,7 +530,7 @@ int encode_frames()
         datas->prev_dts = datas->last_dts;
         
         datas->i_frame_size = encode_frame( datas->h, opt.hout, &pic, &datas->last_dts );
-        
+     
         if( datas->i_frame_size < 0 )
         {
             //b_ctrl_c = 1; /* lie to exit the loop */
@@ -536,11 +546,45 @@ int encode_frames()
 
         if( filter.release_frame( opt.hin, &cli_pic, datas->i_frame + opt.i_seek ) )
             return -1;
+     
 
         /* update status line (up to 1000 times per input file) */
      //   if( opt->b_progress )
        //     i_previous = print_status( i_start, i_previous, i_frame_output, param->i_frame_total, i_file, param, 2 * last_dts - prev_dts - first_dts );
         datas->i_frame++;
+        
+                
+        while(!b_ctrl_c && x264_encoder_delayed_frames( datas->h ))
+        {
+            printf("encoder.x264 %d delayed frames found! \n", x264_encoder_delayed_frames( datas->h ));
+            break;
+            //flush delayed frames ! beendet den encoder!
+            datas->prev_dts = datas->last_dts;
+            datas->i_frame_size = encode_frame( datas->h, opt.hout, NULL, &datas->last_dts );
+            if( datas->i_frame_size < 0 )
+            {
+               b_ctrl_c = 1; /* lie to exit the loop */
+               printf("encoder.x264 Fehler: i_frame_size is less than zero\n");
+                retval = -1;
+            }
+            else if( datas->i_frame_size )
+            {
+                printf("encode frame size: %d\n", datas->i_frame_size);
+                datas->i_file += datas->i_frame_size;
+                datas->i_frame_output++;
+                if( datas->i_frame_output == 1 )
+                    datas->first_dts = datas->prev_dts = datas->last_dts;
+                
+                datas->i_frame++;
+            }
+           // if( opt->b_progress && i_frame_output )
+             //   i_previous = print_status( i_start, i_previous, i_frame_output, param->i_frame_total, i_file, param, 2 * last_dts - prev_dts - first_dts );
+        
+        }
+fail:
+    if(  en_data.pts_warning_cnt >= MAX_PTS_WARNING && cli_log_level < X264_LOG_DEBUG )
+        x264_cli_log( "x264", X264_LOG_WARNING, "%d suppressed nonmonotonic pts warnings\n", en_data.pts_warning_cnt-MAX_PTS_WARNING );
+
      
         return retval;
 }
@@ -658,7 +702,7 @@ static int encode( x264_param_t *param, cli_opt_t *opt )
       
     //}
     /* Flush delayed frames */
-   /* while( !b_ctrl_c && x264_encoder_delayed_frames( h ) )
+/*    while( !b_ctrl_c && x264_encoder_delayed_frames( h ) )
     {
         prev_dts = last_dts;
         i_frame_size = encode_frame( h, opt->hout, NULL, &last_dts );
@@ -677,7 +721,7 @@ static int encode( x264_param_t *param, cli_opt_t *opt )
         if( opt->b_progress && i_frame_output )
             i_previous = print_status( i_start, i_previous, i_frame_output, param->i_frame_total, i_file, param, 2 * last_dts - prev_dts - first_dts );
     }
-    */
+   // */
 fail:
     if(  en_data.pts_warning_cnt >= MAX_PTS_WARNING && cli_log_level < X264_LOG_DEBUG )
         x264_cli_log( "x264", X264_LOG_WARNING, "%d suppressed nonmonotonic pts warnings\n", en_data.pts_warning_cnt-MAX_PTS_WARNING );

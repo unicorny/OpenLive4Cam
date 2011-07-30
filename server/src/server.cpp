@@ -241,7 +241,7 @@ int start()
            return ret;
        }
     }
-    //return 0;
+ //   return 0;
     int encoderPort = encoder->getParameter("encoder.port");
     
     RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
