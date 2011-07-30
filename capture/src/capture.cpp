@@ -183,6 +183,7 @@ int unlock_mutex(void* mutex)
  */
 void setParameter(const char* name, int value)
 {
+
     lock_mutex(mutex);	
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
@@ -381,7 +382,6 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     // if start wasn't called
     if(!g_run)
     {
-		g_Messages.push(string("getPicture error, g_run = false!"));
         unlock_mutex(mutex);
         return 0;
     }
@@ -404,7 +404,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     //m = cvLoadImage("test.jpg");
     if(m.depth() != CV_8U)
     {
-        g_Messages.push(string("capture.getPicture Error, depth != unsigned char"));
+        printf("Error, depth != unsigned char\n");
         unlock_mutex(mutex);
         return 0;
     }
@@ -412,18 +412,11 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     //Scale Picture to choosen resolution (if camera didn't support it)
     Mat matrices[4];    
     //IplImage src = m;
-   // IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
-    //cvResize( &src, scaled, CV_INTER_LINEAR );
-	//printf("%dx%d\n", g_cfg.width, g_cfg.height);
-	char buffer[256];
-	sprintf(buffer, "%dx%d\n", g_cfg.width, g_cfg.height);
-	g_Messages.push(string(buffer));
+  //  IplImage* scaled = cvCreateImage(cvSize(g_cfg.width, g_cfg.height), IPL_DEPTH_8U, 3);
     
-	m3.create(g_cfg.width, g_cfg.height, m.type());
-	resize( m, m3, Size(g_cfg.width, g_cfg.height));
-	//resize( m, m3, Size(0, 0));
-
-	//return 0;
+    //cvResize( &src, scaled, CV_INTER_LINEAR );
+    m3.create(g_cfg.width, g_cfg.height, m.type());
+    resize(m, m3, Size(g_cfg.width, g_cfg.height));
     
     //rgb-output 
     if(rgb)
@@ -458,7 +451,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         memcpy(g_rgbPicture.channel1, m2.data, size);
         
         //free scaled image
-   //     cvReleaseImage(&scaled);
+        //cvReleaseImage(&scaled);
         
         unlock_mutex(mutex);
         //return pointer to picture buffer
@@ -510,7 +503,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         //release u and v pictures
         cvReleaseImage(&U);
         cvReleaseImage(&V);
-  //      cvReleaseImage(&scaled);
+ //       cvReleaseImage(&scaled);
     
         unlock_mutex(mutex);
         //return pointer to picture buffer

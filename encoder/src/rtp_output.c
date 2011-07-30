@@ -114,8 +114,8 @@ static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
 	p->log = fopen("log.txt", "wt");
-   //     p->binaryOut = fopen("raw_video.264", "w+b");
-        p->binaryOut = NULL;
+        p->binaryOut = fopen("raw_video.264", "w+b");
+    //    p->binaryOut = NULL;
         fprintf(p->log, "log oeffnet, open_file called\n");
 	/*p->socket = openSocket(server, cport);
 	if(p->socket <= 0)
@@ -224,11 +224,11 @@ static int write_headers( hnd_t handle, x264_nal_t *p_nal )
 
 static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_t *p_picture )
 {
-    return i_size;
+    //return i_size;
 	rtp_out_handle* p = handle;
         //printf("write_frame: size: %d\n", i_size);
 	//! TODO compiler warning: unknow conversion type
-	//fprintf(p->log, "write_frame: size: %6d, type: %c, pts: %6ld, dts: %6ld, nalu: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n", i_size, g_slice_types[p_picture->i_type], (long int)p_picture->i_pts, (long int)p_picture->i_dts, p_nalu[0], p_nalu[1], p_nalu[2], p_nalu[3], p_nalu[4], p_nalu[5]);
+	fprintf(p->log, "write_frame: size: %6d, type: %c, pts: %6ld, dts: %6ld, nalu: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n", i_size, g_slice_types[p_picture->i_type], (long int)p_picture->i_pts, (long int)p_picture->i_dts, p_nalu[0], p_nalu[1], p_nalu[2], p_nalu[3], p_nalu[4], p_nalu[5]);
         if(!p_nalu)
         {
             fprintf(p->log, "encoder.rtp_output::write_frame: p_nalu is zero\n");
@@ -245,11 +245,11 @@ static int write_frame( hnd_t handle, uint8_t *p_nalu, int i_size, x264_picture_
             return 0;
         }
         
-      //  fwrite( p_nalu, i_size, 1, p->binaryOut );
+        fwrite( p_nalu, i_size, 1, p->binaryOut );
         unsigned* tag = (unsigned*)p_nalu;
         size_t s = i_size/sizeof(unsigned);
-       // fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
-     //   fflush(p->log);
+        fprintf(p->log, "size: %d: short: %d%d%d%d\n", i_size, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
+        fflush(p->log);
         if(!g_FrameBuffer) 
             g_FrameBuffer = stack_init(p_nalu, i_size);
         else

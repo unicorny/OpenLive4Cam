@@ -122,7 +122,7 @@ int run()
 }
 
 void checkIfNewDataAvailable()
-{
+{    
     if(getStackCount() >= 2)
         signalNewFrameData();
 }
