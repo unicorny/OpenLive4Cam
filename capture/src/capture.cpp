@@ -500,6 +500,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         //release u and v pictures
         cvReleaseImage(&U);
         cvReleaseImage(&V);
+        cvReleaseImage(&scaled);
     
         unlock_mutex(mutex);
         //return pointer to picture buffer
