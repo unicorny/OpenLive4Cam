@@ -145,7 +145,7 @@ void CaptureCom::nextFrame()
     //qDebug("current_Frame: %d\n", size);
     encodeFrame();
 
-  //  checkIfNewDataAvailable();
+    checkIfNewDataAvailable();
     SPicture* pic = getPictureFunc(1, 0);
 
     if(!pic) return;

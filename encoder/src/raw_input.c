@@ -109,11 +109,11 @@ static int read_frame_internal( cli_pic_t *pic, raw_hnd_t *h )
     int error = 0;
     int pixel_depth = x264_cli_csp_depth_factor( pic->img.csp );
     
-  //  FILE* f = fopen("log2.txt", "at");
- //   fprintf(f, "encoder.raw_input::read_frame_internal: Plane Count: %d, plane.0.size: %d, plane.1.size: %d, plane.2.size: %d, plane.3.size: %d \
-//pixel-depth: %d\n",
-        //        pic->img.planes, (int)h->plane_size[0], (int)h->plane_size[1], (int)h->plane_size[2], (int)h->plane_size[3],
-          //      (int)pixel_depth);
+   // FILE* f = fopen("log2.txt", "at");
+    //fprintf(f, "encoder.raw_input::read_frame_internal: Plane Count: %d, plane.0.size: %d, plane.1.size: %d, plane.2.size: %d, plane.3.size: %d \
+     //           pixel-depth: %d\n",
+     //          pic->img.planes, (int)h->plane_size[0], (int)h->plane_size[1], (int)h->plane_size[2], (int)h->plane_size[3],
+     //           (int)pixel_depth);
    // fflush(f);
     
         
@@ -132,7 +132,7 @@ static int read_frame_internal( cli_pic_t *pic, raw_hnd_t *h )
     {
       //  error |= fread( pic->img.plane[i], pixel_depth, h->plane_size[i], h->fh ) != h->plane_size[i];
      //   fprintf(f, "ptr: %d, size: %d, count: %d, stream: %d\n", (int)pic->img.plane[i], pixel_depth, (int)h->plane_size[i], (int)h->fh);
-       // fflush(f);
+     //   fflush(f);
         
         memcpy(pic->img.plane[i], picture->channel[i], pixel_depth*h->plane_size[i]);
         
