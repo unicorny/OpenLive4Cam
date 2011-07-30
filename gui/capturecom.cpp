@@ -72,7 +72,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 #ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
 #endif
-    /*
+/*
     int ret = 0;
     if((ret = mInterface->start()))
     {
@@ -85,7 +85,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
         stopStream();
         return -1;
     }
-
+/*
 
     mLogger->append("Der Stream wurde gestartet!");
 //*/
@@ -104,11 +104,14 @@ void CaptureCom::stopStream()
 void CaptureCom::nextFrame()
 {
     char* m = NULL;
+    static int count = 0;
     while((m = (char*)mInterface->getParameter("getLastMessage")) != NULL)
     {
         mLogger->append(m);
     }
   //  return;
+    QString str;
+   // mLogger->append(str.sprintf("Frame: %d", count++));
 
     if(!getPictureFunc)
         getPictureFunc = (SPicture* (*)(int, int))mInterface->getParameter("capture.getPictureFunc");
@@ -127,7 +130,7 @@ void CaptureCom::nextFrame()
     int size = 0;
     unsigned char* data = NULL;//getFrameFunc(&size);
 
-    FILE* f = fopen("video.264", "ab");
+ /*   FILE* f = fopen("video.264", "ab");
     if(f && data)
     {
         fwrite(data, size, 1, f);
@@ -138,10 +141,13 @@ void CaptureCom::nextFrame()
     {
        // qDebug("data is zero, size: %d", size);
     }
+    */
     //qDebug("current_Frame: %d\n", size);
     encodeFrame();
+
   //  checkIfNewDataAvailable();
     SPicture* pic = getPictureFunc(1, 0);
+
     if(!pic) return;
 
     if(mImage &&(mImage->width() != pic->width || mImage->height() != pic->height))

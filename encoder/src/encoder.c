@@ -157,6 +157,7 @@ void ende()
 	free(mutex);
 #endif
  
+    printf("Frames on Stack: %d\n", count_stack(g_FrameBuffer));
     clear_stack(g_FrameBuffer);
     if(capture)
     {
@@ -297,6 +298,13 @@ int encodeFrame()
         unlock();
         return -1;
     }
+    while(getStackCount() > 20)
+    {
+        SFrame* f;
+        stack_pop(g_FrameBuffer, &f);
+        delete_frame(f);
+    }
+        
     unlock();
     return 0;
 }

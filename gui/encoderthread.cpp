@@ -1,7 +1,7 @@
 #include "encoderthread.h"
 
 EncoderThread::EncoderThread(CInterface* _interface, QObject *parent) :
-    QThread(parent), mInterface(_interface)
+    QThread(parent), mLogger(NULL),  mInterface(_interface)
 {
 }
 
@@ -16,9 +16,21 @@ EncoderThread::~EncoderThread()
 
 void EncoderThread::run()
 {
-    mInterface->start();
-    return;
 
+    int ret = 0;
+    if((ret = mInterface->start()))
+    {
+        QString res;
+        mLogger->append(res.sprintf("Fehler, Server konnte nicht gestartet werden!, Fehler nummer: %d", ret));
+        char* m = NULL;
+        while((m = (char*)mInterface->getParameter("getLastMessage")) != NULL)
+        {
+            mLogger->append(m);
+        }
+        //stopStream();
+    }
+    return;
+/*
     int (*encodeFrame)();
     encodeFrame = (int (*)())mInterface->getParameter("encoder.EncodeFrameFunc");
  //   return;
@@ -33,5 +45,5 @@ void EncoderThread::run()
         mutex.unlock();
         usleep(100);
     }
-
+//*/
 }

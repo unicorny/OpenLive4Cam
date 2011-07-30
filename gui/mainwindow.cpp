@@ -39,6 +39,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mCapture, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
 
     mServer->setLogger(line);
+    mEncoderThread->setLogger(line);
     mServer->start();
 }
 

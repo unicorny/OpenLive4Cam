@@ -35,7 +35,11 @@ int camera_resolution(string* params, int number)
             v = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
         
         cap.release();
-            
+        if(v > 5000)
+        {
+            unlock_mutex(mutex);
+            return 0;    
+        }
         sprintf(gBuffer, "%.0f", v);
         unlock_mutex(mutex);
         return (int)gBuffer;       
