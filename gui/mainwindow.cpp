@@ -46,6 +46,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(mEncoderThread, SIGNAL(setPicture(QImage*)), this->findChild<VideoView*>("Picture"), SLOT(newPicture(QImage*)));
     connect(mEncoderThread, SIGNAL(appendLog(QString)), line, SLOT(append(QString)));
     connect(mServer, SIGNAL(appendLog(QString)), line, SLOT(append(QString)));
+    connect(&mTimer, SIGNAL(timeout()), this, SLOT(on_halfSecond_count()));
+    connect(this, SIGNAL(updateCount(int)), this->findChild<QLCDNumber*>("lcdNumber"), SLOT(display(int)));
 
     mServer->start();
 }
@@ -141,4 +143,13 @@ void MainWindow::on_chooseKam_clicked()
 void MainWindow::on_port_spinBox_valueChanged(int value)
 {
     mInterface->setParameter("server.port", value);
+}
+
+void MainWindow::on_halfSecond_count()
+{
+    unsigned newCount = (unsigned)mInterface->getParameter("server.client.count");
+    QTextEdit* line = this->findChild<QTextEdit*>("textLog");
+    QString str;
+    //line->append(str.sprintf("Count: %d", newCount));
+    emit updateCount(newCount);
 }

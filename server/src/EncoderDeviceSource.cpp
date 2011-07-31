@@ -267,7 +267,7 @@ void EncoderDeviceSource::deliverFrame() {
   //fprintf(f, "frameSize2: %d, p: %d\n", fFrameSize, (int)newFrameDataStart);
   fflush(f);
   
-//  fFrameSize = fread(fTo, 1, fMaxSize, bin);
+/*  fFrameSize = fread(fTo, 1, fMaxSize, bin);
   if(fMaxSize != fFrameSize)
   {
       fprintf(f, "Fehler, weniger bytes gelesen als erwartet: %d, %d\n", fMaxSize, fFrameSize);

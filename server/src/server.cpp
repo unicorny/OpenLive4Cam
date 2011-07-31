@@ -42,6 +42,7 @@ int (*getStackCount)(void) = NULL;
 UsageEnvironment* env = NULL;
 TaskScheduler* scheduler = NULL;
 RTSPServer* rtspServer = NULL;
+ServerMediaSession* sms = NULL;
 FramedSource* eds = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
@@ -198,7 +199,13 @@ int getParameter(const char* name)
         return encoder->getParameter(name);
     }
     
-    if(g_Parameters[1].compare(string("port")) == 0)
+    if(g_Parameters[1].compare(string("client")) == 0 && g_Parameters[2].compare(string("count")) == 0)
+    {
+        if(sms) 
+           return (int)sms->referenceCount();
+        else return 0;
+    }
+    else if(g_Parameters[1].compare(string("port")) == 0)
     {
         return g_Port;
     }
@@ -210,6 +217,7 @@ int getParameter(const char* name)
     {
         return (int)checkIfNewDataAvailable;
     }
+    
     
     
     return 0;
@@ -241,8 +249,7 @@ int start()
     }
 	g_Messages.push(string("start</b> <font color='green'>Encoder gestartet</font>"));
  //   return 0;
-    int encoderPort = encoder->getParameter("encoder.port");
-    
+        
     rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
         g_Messages.push(string("start</b> <font color='red'>Failed to create RTSP server: ").append(env->getResultMsg()).append("</font>"));
@@ -258,8 +265,7 @@ int start()
     char const* inputFileName = "./jumper2.h264";
     
 
-    ServerMediaSession* sms
-      = ServerMediaSession::createNew(*env, streamName, streamName,
+    sms = ServerMediaSession::createNew(*env, streamName, streamName,
 				      descriptionString);
     //EncoderDeviceSource* eds = 
       //      EncoderDeviceSource::createNew(*env, EncoderDeviceParameters(getFrameFunc, &g_run));
@@ -313,7 +319,10 @@ int stop()
     
     if(encoder)
         encoder->stop();
+    Medium::close(sms);
+    sms = NULL;
     Medium::close(rtspServer);
+    rtspServer = NULL;
      //g_watch = 1;
     return 0;
 }

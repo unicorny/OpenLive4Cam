@@ -22,6 +22,9 @@ public:
 protected:
     void changeEvent(QEvent *e);
 
+signals:
+    void updateCount(int count);
+
 private:
     Ui::MainWindow *ui;
     CInterface     *mInterface;
@@ -37,6 +40,7 @@ private slots:
     void on_chooseKam_clicked();
     void on_source_comboBox_currentIndexChanged(int index);
     void on_startButton_clicked();
+    void on_halfSecond_count();
 
 };
 
