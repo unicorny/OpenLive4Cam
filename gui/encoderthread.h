@@ -14,6 +14,7 @@ public:
 
 signals:
     void appendLog(QString logText);
+    void setPicture(QImage* pic);
 
 public slots:
 protected:
@@ -21,6 +22,7 @@ protected:
 
 private:
      QMutex mutex;
+     QImage* mImage;
     CInterface* mInterface;
 };
 

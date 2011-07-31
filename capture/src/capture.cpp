@@ -92,9 +92,6 @@ int init()
         return -2;
     }
 #endif
-
-
-	
     
     return 42;
 }
@@ -281,7 +278,7 @@ int getParameter(const char* name)
     {
         if(g_Messages.size())
         {
-          sprintf(g_MessagesBuffer,"capture: %s", g_Messages.top().data());
+          sprintf(g_MessagesBuffer,"<b>capture.%s", g_Messages.top().data());
           g_Messages.pop();
           unlock_mutex(mutex);
           return (int)g_MessagesBuffer;  
@@ -340,11 +337,12 @@ int getParameter(const char* name)
 int start()
 {
     lock_mutex(mutex);	
+    
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
     {
         //printf("Kamera konnte nicht geöffnet werden!");
-        g_Messages.push(string("Fehler, Kamera konnte nicht geoeffnet werden!"));
+        g_Messages.push(string("start</b> <font color='red'>Kamera konnte nicht geoeffnet werden!</font>"));
         unlock_mutex(mutex);
         return -7;
     }
@@ -388,7 +386,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     // try to open capture
     else if(!g_capture.isOpened())
     {
-         g_Messages.push(string("getPicture error, weil keine Kamera geoeffnet ist!"));
+         g_Messages.push(string("getPicture</b> <font color='red'>keine Kamera geoeffnet!</font>"));
          unlock_mutex(mutex);
          return 0;
     }
@@ -401,10 +399,17 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     else
         g_capture >> m; // get a new frame from camer
     
+    if(!m.size().area())
+    {
+        g_Messages.push(string("getPicture</b> <font color='red'>picture from camera is empty</font>"));
+        unlock_mutex(mutex);
+        return 0;
+    }
+            
     //m = cvLoadImage("test.jpg");
     if(m.depth() != CV_8U)
     {
-        printf("Error, depth != unsigned char\n");
+        g_Messages.push(string("getPicture</b> <font color='red'>depth != unsigned char</font>\n"));
         unlock_mutex(mutex);
         return 0;
     }
@@ -417,6 +422,10 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     //cvResize( &src, scaled, CV_INTER_LINEAR );
     m3.create(g_cfg.width, g_cfg.height, m.type());
     resize(m, m3, Size(g_cfg.width, g_cfg.height));
+    
+    char buffer[256];
+    sprintf(buffer, "getPicture</b> <i>breite: %d, hoehe: %d, area: %d</i>", m.size().width, m.size().height, m.size().area());
+   // g_Messages.push(string(buffer));
     
     //rgb-output 
     if(rgb)
@@ -439,7 +448,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             picture_release(&g_rgbPicture);
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
-                printf("Fehler beim speicher reservieren in getPicture rgb!\n");
+                g_Messages.push(string("getPicture</b> <font color='red'>Fehler beim speicher reservieren in getPicture rgb!</font>"));
                 unlock_mutex(mutex);
                 return NULL;
             }
@@ -488,7 +497,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             picture_release(&g_yuvPicture);
             if(picture_create(&g_yuvPicture, m2.cols, m2.rows, 1))
             {
-                printf("Fehler beim speicher reservieren in getPicture yuv!\n");
+                g_Messages.push(string("getPicture</b> <font color='red'>Fehler beim speicher reservieren in getPicture yuv!</font>"));
                 unlock_mutex(mutex);
                 return 0;
             }

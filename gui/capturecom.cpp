@@ -62,7 +62,7 @@ void CaptureCom::chooseCurrentCamera(int cameraNr)
 {
     mInterface->setParameter("capture.camera.choose", cameraNr);
     QString text;
-    mLogger->append(text.sprintf("Kamera: %d wurde ausgewaehlt", cameraNr));
+    mLogger->append(text.sprintf("<font color='grey'>gui.CaptureCom::chooseCurrentCamera <i>Kamera: %d wurde ausgewaehlt</i></font>", cameraNr));
 }
 
 int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
@@ -109,7 +109,7 @@ void CaptureCom::nextFrame()
     {
         mLogger->append(m);
     }
-  //  return;
+    return;
     QString str;
    // mLogger->append(str.sprintf("Frame: %d", count++));
 
@@ -143,9 +143,9 @@ void CaptureCom::nextFrame()
     }
     */
     //qDebug("current_Frame: %d\n", size);
-    //encodeFrame();
+  //  encodeFrame();
 
-  //  checkIfNewDataAvailable();
+    checkIfNewDataAvailable();
     SPicture* pic = getPictureFunc(1, 1);
 
     if(pic <= 0)
