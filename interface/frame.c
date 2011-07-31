@@ -74,7 +74,7 @@ int count_stack(SFrame_stack* s)
 //von unten hinzufügen
 void stack_push(SFrame_stack* s, SFrame* f)
 {
-	SFrame_stack_element* new_s = NULL;
+    SFrame_stack_element* new_s = NULL;
     if(!s)
     {
         if(f)
@@ -93,13 +93,14 @@ void stack_push(SFrame_stack* s, SFrame* f)
         s->bottom = new_s;
 	new_s->frame = f;
         if(!s->top) s->top = new_s;
+        gettimeofday(&new_s->captureTime, NULL);
         s->count++;
         stack_unlock(s->mutex);
 }
 
-void stack_pop(SFrame_stack* s, SFrame** pf)
+void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time)
 {
-	SFrame_stack_element* old = NULL;
+    SFrame_stack_element* old = NULL;
     if(!s || !s->top)
     {
         if(pf)
@@ -115,6 +116,8 @@ void stack_pop(SFrame_stack* s, SFrame** pf)
     s->top = old->bottom;
     if(s->top)
         s->top->top = 0;
+    if(old && time)
+        memcpy(time, &old->captureTime, sizeof(struct timeval));
     //SFrame_stack_element* cur_s = s->top;
     if(old)
         free(old);
@@ -155,7 +158,7 @@ void clear_stack(SFrame_stack* g_s)
     
     while(g_s->top != 0 && g_s->bottom != 0)
     {
-        stack_pop(g_s, &temp);
+        stack_pop(g_s, &temp, NULL);
         delete_frame(temp);
     }
 #ifdef _WIN32

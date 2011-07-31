@@ -592,7 +592,7 @@ fail:
 //! \param size pointer to var for size of frame, if NULL, only last frame will be deleted
 //! \return pointer to framedata with size write into size, framedate changed after next call
 //! \return 0 by error or if param size is 0
-unsigned char* getFrame(int *size)
+unsigned char* getFrame(int *size, struct timeval* frame_time)
 {
   //  encode_frames(&opt);
    // return NULL;
@@ -604,7 +604,7 @@ unsigned char* getFrame(int *size)
     {
         
         if(!g_FrameBuffer || g_FrameBuffer->count < 2) return 0;
-        stack_pop(g_FrameBuffer, &current);
+        stack_pop(g_FrameBuffer, &current, frame_time);
         //return 0;
         //printf("encoder.x264::getFrame stack-count: %d, current. %d\n", g_FrameBuffer->count, (int)current);
         if(!current) return 0;

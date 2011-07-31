@@ -72,6 +72,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 #ifndef _WIN32
     mInterface->setParameter(res.sprintf("capture.camera.%d.resolution.choose", cameraNr), resolutionNr);
 #endif
+    return 0;
 /*
     int ret = 0;
     if((ret = mInterface->start()))
@@ -98,7 +99,7 @@ int CaptureCom::startStreaming(int cameraNr, int resolutionNr)
 void CaptureCom::stopStream()
 {
     mInterface->stop();
-    mLogger->append("Der Stream wurde angehalten!");
+    mLogger->append("<b>gui.CaptureCom</b> <font color='green'>Der Stream wurde angehalten!</font>");
 }
 
 void CaptureCom::nextFrame()

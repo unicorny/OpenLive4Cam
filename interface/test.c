@@ -36,6 +36,7 @@ int main(int argc, char* argv[])
 {
     unsigned char TestBuffer1[] = "Dies wird ein schoener und laaaanger Text.\0";
     unsigned char TestBuffer2[] = "Dies ist der 2. Testbuffer Text\0";
+    struct timeval testTime;
 	SFrame* frame = NULL;
 	SFrame f;
 	unsigned* mem = NULL;
@@ -59,11 +60,11 @@ int main(int argc, char* argv[])
     if(stack->top == stack->bottom)
         printf("error: nachdem zwei Datensätze auf dem Stack liegen, sind top == bottom");
     
-    stack_pop(stack, &frame);
+    stack_pop(stack, &frame, NULL);
     printf("stack count 1 erwartet: %d\n", stack->count);
     printf("Daten vom Stack: size: %d, text: %s, vergleichstext: %s\n", frame->size, frame->data, TestBuffer1);
     delete_frame(frame);
-    stack_pop(stack, &frame);
+    stack_pop(stack, &frame, NULL);
 //    return 1;
     delete_frame(frame);
 
@@ -72,10 +73,10 @@ int main(int argc, char* argv[])
     frame_to_stack(stack, TestBuffer1, strlen(TestBuffer1)+1);
     printf("stack count 1 erwartet: %d\n", stack->count);
     
-    stack_pop(stack, &frame);
+    stack_pop(stack, &frame, &testTime);
     delete_frame(frame);
     
-    stack_pop(stack, &frame);
+    stack_pop(stack, &frame, &testTime);
     if(frame)
         printf("leerer Eintrag: %d, %s\n",frame->size, frame->data );
     printf("stack count 0 erwartet: %d\n", stack->count);

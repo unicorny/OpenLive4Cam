@@ -380,6 +380,7 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     // if start wasn't called
     if(!g_run)
     {
+        g_capture.release();
         unlock_mutex(mutex);
         return 0;
     }
@@ -530,7 +531,7 @@ int stop()
 {
     lock_mutex(mutex);
     g_run = false;
-    g_capture.release();
+    //g_capture.release();
     unlock_mutex(mutex);
     return 0;
 }

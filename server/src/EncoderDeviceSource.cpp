@@ -106,7 +106,7 @@ void EncoderDeviceSource::doGetNextFrame() {
       /*do*/ {
           //memcpy
           int temp_size = 0;
-          unsigned char* temp = (unsigned char*)fParams.getFrame(&temp_size); 
+          unsigned char* temp = (unsigned char*)fParams.getFrame(&temp_size, &fParams.frame_time); 
           //fprintf(f, "temp: %d, size: %d\n", (int)temp, temp_size);
          
           if(temp)
@@ -193,7 +193,7 @@ void EncoderDeviceSource::deliverFrame() {
    {
        if(!fParams.used)
        {
-           newFrameDataStart = (unsigned char*)fParams.getFrame(&newFrameSize);
+           newFrameDataStart = (unsigned char*)fParams.getFrame(&newFrameSize, &fParams.frame_time);
            if(newFrameDataStart)
                 fParams.setData(newFrameDataStart, newFrameSize);
            else
@@ -223,14 +223,14 @@ void EncoderDeviceSource::deliverFrame() {
    
           
    
-           
+   /*        
    if(frameCount <= 1)
    {
         gettimeofday(&fPresentationTime, NULL);
    }
    else
    {
-       fLastPlayTime = frameCount*33333;
+       fLastPlayTime = frameCount*100000;
        unsigned uSeconds	= fPresentationTime.tv_usec + fLastPlayTime;
        fPresentationTime.tv_sec += uSeconds/1000000;
        fPresentationTime.tv_usec = uSeconds%1000000;
@@ -239,7 +239,9 @@ void EncoderDeviceSource::deliverFrame() {
        fprintf(f, "fLastPlayTime: %d\n", fLastPlayTime);
        fflush(f);
    }
+   
      //*/  
+   memcpy(&fPresentationTime, &fParams.frame_time, sizeof(struct timeval));
    
   //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
@@ -287,7 +289,7 @@ void EncoderDeviceSource::deliverFrame() {
 // The following code would be called to signal that a new frame of data has become available.
 // This (unlike other "LIVE555 Streaming Media" library code) may be called from a separate thread.
 void signalNewFrameData() {
-    printf("signalNewFrameData\n");
+    //printf("signalNewFrameData\n");
   TaskScheduler* ourScheduler = scheduler; //%%% TO BE WRITTEN %%%
   EncoderDeviceSource* ourDevice  = (EncoderDeviceSource*)eds; //%%% TO BE WRITTEN %%%
 

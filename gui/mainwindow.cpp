@@ -119,6 +119,7 @@ void MainWindow::on_startButton_clicked()
         mTimer.stop();
         mCapture->stopStream();
         mStreamingRunning = false;
+        mEncoderThread->exit();
         res->setEnabled(true);
         port->setEnabled(true);
     }

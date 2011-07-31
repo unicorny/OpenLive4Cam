@@ -58,7 +58,7 @@ SERVER_API int stop();
 SERVER_API int run();
 
 
-extern unsigned char* (*getFrameFunc)(int*);
+extern unsigned char* (*getFrameFunc)(int*, struct timeval*);
 
  
 

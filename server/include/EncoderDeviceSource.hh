@@ -33,7 +33,7 @@ class EncoderDeviceParameters {
   //%%% TO BE WRITTEN %%%
 public:
     
-    EncoderDeviceParameters(unsigned char*(*getFrameFunc)(int*), bool* run)
+    EncoderDeviceParameters(unsigned char*(*getFrameFunc)(int*, struct timeval*), bool* run)
     : getFrame(getFrameFunc), running(run), tempSize(0), used(false), tempData(NULL){}
     
     ~EncoderDeviceParameters()
@@ -59,9 +59,10 @@ public:
         used = false;
     }
     
-    unsigned char*(*getFrame)(int*);
+    unsigned char*(*getFrame)(int*, struct timeval*);
     bool* running;
     
+    struct timeval frame_time;
     int tempSize;
     bool used;
     unsigned char* tempData;

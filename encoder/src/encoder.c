@@ -294,7 +294,9 @@ int encodeFrame()
     }
     if(encode_frames())
     {
-        printf("encoder: Fehler bei encode_frames\n");
+        //printf("encoder: Fehler bei encode_frames\n");
+        g_run = 0;
+        encoder_stop_frames();
         unlock();
         return -1;
     }
@@ -319,6 +321,9 @@ int getStackCount()
 //! \return 0
 int stop()
 {
+    if(capture) capture->stop();
+    return 0;
+    
     lock();
     g_run = 0;
     encoder_stop_frames();
@@ -330,7 +335,7 @@ int stop()
         en_data.h = NULL;
      }
      * */
-    if(capture) capture->stop();
+  
     return 0;
 }
 

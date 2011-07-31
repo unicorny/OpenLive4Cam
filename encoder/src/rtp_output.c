@@ -276,7 +276,7 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
     //return 0;
     fprintf(p->log, "Ende, close from handle and log-file\n");
     int ret = fclose(p->log);
-   // fclose(p->binaryOut);
+    fclose(p->binaryOut);
 	
    // closeSocket(p->socket);
     p->socket = 0;

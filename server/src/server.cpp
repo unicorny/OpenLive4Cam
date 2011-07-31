@@ -35,7 +35,7 @@ SInterface* encoder = NULL;
 std::stack<std::string> g_Messages;
 char g_MessagesBuffer[256];
 int g_Port = 8554;
-unsigned char* (*getFrameFunc)(int*) = NULL;
+unsigned char* (*getFrameFunc)(int*, struct timeval*) = NULL;
 int (*getStackCount)(void) = NULL;
 
 //live
@@ -84,7 +84,7 @@ int init()
         return -2;
     }
     //getFrame function holen von encoder
-    getFrameFunc = (unsigned char* (*)(int*))encoder->getParameter("encoder.getFrameFunc");
+    getFrameFunc = (unsigned char* (*)(int*, struct timeval*))encoder->getParameter("encoder.getFrameFunc");
     if(!getFrameFunc)
     {
         printf("Error, encoder.getFrameFunc didn't work as exceptet!");
@@ -183,7 +183,7 @@ int getParameter(const char* name)
     {
         if(g_Messages.size())
         {
-          sprintf(g_MessagesBuffer,"server: %s", g_Messages.top().data());
+          sprintf(g_MessagesBuffer,"<b>server.%s", g_Messages.top().data());
           g_Messages.pop();
           return (int)g_MessagesBuffer;  
         }
@@ -218,12 +218,10 @@ static void announceStream(RTSPServer* rtspServer, ServerMediaSession* sms,
 			   char const* streamName) {
   char* url = rtspServer->rtspURL(sms);
   string a;
-  a += streamName;
-  a += "\" stream, from camera \"";
-  a += "\"\n";
-  a += "Play this stream using the URL \"";
+  a += "announceStream</b> ";
+  a += "<br><font color='green'>Der Stream kann empfangen werden unter der Adresse: <br><u>";
   a += url;
-  a += "\"\n";
+  a += "</u><br> Zum Beispiel mit dem VLC-Player.</font>";
   
   g_Messages.push(a);
   delete[] url;
@@ -237,17 +235,17 @@ int start()
        ret = encoder->start();
        if(ret)
        {
-           g_Messages.push(string("server.start Fehler beim starten des Encoders!"));
+           g_Messages.push(string("start</b> <font color='red'>Fehler beim starten des Encoders!</font>"));
            return ret;
        }
     }
-	g_Messages.push(string("server.start Encoder gestartet"));
+	g_Messages.push(string("start</b> <font color='green'>Encoder gestartet</font>"));
  //   return 0;
     int encoderPort = encoder->getParameter("encoder.port");
     
-    RTSPServer* rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
+    rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
-        g_Messages.push(string("Failed to create RTSP server: ").append(env->getResultMsg()));
+        g_Messages.push(string("start</b> <font color='red'>Failed to create RTSP server: ").append(env->getResultMsg()).append("</font>"));
         *env << "Failed to create RTSP server: " << env->getResultMsg() << "\n";
         return -1;
   }    
@@ -298,10 +296,10 @@ int start()
   char t[256];
   if (rtspServer->setUpTunnelingOverHTTP(80) || rtspServer->setUpTunnelingOverHTTP(8000) || rtspServer->setUpTunnelingOverHTTP(8080)) {
     //*env << "\n(We use port " << rtspServer->httpServerPortNum() << " for optional RTSP-over-HTTP tunneling.)\n";
-    sprintf(t, "(We use port %d for optional RTSP-over-HTTP tunneling.)", rtspServer->httpServerPortNum());
+    sprintf(t, "start</b> <i>(We use port %d for optional RTSP-over-HTTP tunneling.)</i>", rtspServer->httpServerPortNum());
   } else {
     //*env << "\n(RTSP-over-HTTP tunneling is not available.)\n";
-      sprintf(t, "(RTSP-over-HTTP tunneling is not available.)");
+      sprintf(t, "start</b> <i>(RTSP-over-HTTP tunneling is not available.)</i>");
   }
     g_Messages.push(string(t));
     g_run = true;
@@ -312,9 +310,10 @@ int stop()
 {
     g_run = false;
    // rtspServer->close(*env, "h264");
+    
     if(encoder)
         encoder->stop();
-    
+    Medium::close(rtspServer);
      //g_watch = 1;
     return 0;
 }

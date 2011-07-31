@@ -4,6 +4,9 @@
 #include "interface.h"
 #include <malloc.h>
 #include <memory.h>
+#include <sys/time.h>
+
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -14,6 +17,8 @@
 extern "C"
 {
 #endif
+    
+
 
 typedef struct SFrame_stack
 {
@@ -33,13 +38,14 @@ typedef struct SFrame_stack_element
     struct SFrame_stack_element* top;
     struct SFrame_stack_element* bottom;
     SFrame* frame;		    
+    struct timeval captureTime;
 } SFrame_stack_element;
 
 SFrame_stack* stack_init(unsigned char* data, int size);
 // von unten hinzufügen
 void stack_push(SFrame_stack* s, SFrame* f);
 // von oben entfernen
-void stack_pop(SFrame_stack* s, SFrame** pf);
+void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time);
 
 void frame_to_stack(SFrame_stack* s, unsigned char* data, int size);
 void delete_frame(SFrame* f);
