@@ -51,7 +51,7 @@ EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
   FILE* f = fopen("IwasHere.txt", "wt");
   FILE* f2 = fopen("viddeo.264", "wb");
   FILE* f3 = fopen("vidddeo.264", "wb");
-  bin = fopen("_video.264", "rb");
+  bin = fopen("jumper2.h264", "rb");
   fprintf(f, "Constructor!\n");
   fclose(f);
   fclose(f2);
@@ -250,7 +250,7 @@ void EncoderDeviceSource::deliverFrame() {
    }
    
      //*/  
-   memcpy(&fPresentationTime, &fParams.frame_time, sizeof(struct timeval));
+  memcpy(&fPresentationTime, &fParams.frame_time, sizeof(struct timeval));
    
   //gettimeofday(&fPresentationTime, NULL); // If you have a more accurate time - e.g., from an encoder - then use that instead.
   // If the device is *not* a 'live source' (e.g., it comes instead from a file or buffer), then set "fDurationInMicroseconds" here.
@@ -275,8 +275,8 @@ void EncoderDeviceSource::deliverFrame() {
   fprintf(f, "size: %d: short: %d%d%d%d\n", fFrameSize, tag[s-4], tag[s-3], tag[s-2], tag[s-1]);
   //fprintf(f, "frameSize2: %d, p: %d\n", fFrameSize, (int)newFrameDataStart);
   fflush(f);
-  
-/*  fFrameSize = fread(fTo, 1, fMaxSize, bin);
+  /*
+  fFrameSize = fread(fTo, 1, fMaxSize, bin);
   if(fMaxSize != fFrameSize)
   {
       fprintf(f, "Fehler, weniger bytes gelesen als erwartet: %d, %d\n", fMaxSize, fFrameSize);

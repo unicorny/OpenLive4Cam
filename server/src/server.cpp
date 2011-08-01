@@ -128,7 +128,7 @@ int run()
 
 void checkIfNewDataAvailable()
 {    
-    //g_Messages.push(string("checkIfNewDataAvailable</b>"));
+ //   g_Messages.push(string("checkIfNewDataAvailable</b>"));
     if(mutex_lock(mutex)) g_Messages.push(string("checkIfNewDataAvailable</b> "
             "<font color='red'>Fehler bei mutex_lock</font>"));
     if(g_run && getStackCount() >= 2)
@@ -331,6 +331,7 @@ int stop()
     
     if(encoder)
         encoder->stop();
+	Medium::close(eds);
     Medium::close(sms);
     sms = NULL;
     Medium::close(rtspServer);

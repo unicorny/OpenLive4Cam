@@ -58,21 +58,23 @@ void EncoderThread::run()
         mutex.lock();
         SPicture* pic = NULL;
 
-    //    if(mInterface->getParameter("server.client.count"))
+
+        if(encodeFrame())
         {
-            if(encodeFrame())
-            {
-                mutex.unlock();
-                break;
-            }
-            checkIfNewDataAvailable();
-            pic = getPictureFunc(1, 0);
+            mutex.unlock();
+            emit appendLog("<b>gui.encoderThread</b> <font color='red'>Fehler in encodeFrame aufgetreten!</font>");
+            break;
         }
-      /*  else
+        if(mInterface->getParameter("server.client.count"))
+            checkIfNewDataAvailable();
+
+        pic = getPictureFunc(1, 0);
+
+    /*    else
         {
             pic = getPictureFunc(1, 1);
         }
-        */
+//*/
 
         if(pic <= 0)
         {
