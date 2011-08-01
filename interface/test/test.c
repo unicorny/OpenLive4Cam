@@ -70,9 +70,10 @@ int main(int argc, char* argv[])
     stack_delete_top(stack);
     frame_to_stack(stack, TestBuffer2, strlen(TestBuffer2)+1);
     //return 0;
-    stack_pop(stack, &frame, NULL);
+    stack_pop(stack, &frame, &testTime);
     printf("stack count 1 erwartet: %d\n", stack->count);
     printf("Daten vom Stack: size: %d, text: %s, vergleichstext: %s\n", frame->size, frame->data, TestBuffer1);
+    printf("time1: %d, time2: %d\n", testTime.tv_sec, testTime.tv_usec);
     delete_frame(frame);
     stack_pop(stack, &frame, NULL);
 //    return 1;
