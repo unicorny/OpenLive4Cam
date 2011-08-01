@@ -4,70 +4,48 @@
 #endif
 
 
-int stack_lock(void* mutex)
-{
-	int ret = 1;
-#ifdef _WIN32
-	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
-	if(waitResult == WAIT_OBJECT_0)
-		ret = 0;
-	else if(waitResult == WAIT_FAILED)
-		printf("Fehler %d bei lock mutex\n", GetLastError());
-
-#else
-    ret = pthread_mutex_lock(mutex);
-#endif
-    if(ret)
-        printf("interface.frame::stack_lock fehler bei lock Stack mutex\n");
-    return ret;        
-}
-
-int stack_unlock(void* mutex)
-{
-#ifdef _WIN32
-	int ret = !ReleaseMutex(mutex);
-#else
-    int ret = pthread_mutex_unlock(mutex);
-#endif
-    
-    if(ret)
-        printf("interface.frame::stack_unlock fehler bei unlock Stack mutex\n");
-    return ret;
-}
-
 SFrame_stack* stack_init(unsigned char* data, int size)
 {
 	SFrame_stack* s = (SFrame_stack*)malloc(sizeof(SFrame_stack));
 	if(!s) return 0;
-#ifdef _WIN32
-		s->mutex = CreateMutex(NULL, FALSE, NULL);
-		if(s->mutex == NULL) printf("Fehler: %d bei CreateMutex", GetLastError());
-#else
-		s->mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-        pthread_mutex_init(s->mutex, NULL);
-#endif
-        stack_lock(s->mutex);
+
+        s->mutex = mutex_init();
+        if(!s->mutex) 
+        {
+            printf("interface.stack_init Fehler bei mutex_init!\n");
+            free(s);
+            return NULL;
+        }
+       
+        if(mutex_lock(s->mutex))
+            printf("interface.stack_init Fehler bei mutex_lock\n");
 
         s->top = (SFrame_stack_element*)malloc(sizeof(SFrame_stack_element));
         s->bottom = s->top;
         
         s->top->top = 0;
         s->top->bottom = 0;
+        gettimeofday(&s->top->captureTime, NULL);
+        s->top->firstEntry = 1;
 	s->top->frame = (SFrame*)malloc(sizeof(SFrame));	
         s->top->frame->size = size;
         s->top->frame->data = (unsigned char*)malloc(size);
         memmove(s->top->frame->data, data, size);
         s->count = 1;
-        stack_unlock(s->mutex);
+        
+        if(mutex_unlock(s->mutex))
+            printf("interface.stack_init Fehler bei mutex_unlock\n");
         
 	return s;
 }
 int count_stack(SFrame_stack* s)
 {
     if(!s) return 0;
-    stack_lock(s->mutex);
+    if(mutex_lock(s->mutex))
+        printf("interface.count_stack Fehler bei mutex_lock\n");
     int count = s->count;
-    stack_unlock(s->mutex);
+    if(mutex_unlock(s->mutex))
+        printf("interface.count_stack Fehler bei mutex_unlock\n");
     return count;
 }
 
@@ -81,21 +59,24 @@ void stack_push(SFrame_stack* s, SFrame* f)
            delete_frame(f);
         return;
     }
-    stack_lock(s->mutex);
-	new_s = (SFrame_stack_element*)malloc(sizeof(SFrame_stack_element));
-        if(!new_s)
-            return;
-        
-	new_s->top = s->bottom;
-	new_s->bottom = NULL;
-        if(s->bottom)
-                s->bottom->bottom = new_s;
-        s->bottom = new_s;
-	new_s->frame = f;
-        if(!s->top) s->top = new_s;
-        gettimeofday(&new_s->captureTime, NULL);
-        s->count++;
-        stack_unlock(s->mutex);
+    if(mutex_lock(s->mutex))
+        printf("interface.stack_push Fehler bei mutex_lock\n");
+    new_s = (SFrame_stack_element*)malloc(sizeof(SFrame_stack_element));
+    if(!new_s)
+        return;
+    new_s->firstEntry = 0;
+    new_s->top = s->bottom;
+    new_s->bottom = NULL;
+    if(s->bottom)
+            s->bottom->bottom = new_s;
+    s->bottom = new_s;
+    new_s->frame = f;
+    if(!s->top) s->top = new_s;
+    gettimeofday(&new_s->captureTime, NULL);
+    s->count++;
+    
+    if(mutex_unlock(s->mutex))
+        printf("interface.stack_push Fehler bei mutex_unlock\n");
 }
 
 void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time)
@@ -107,7 +88,8 @@ void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time)
            *pf = NULL;
         return;
     }
-    stack_lock(s->mutex);
+    if(mutex_lock(s->mutex))
+        printf("interface.stack_pop Fehler bei mutex_lock\n");
     if(pf)
         *pf = s->top->frame;
     
@@ -122,7 +104,60 @@ void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time)
     if(old)
         free(old);
     s->count--;
-    stack_unlock(s->mutex);   
+    if(mutex_unlock(s->mutex))
+        printf("interface.stack_pop Fehler bei mutex_unlock\n");
+}
+
+void stack_delete_top(SFrame_stack* s)
+{
+    SFrame_stack_element* old = NULL;
+    SFrame_stack_element* firstFrame = NULL;
+    if(!s || !s->top)
+    {
+        return;
+    }
+    if(mutex_lock(s->mutex))
+        printf("interface.stack_Delete_top Fehler bei mutex_lock\n");
+        
+    old = s->top;
+    if(old->firstEntry) {old = old->bottom; firstFrame = s->top;}
+    if(!old)
+    {
+        if(mutex_unlock(s->mutex))
+            printf("interface.stack_delete_top Fehler bei mutex_unlock\n");
+        return;
+    }
+    
+    if(old == s->bottom)
+    {
+        if(!firstFrame)
+            s->bottom = 0;
+        else
+            s->bottom = firstFrame;
+    }
+    
+    
+    if(!firstFrame)
+    {
+        //printf("!firstFrame\n");
+        s->top = old->bottom;
+        if(s->top)
+                s->top->top = 0;
+    }
+    else
+    {
+       // printf("firstFrame: %d\n", firstFrame);
+        if(old->bottom)
+                old->bottom->top = firstFrame;
+    }
+    
+    //SFrame_stack_element* cur_s = s->top;
+    if(old->frame) delete_frame(old->frame);
+    if(old) free(old);
+    
+    s->count--;
+    if(mutex_unlock(s->mutex))
+        printf("interface.stack_delete_top Fehler bei mutex unlock\n");
 }
 
 void frame_to_stack(SFrame_stack* s, unsigned char* data, int size)
@@ -161,12 +196,8 @@ void clear_stack(SFrame_stack* g_s)
         stack_pop(g_s, &temp, NULL);
         delete_frame(temp);
     }
-#ifdef _WIN32
-	CloseHandle(g_s->mutex);
-#else
-    pthread_mutex_destroy(g_s->mutex);
-	free(g_s->mutex);
-#endif
+    mutex_close(g_s->mutex);
+    g_s->mutex = NULL;
     free(g_s);
 }
 

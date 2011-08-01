@@ -9,8 +9,10 @@
 
 #include <iostream>
 #include <ctype.h>
+#include <stack>
 
 #include "../../interface/picture.h"
+#include "../../interface/mutex.h"
 
 using namespace cv;
 using namespace std;
@@ -28,6 +30,7 @@ struct Config
 
 #define MAX_PARAMETER_COUNT 8
 const char g_modulname[] = "capture";
+extern std::stack<std::string> g_Messages;
 
 
 #ifdef _WIN32
@@ -78,18 +81,8 @@ CAPTURE_API int stop();
 
 //CAPTURE_API 
 //! \brief mutex for threadsave working
-#ifdef _WIN32
-extern void* mutex;
-#else
-extern pthread_mutex_t* mutex;//PTHREAD_MUTEX_INITIALIZER; 
-#endif
+extern Mutex* mutex;
 
-//! \brief lock mutex 
-//! \param mutex to lock
-int lock_mutex(void* mutex);
-//! \brief unlock mutex
-//! \param mutex mutex to unlock
-int unlock_mutex(void* mutex);
 
 #ifdef __cplusplus
 }

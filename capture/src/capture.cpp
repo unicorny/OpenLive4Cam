@@ -1,7 +1,7 @@
 #include "capture.h"
 #include "camera.h"
 #include <stdio.h>
-#include <stack>
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -46,11 +46,7 @@ std::string g_Parameters[MAX_PARAMETER_COUNT];
 std::stack<std::string> g_Messages;
 
 //! \brief mutex for threadsave working
-#ifdef _WIN32
-void* mutex = NULL;
-#else
-pthread_mutex_t* mutex = NULL;//PTHREAD_MUTEX_INITIALIZER; 
-#endif
+Mutex* mutex = NULL;
 
 //! \brief buffer for last error message, used by getParameter()
 char g_MessagesBuffer[256];
@@ -77,21 +73,13 @@ int init()
     g_rgbPicture.rgb = 1;
     g_yuvPicture.rgb = 0;
     printf("Capture Modul init!\n");
-#ifdef _WIN32
-	mutex = CreateMutex(NULL, FALSE, NULL);
-	if(mutex == NULL)
-	{
-		printf("capture.init Fehler: %d bei mutex init\n", GetLastError());
-		return -2;
-	}
-#else
-	mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-    if(pthread_mutex_init(mutex, NULL))
+    
+    mutex = mutex_init();
+    if(!mutex)
     {
-        printf("capture.init fehler bei mutex init\n");
+        printf("capture.init Fehler bei mutex_init\n");
         return -2;
     }
-#endif
     
     return 42;
 }
@@ -104,58 +92,13 @@ void ende()
     picture_release(&g_rgbPicture);
     picture_release(&g_yuvPicture);
     printf("capture.ende: called\n");
-#ifdef _WIN32
-	CloseHandle(mutex);
-#else
-    pthread_mutex_destroy(mutex);
-	free(mutex);
-#endif
+    
+    mutex_close(mutex);
+    mutex = NULL;
 	
 }
-//! \brief lock mutex of capture, or wait until it is unlocked and lock it than
-//! \param mutex pointer to mutex (in this case the global var mutex)
-//! \return 0 without error
-//! \return 1 by error in windows
-//! \return return-value of pthread_mutex_lock(pthread_mutex_t*) in linux
-int lock_mutex(void* mutex)
-{
-	int ret = 1;
-#ifdef _WIN32
-	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
-	if(waitResult == WAIT_OBJECT_0)
-        {
-		ret = 0;
-                printf("capture mutex locked\n");
-        }
-	else if(waitResult == WAIT_FAILED)
-        {
-		printf("Fehler %d bei lock mutex\n", GetLastError());
-        }
 
-#else
-    ret = pthread_mutex_lock((pthread_mutex_t*)mutex);
-#endif
-    if(ret)
-        printf("capture.lock_mutex fehler bei lock mutex\n");
-    return ret;        
-}
-//! \brief unlock mutex of capture
-//! \param mutex pointer to mutex (in this case the global var mutex)
-//! \return 0 without error
-//! \return 1 by error in windows
-//! \return return-value of pthread_mutex_unlock(pthread_mutex_t*) in linux
-int unlock_mutex(void* mutex)
-{
-#ifdef _WIN32
-	int ret = !ReleaseMutex(mutex);
-#else
-    int ret = pthread_mutex_unlock((pthread_mutex_t*)mutex);
-#endif
-    
-    if(ret)
-        printf("capture.unlock_mutex fehler bei unlock mutex\n");
-    return ret;
-}
+
 /*! \brief set parameter for capture, threadsave 
  * 
  * by function call, mutex will be locked or if already locked, call wait until mutex is unlocked 
@@ -181,7 +124,8 @@ int unlock_mutex(void* mutex)
 void setParameter(const char* name, int value)
 {
 
-    lock_mutex(mutex);	
+    if(mutex_lock(mutex))
+        g_Messages.push(string("setParameter</b> <font color='red'>Fehler bei mutex_lock</font>"));
     //printf("capture.setParameter: name: %s, value: %d\n", name, value);
     if(string(name) == string("capture.camera.choose"))
     {
@@ -197,7 +141,8 @@ void setParameter(const char* name, int value)
             {
                 g_capture.open(g_cfg.cameraNr);
                 g_run = true;
-                unlock_mutex(mutex);
+                if(mutex_unlock(mutex))
+                   g_Messages.push(string("setParameter</b> <font color='red'>Fehler bei mutex_unlock</font>"));    
                 return;
             }
             g_run = true;
@@ -215,7 +160,8 @@ void setParameter(const char* name, int value)
                 string(name) == string("capture.resolution.height"))
             g_cfg.height = value;
     }
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+                   g_Messages.push(string("setParameter</b> <font color='red'>Fehler bei mutex_unlock</font>"));    
         
 }
 /*! \brief get parameter from capture 
@@ -258,7 +204,8 @@ void setParameter(const char* name, int value)
  */
 int getParameter(const char* name)
 {
-    lock_mutex(mutex);	
+    if(mutex_lock(mutex))
+        printf("capture.getParameter Fehler bei lock_mutex\n");
     
    // printf("Name: %s\n", name);
     char buffer[256];
@@ -280,19 +227,19 @@ int getParameter(const char* name)
         {
           sprintf(g_MessagesBuffer,"<b>capture.%s", g_Messages.top().data());
           g_Messages.pop();
-          unlock_mutex(mutex);
+          if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 1\n");
           return (int)g_MessagesBuffer;  
         }
         else
         {
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 2\n");
             return 0;
         }
     }
     else if(g_Parameters[0] != string(g_modulname))
     {
             //TODO: weiterleiten
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 3\n");
             return 0;
     }
     if(g_Parameters[1] == string("camera"))
@@ -301,7 +248,7 @@ int getParameter(const char* name)
     }
     else if(g_Parameters[1] == string("getPictureFunc") )
     {   
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 4\n");
         return (int)getPicture;
     }
     else if(string(name) == string("capture.resolution.x") ||
@@ -310,14 +257,14 @@ int getParameter(const char* name)
         
         
         int width = g_cfg.width;
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 5\n");
         return width;
     }
     else if(string(name) == string("capture.resolution.y") ||
             string(name) == string("capture.resolution.height"))
     {
         int height = g_cfg.height;    
-        unlock_mutex(mutex);        
+        if(mutex_unlock(mutex)) printf("capture.getParameter Fehler bei unlock_mutex 6\n");       
         return height;
     }
         
@@ -336,14 +283,16 @@ int getParameter(const char* name)
 //! \return -7 if camera not open
 int start()
 {
-    lock_mutex(mutex);	
+    if(mutex_lock(mutex))
+        g_Messages.push(string("start</b> <font color='red'>Fehler bei mutex_lock</font>"));
     
     g_capture.open(g_cfg.cameraNr);    
     if(!g_capture.isOpened())  // check if we succeeded
     {
         //printf("Kamera konnte nicht geöffnet werden!");
         g_Messages.push(string("start</b> <font color='red'>Kamera konnte nicht geoeffnet werden!</font>"));
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+             g_Messages.push(string("start</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
         return -7;
     }
     
@@ -359,7 +308,8 @@ int start()
     printf("start called\n");
 
    // namedWindow("LIVE",1);
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+         g_Messages.push(string("start</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
     return 0;
 }
 
@@ -375,20 +325,23 @@ int start()
  */
 SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 {
-    lock_mutex(mutex); 	
+    if(mutex_lock(mutex))
+        g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_lock</font>"));
     
     // if start wasn't called
     if(!g_run)
     {
         g_capture.release();
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
         return 0;
     }
     // try to open capture
     else if(!g_capture.isOpened())
     {
          g_Messages.push(string("getPicture</b> <font color='red'>keine Kamera geoeffnet!</font>"));
-         unlock_mutex(mutex);
+         if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
          return 0;
     }
     
@@ -403,7 +356,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     if(!m.size().area())
     {
         g_Messages.push(string("getPicture</b> <font color='red'>picture from camera is empty</font>"));
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 3</font>"));
         return 0;
     }
             
@@ -411,7 +365,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     if(m.depth() != CV_8U)
     {
         g_Messages.push(string("getPicture</b> <font color='red'>depth != unsigned char</font>\n"));
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 4</font>"));
         return 0;
     }
     //m.convertTo(m2, )
@@ -450,7 +405,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_rgbPicture, m2.cols, m2.rows, 4))
             {
                 g_Messages.push(string("getPicture</b> <font color='red'>Fehler beim speicher reservieren in getPicture rgb!</font>"));
-                unlock_mutex(mutex);
+                if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 5</font>"));
                 return NULL;
             }
         }
@@ -463,7 +419,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         //free scaled image
         //cvReleaseImage(&scaled);
         
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 6</font>"));
         //return pointer to picture buffer
         return &g_rgbPicture;
         
@@ -499,7 +456,8 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
             if(picture_create(&g_yuvPicture, m2.cols, m2.rows, 1))
             {
                 g_Messages.push(string("getPicture</b> <font color='red'>Fehler beim speicher reservieren in getPicture yuv!</font>"));
-                unlock_mutex(mutex);
+                if(mutex_unlock(mutex))
+                        g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 7</font>"));
                 return 0;
             }
         }
@@ -515,12 +473,14 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
         cvReleaseImage(&V);
  //       cvReleaseImage(&scaled);
     
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 8</font>"));
         //return pointer to picture buffer
         return &g_yuvPicture;        
     }
 	
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+            g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 9</font>"));
     return NULL;
 }
 //! \brief stop capture, threadsafe
@@ -529,10 +489,12 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
 //! \return 0
 int stop()
 {
-    lock_mutex(mutex);
+    if(mutex_lock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_lock</font>"));
     g_run = false;
     //g_capture.release();
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_unlock</font>"));
     return 0;
 }
 

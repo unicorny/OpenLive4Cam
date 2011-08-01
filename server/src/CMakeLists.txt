@@ -4,13 +4,13 @@ CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
 
 
 
-SET(ServerSrc server H264VideoEncoderServerMediaSubsession EncoderDeviceSource
-			  ../../interface/interface.cpp)
+SET(ServerSrc server H264VideoEncoderServerMediaSubsession EncoderDeviceSource)
 #IF(WIN32)
 SET(ServerSrc ${ServerSrc} ../include/server.h ../include/H264VideoEncoderServerMediaSubsession.h ../include/EncoderDeviceSource.hh ../../interface/interface.h)
 #ENDIF(WIN32)
-
+SET(PA2 ../../interface)
 SET(PA ../lib)
+find_library(INTERFACE_LIB interface PATHS ${PA2} REQUIRED)
 IF(WIN32)
 find_library(USAGE_ENV libUsageEnvironment.lib PATHS ${PA} REQUIRED)
 find_library(BASIC_USAGE_ENV libBasicUsageEnvironment.lib PATHS ${PA} REQUIRED)
@@ -18,13 +18,13 @@ find_library(LIVE_MEDIA libliveMedia.lib PATHS ${PA} REQUIRED)
 find_library(GROUP_SOCK libgroupsock.lib PATHS ${PA} REQUIRED)
 #find_library(WINMM winmm.lib REQUIRED)
 #find_library(WS2_32_LIBRARY ws2_32.lib REQUIRED)
-SET(LIBS ws2_32 winmm ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+SET(LIBS ws2_32 winmm ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} ${INTERFACE_LIB} )
 ELSE ()
 find_library(USAGE_ENV UsageEnvironment PATHS ${PA} REQUIRED)
 find_library(BASIC_USAGE_ENV BasicUsageEnvironment PATHS ${PA} REQUIRED)
 find_library(LIVE_MEDIA liveMedia PATHS ${PA} REQUIRED)
 find_library(GROUP_SOCK groupsock PATHS ${PA} REQUIRED)
-SET(LIBS ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
+SET(LIBS ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} ${INTERFACE_LIB})
 ENDIF(WIN32)
 #SET(LIBS ${LIVE_MEDIA} ${GROUP_SOCK} ${BASIC_USAGE_ENV} ${USAGE_ENV} )
 

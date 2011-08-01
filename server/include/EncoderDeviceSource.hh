@@ -28,17 +28,21 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
 #include "FramedSource.hh"
 #endif
 
+
 // The following class can be used to define specific encoder parameters
 class EncoderDeviceParameters {
   //%%% TO BE WRITTEN %%%
 public:
     
     EncoderDeviceParameters(unsigned char*(*getFrameFunc)(int*, struct timeval*), bool* run)
-    : getFrame(getFrameFunc), running(run), tempSize(0), used(false), tempData(NULL){}
+    : getFrame(getFrameFunc), running(run), tempSize(0), used(false), tempData(NULL)
+    {
+        
+    }
     
     ~EncoderDeviceParameters()
     {
-        clear();            
+        clear();                    
     }    
     
     void setData(const unsigned char* data, const int size)
@@ -66,6 +70,7 @@ public:
     int tempSize;
     bool used;
     unsigned char* tempData;
+    
 };
 void signalNewFrameData();
 

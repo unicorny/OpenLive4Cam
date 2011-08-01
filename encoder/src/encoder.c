@@ -1,9 +1,5 @@
 #include "encoder.h"
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h>
-#endif
+#include "../../interface/mutex.h"
 
 #ifdef _WIN32
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
@@ -45,50 +41,8 @@ SFrame_stack* g_FrameBuffer = NULL;
 int g_run = 0;
 int port = 0;
 //! brief mutex for threadsafe
-#ifdef _WIN32
-void* mutex = NULL;
-#else
-pthread_mutex_t* mutex; 
-#endif
+Mutex* mutex;
 
-//! \brief lock mutex of encoder, or wait until it is unlocked and lock it than
-//! \return 0 without error
-//! \return 1 by error in windows
-//! \return return-value of pthread_mutex_lock(pthread_mutex_t*) in linux
-int lock()
-{
-	int ret = 1;
-#ifdef _WIN32
-	DWORD waitResult = WaitForSingleObject(mutex, INFINITE);
-	if(waitResult == WAIT_OBJECT_0)
-		ret = 0;
-	else if(waitResult == WAIT_FAILED)
-		printf("Fehler %d bei lock mutex\n", GetLastError());
-
-#else
-    ret = pthread_mutex_lock(mutex);
-#endif
-    if(ret)
-        printf("capture.lock_mutex fehler bei lock mutex\n");
-    return ret;        
-}
-
-//! \brief unlock mutex of encoder
-//! \return 0 without error
-//! \return 1 by error in windows
-//! \return return-value of pthread_mutex_unlock(pthread_mutex_t*) in linux
-int unlock()
-{
-#ifdef _WIN32
-	int ret = !ReleaseMutex(mutex);
-#else
-    int ret = pthread_mutex_unlock(mutex);
-#endif
-    
-    if(ret)
-        printf("capture.unlock_mutex fehler bei unlock mutex\n");
-    return ret;
-}
 
 //! \brief load capture-Modul (Shared Library, *.so or *.dll), init mutex
 //! \return -1 if capture open failed
@@ -121,41 +75,34 @@ int init()
         return -3;
     }
     en_data.h = NULL;
-#ifdef _WIN32
-	mutex = CreateMutex(NULL, FALSE, NULL);
-	if(mutex == NULL)
-	{
-		printf("encoder.init Fehler: %d bei mutex init\n", GetLastError());
-		return -4;
-	}
-#else
-	mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
-    if(pthread_mutex_init(mutex, NULL))
+    mutex = mutex_init();
+    if(!mutex)
     {
-        printf("encoder.init fehler bei mutex init\n");
+        printf("encoder.init Fehler bei mutex init\n");
         return -4;
     }
-#endif
+
     return 42;
 }
 
 //! \brief call stop, free mutex, clear stack, free capture-Modul
 void ende()
 {
-    lock();
+    if(mutex_lock(mutex))
+        printf("encoder.ende Fehler beu mutex_lock 1\n");
     g_run = 0;
-    unlock();
+    if(mutex_unlock(mutex))
+        printf("encoder.ende Fehler bei mutex_unlock 1\n");
     stop();
-    lock();
+    if(mutex_lock(mutex))
+        printf("encoder.ende Fehler bei mutex_lock 2\n");
     //löschen des letzten Frames
     getFrame(NULL);
-    unlock();
-#ifdef _WIN32
-	CloseHandle(mutex);
-#else
-    pthread_mutex_destroy(mutex);
-	free(mutex);
-#endif
+    if(mutex_unlock(mutex))
+        printf("encoder.ende Fehler bei mutex_unlock 2\n");
+
+    mutex_close(mutex);
+    mutex = NULL;
  
     printf("Frames on Stack: %d\n", count_stack(g_FrameBuffer));
     clear_stack(g_FrameBuffer);
@@ -165,7 +112,7 @@ void ende()
         interface_close(capture);
     }
     capture = NULL;
-    printf("Encoder Modul ende\n");
+    printf("encoder.ende Encoder Modul ende\n");
 }
 
 
@@ -261,7 +208,8 @@ int start()
     sprintf(resolution, "%dx%d", capture->getParameter("capture.resolution.x"), capture->getParameter("capture.resolution.y"));
     printf("resolution: %s\n", resolution);
     
-    lock();
+    if(mutex_lock(mutex))
+        printf("encoder.start Fehler bie mutex_lock\n");
     //reset capture data
     en_data.last_dts = 0;
     en_data.prev_dts = 0;
@@ -277,7 +225,8 @@ int start()
    
     int r = start_x264(resolution);
     g_run = 1;
-    unlock();
+    if(mutex_unlock(mutex))
+        printf("encoder.start Fehler bei mutex_unlock\n");
     printf("encoder::start return von start: %d\n", r);
     return r;
 }
@@ -286,10 +235,12 @@ int start()
 //! \return -1 if encode_frames() failed
 int encodeFrame()
 {
-    lock();
+    if(mutex_lock(mutex))
+        printf("encoder.encodeFrame Fehler bei mutex_lock\n");
     if(!g_run)
     {
-        unlock();
+        if(mutex_unlock(mutex))
+            printf("encoder.encodeFrame Fehler bei mutex_unlock 1\n");
         return 1;
     }
     if(encode_frames())
@@ -297,17 +248,18 @@ int encodeFrame()
         //printf("encoder: Fehler bei encode_frames\n");
         g_run = 0;
         encoder_stop_frames();
-        unlock();
+        if(mutex_unlock(mutex))
+            printf("encoder.encodeFrame Fehler bei mutex_unlock 2\n");
         return -1;
     }
- /*   while(getStackCount() > 20)
+  /*  while(getStackCount() > 20)
     {
-        SFrame* f;
-        stack_pop(g_FrameBuffer, &f);
-        delete_frame(f);
+      //  stack_delete_top(g_FrameBuffer);
+        
     }
    //*/     
-    unlock();
+    if(mutex_unlock(mutex))
+            printf("encoder.encodeFrame Fehler bei mutex_unlock 3\n");
     return 0;
 }
 
@@ -324,10 +276,12 @@ int stop()
     if(capture) capture->stop();
     return 0;
     
-    lock();
+    if(mutex_lock(mutex))
+        printf("encoder.stop Fehler bei mutex_lock\n");
     g_run = 0;
     encoder_stop_frames();
-    unlock();
+    if(mutex_unlock(mutex))
+        printf("encoder.stop Fehler bei mutex_unlock\n");
     /*printf("en_data.h: %d\n", (int)en_data.h);
      if( en_data.h )
      {

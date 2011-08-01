@@ -9,15 +9,20 @@ endif(COMMAND cmake_policy)
 
 FIND_PACKAGE( OpenCV REQUIRED )
 
-SET(CaptureSrc capture camera ../../interface/picture.c)
+SET(CaptureSrc capture camera )
 #IF(WIN32)
 SET(CaptureSrc ${CaptureSrc} ../include/capture.h ../include/camera.h ../../interface/picture.h ../../interface/interface.h)
 #ENDIF(WIN32)
 
+SET(PA ../../interface/)
+
+find_library(INTERFACE interface PATHS ${PA} REQUIRED)
+SET(LIBS ${INTERFACE} ${OpenCV_LIBS})
+
 # Declare the target (an executable)
 ADD_LIBRARY(capture SHARED ${CaptureSrc})
 
-TARGET_LINK_LIBRARIES(capture ${OpenCV_LIBS})
+TARGET_LINK_LIBRARIES(capture ${LIBS})
 set_target_properties(capture PROPERTIES DEFINE_SYMBOL BUILD_DLL)
 IF(MSVC)
 	set_target_properties(capture PROPERTIES DEFINE_SYMBOL VC_BUILD)

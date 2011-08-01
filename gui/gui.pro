@@ -5,8 +5,6 @@ TARGET = OpenLive4Cam
 TEMPLATE = app
 SOURCES += main.cpp \
     mainwindow.cpp \
-    ../interface/interface.c \
-    ../interface/picture.c \
     CInterface.cpp \
     capturecom.cpp \
     videoview.cpp \
@@ -21,3 +19,5 @@ HEADERS += mainwindow.h \
     serverthread.h \
     encoderthread.h
 FORMS += mainwindow.ui
+unix:LIBS += -L../interface -linterface
+win32:LIBS += ../interface/interface.lib

@@ -12,6 +12,7 @@
 #include <stdio.h>
 
 #include "interface.h"
+#include "mutex.h"
 #include "liveMedia.hh"
 #include "BasicUsageEnvironment.hh"
 
@@ -22,9 +23,10 @@ using namespace std;
 #define MAX_PARAMETER_COUNT 8
 const char g_modulname[] = "server";
 extern bool g_run;
+extern stack<string> g_Messages;
 extern TaskScheduler* scheduler;
 extern FramedSource* eds;
-
+extern Mutex* mutex;
 
 #ifdef _WIN32
 #define SERVER_API

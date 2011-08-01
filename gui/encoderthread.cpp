@@ -52,17 +52,27 @@ void EncoderThread::run()
         return;
     }
 
- //   return;
+
     forever
     {
         mutex.lock();
-        if(encodeFrame())
+        SPicture* pic = NULL;
+
+    //    if(mInterface->getParameter("server.client.count"))
         {
-            mutex.unlock();
-            break;
+            if(encodeFrame())
+            {
+                mutex.unlock();
+                break;
+            }
+            checkIfNewDataAvailable();
+            pic = getPictureFunc(1, 0);
         }
-        checkIfNewDataAvailable();
-        SPicture* pic = getPictureFunc(1, 0);
+      /*  else
+        {
+            pic = getPictureFunc(1, 1);
+        }
+        */
 
         if(pic <= 0)
         {

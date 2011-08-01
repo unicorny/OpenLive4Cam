@@ -1,8 +1,10 @@
 #include "camera.h"
+#include "../../interface/mutex.h"
 #include <stdio.h>
 
 #include <cv.h>
 #include <highgui.h>
+
 
 using namespace cv;
 using namespace std;
@@ -15,7 +17,8 @@ int camera_resolution(string* params, int number)
 {
     if(params[0] == string("count"))
     {
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("camera_resolution</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
         return 1;
     }
    //return (int)"null";        
@@ -24,7 +27,8 @@ int camera_resolution(string* params, int number)
         VideoCapture cap(number);
         if(!cap.isOpened())
         {
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex))
+            g_Messages.push(string("camera_resolution</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
             return 0;
         }
         
@@ -35,16 +39,22 @@ int camera_resolution(string* params, int number)
             v = cap.get(CV_CAP_PROP_FRAME_HEIGHT);
         
         cap.release();
+        // falls ein Fehler auftritt und v unmöglich hoch ist
+        // falls auflösungen mit einer seite größer als 5000 unterstützt werden sollen
+        // muss das hier abgeändert werden
         if(v > 5000)
         {
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex))
+                g_Messages.push(string("camera_resolution</b> <font color='red'>Fehler bei mutex_unlock 3</font>"));;
             return 0;    
         }
         sprintf(gBuffer, "%.0f", v);
-        unlock_mutex(mutex);
+        if(mutex_unlock(mutex))
+            g_Messages.push(string("camera_resolution</b> <font color='red'>Fehler bei mutex_unlock 4</font>"));
         return (int)gBuffer;       
     }
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+            g_Messages.push(string("camera_resolution</b> <font color='red'>Fehler bei mutex_unlock 5</font>"));;
     return 0;
     
 }
@@ -57,13 +67,15 @@ int camera_count()
         VideoCapture cap(i); // try to open a camera
         if(!cap.isOpened())  // check if we succeeded
         {
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex))
+                g_Messages.push(string("camera_count</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
             return i;
         }
         cap.release();
         i++;
     }
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+            g_Messages.push(string("camera_count</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
     return i;
 }
 
@@ -81,14 +93,16 @@ int camera_number(int number, string* params)
         if(number == 0)
         {
             //cap.release();
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex))
+                g_Messages.push(string("camera_number</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
             return (int)"0 (default)";
         }
         else 
         {
             sprintf(gBuffer, "%d", number);
            // cap.release();
-            unlock_mutex(mutex);
+            if(mutex_unlock(mutex))
+                g_Messages.push(string("camera_number</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
             return (int)gBuffer;
         }
     }
@@ -98,7 +112,8 @@ int camera_number(int number, string* params)
         return camera_resolution(&params[1], number);
     }
    // cap.release();
-    unlock_mutex(mutex);
+    if(mutex_unlock(mutex))
+        g_Messages.push(string("camera_number</b> <font color='red'>Fehler bei mutex_unlock 3</font>"));
     return 0;
 }
 //! \brief call camera_count() or camera_number()

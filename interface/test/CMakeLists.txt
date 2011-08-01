@@ -1,0 +1,24 @@
+PROJECT(test C)
+
+CMAKE_MINIMUM_REQUIRED(VERSION 2.6)
+
+SET(TestSrc test.c )
+
+
+#IF(WIN32)
+SET(TestSrc ${TestSrc} ../interface.h ../frame.h ../mutex.h ../picture.h)
+#ENDIF(WIN32)
+SET(PA ../)
+
+find_library(INTERFACE interface PATHS ${PA} REQUIRED)
+SET(LIBS ${INTERFACE} )
+
+ADD_EXECUTABLE(test ${TestSrc})
+TARGET_LINK_LIBRARIES(test ${LIBS})
+
+IF(UNIX)
+TARGET_LINK_LIBRARIES(test dl)
+ENDIF(UNIX)
+
+SET_TARGET_PROPERTIES(test PROPERTIES LINKER_LANGUAGE C)
+

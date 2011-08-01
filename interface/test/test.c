@@ -1,7 +1,8 @@
 #include <stdio.h>
 #include <string.h>
-#include "interface.h"
-#include "frame.h"
+#include "../interface.h"
+#include "../frame.h"
+#include "../mutex.h"
 
 void try_load_dll(const char* filename)
 {
@@ -37,10 +38,16 @@ int main(int argc, char* argv[])
     unsigned char TestBuffer1[] = "Dies wird ein schoener und laaaanger Text.\0";
     unsigned char TestBuffer2[] = "Dies ist der 2. Testbuffer Text\0";
     struct timeval testTime;
-	SFrame* frame = NULL;
-	SFrame f;
-	unsigned* mem = NULL;
-	size_t s_mem = 0;
+    SFrame* frame = NULL;
+    SFrame f;
+    unsigned* mem = NULL;
+    size_t s_mem = 0;
+    Mutex* mutex = NULL;
+    
+    mutex = mutex_init();
+    if(!mutex) printf("Fehler bei Mutex init aufgetreten :/\n");
+    if(mutex_lock(mutex)) printf("Fehler bei Mutex lock aufgetreten!\n");
+    if(mutex_unlock(mutex)) printf("Fehler bei Mutex unlock aufgetreten!\n");
 
     stack = stack_init(TestBuffer1, strlen(TestBuffer1)+1);
 	printf("Start stack Test\n");
@@ -60,6 +67,9 @@ int main(int argc, char* argv[])
     if(stack->top == stack->bottom)
         printf("error: nachdem zwei Datensätze auf dem Stack liegen, sind top == bottom");
     
+    stack_delete_top(stack);
+    frame_to_stack(stack, TestBuffer2, strlen(TestBuffer2)+1);
+    //return 0;
     stack_pop(stack, &frame, NULL);
     printf("stack count 1 erwartet: %d\n", stack->count);
     printf("Daten vom Stack: size: %d, text: %s, vergleichstext: %s\n", frame->size, frame->data, TestBuffer1);
@@ -92,6 +102,7 @@ int main(int argc, char* argv[])
     printf("ende memory block: %d%d%d%d\n", mem[s_mem-4], mem[s_mem-3], mem[s_mem-2], mem[s_mem-1]);    
   
     clear_stack(stack);
+    mutex_close(mutex);
     
     printf("--- ende Stack Test ---\n\n--- Beginn DLL Tests ---\n");
     

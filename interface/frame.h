@@ -2,16 +2,13 @@
 #define __OPEN_LIVE_4_CAM_INTERFACE_FRAME__
 
 #include "interface.h"
+#include "mutex.h"
 #include <malloc.h>
 #include <memory.h>
 #include <sys/time.h>
 
 
-#ifdef _WIN32
-#include <windows.h>
-#else
-#include <pthread.h> 
-#endif
+
 
 #ifdef __cplusplus
 extern "C"
@@ -19,17 +16,12 @@ extern "C"
 #endif
     
 
-
 typedef struct SFrame_stack
 {
     struct SFrame_stack_element* top;
     struct SFrame_stack_element* bottom;
     int count;
-#ifdef _WIN32
-	void* mutex;
-#else
-    pthread_mutex_t* mutex; 
-#endif
+    Mutex* mutex;
 
 } SFrame_stack;
 
@@ -37,7 +29,8 @@ typedef struct SFrame_stack_element
 {
     struct SFrame_stack_element* top;
     struct SFrame_stack_element* bottom;
-    SFrame* frame;		    
+    SFrame* frame;	
+    unsigned firstEntry;
     struct timeval captureTime;
 } SFrame_stack_element;
 
@@ -46,6 +39,9 @@ SFrame_stack* stack_init(unsigned char* data, int size);
 void stack_push(SFrame_stack* s, SFrame* f);
 // von oben entfernen
 void stack_pop(SFrame_stack* s, SFrame** pf, struct timeval* time);
+
+// entfernt den obersten Eintrag wenn er nicht der erste eintrag war
+void stack_delete_top(SFrame_stack* s);
 
 void frame_to_stack(SFrame_stack* s, unsigned char* data, int size);
 void delete_frame(SFrame* f);

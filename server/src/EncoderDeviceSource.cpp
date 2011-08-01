@@ -94,12 +94,13 @@ void EncoderDeviceSource::doGetNextFrame() {
     handleClosure(this);
     return;
   }
+  if(mutex_lock(mutex))
+      g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b>"
+                             "<font color='red'>Fehler bei mutex lock!</font>"));
   //deliverFrame();
   FILE* f = fopen("IwasHere.txt", "at");
   FILE* f2 = fopen("vidddeo.264", "ab");
- 
-  
-          
+           
   //printf("\n\ndoGetNextFrame\n\n");
   if(!fParams.used)
   {
@@ -134,6 +135,10 @@ void EncoderDeviceSource::doGetNextFrame() {
   }
   fclose(f);
   fclose(f2);
+  
+  if(mutex_unlock(mutex))
+      g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b> "
+                             "<font color='red'>Fehler bei mutex_unlock</font>"));
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
     deliverFrame();
@@ -178,6 +183,8 @@ void EncoderDeviceSource::deliverFrame() {
   // Note the code below.
    
   if (!isCurrentlyAwaitingData()) return; // we're not ready for the data yet
+  if(mutex_lock(mutex)) g_Messages.push(string("EncoderDeviceSource::deliverFrame</b> "
+                                "<font color='red'>Fehler bei mutex_lock</font>"));
   
   FILE* f = fopen("IwasHere.txt", "at");
   FILE* f2 = fopen("viddeo.264", "ab");
@@ -202,6 +209,8 @@ void EncoderDeviceSource::deliverFrame() {
        else
        {
             printf("server.encoderDeviceSource::deliverFrame newFrameDataStart NULL-Pointer\n");
+            if(mutex_unlock(mutex)) g_Messages.push(string("EncoderDeviceSource::deliverFrame</b> "
+                        "<font color='red'>Fehler bei mutex_unlock 1</font>"));
             return;
        }
    }  
@@ -281,8 +290,11 @@ void EncoderDeviceSource::deliverFrame() {
   
   fclose(f);
 
+  if(mutex_unlock(mutex)) g_Messages.push(string("EncoderDeviceSource::deliverFrame</b> "
+                        "<font color='red'>Fehler bei mutex_unlock 2</font>"));
   // After delivering the data, inform the reader that it is now available:
   FramedSource::afterGetting(this);
+  
 }
 
 

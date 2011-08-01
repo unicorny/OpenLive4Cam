@@ -147,9 +147,6 @@ void MainWindow::on_port_spinBox_valueChanged(int value)
 
 void MainWindow::on_halfSecond_count()
 {
-    unsigned newCount = (unsigned)mInterface->getParameter("server.client.count");
-    QTextEdit* line = this->findChild<QTextEdit*>("textLog");
-    QString str;
-    //line->append(str.sprintf("Count: %d", newCount));
+    unsigned newCount = (unsigned)mInterface->getParameter("server.client.count");    
     emit updateCount(newCount);
 }

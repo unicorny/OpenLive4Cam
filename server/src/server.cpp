@@ -44,6 +44,7 @@ TaskScheduler* scheduler = NULL;
 RTSPServer* rtspServer = NULL;
 ServerMediaSession* sms = NULL;
 FramedSource* eds = NULL;
+Mutex* mutex = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
 bool g_run = false;
@@ -97,6 +98,9 @@ int init()
         printf("Error, encoder.getStackCountFunc didn't work as exceptet!");
         return -5;
     }
+    
+    mutex = mutex_init();
+    if(!mutex) printf("server.init Fehler bei mutex_init\n");
  //return 0;    
     //live starten
     scheduler = BasicTaskScheduler::createNew();
@@ -124,8 +128,13 @@ int run()
 
 void checkIfNewDataAvailable()
 {    
-    if(getStackCount() >= 2)
+    //g_Messages.push(string("checkIfNewDataAvailable</b>"));
+    if(mutex_lock(mutex)) g_Messages.push(string("checkIfNewDataAvailable</b> "
+            "<font color='red'>Fehler bei mutex_lock</font>"));
+    if(g_run && getStackCount() >= 2)
         signalNewFrameData();
+    if(mutex_unlock(mutex)) g_Messages.push(string("checkIfNewDataAvailable</b> "
+            "<font color='red'>Fehler bei unlock_mutex</font>"));
 }
 
 void ende()
@@ -139,6 +148,8 @@ void ende()
         interface_close(encoder);
     }
     encoder = NULL;
+    mutex_close(mutex);
+    mutex = NULL;
     printf("Server Modul ende\n");
 }
 
@@ -289,6 +300,7 @@ int start()
     rtspServer->addServerMediaSession(sms);
 
     announceStream(rtspServer, sms, streamName);
+
    
   }
 
