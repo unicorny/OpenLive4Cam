@@ -1,0 +1,47 @@
+
+Verwendete Bibliotheken und deren Hompages
+live555: <http://www.live555.com/liveMedia/>
+opencv : <http://opencv.willowgarage.com>
+x264   : <http://www.videolan.org/developers/x264.html>
+Qt	   : <http://qt.nokia.com/products/>
+
+von der live555 Bibliothekensammlung befinden sich benötigte Header und Libs
+im Verzeichnis des Server-Moduls (server)
+der x264 befindet sich komplett in einem Unterverzeichniss des Capture-Moduls (capture/x264)
+opencv und Qt werden nicht mitgeliefert und müssen auf dem Zielrechner installiert werden
+
+Dokumentation: 
+	Die Dokumentation für das Programm kann mithilfe von Doxygen erstellt werden,
+	für jedes Modul befindet sich ein entsprechendes Doxyfile im Ordner doc im
+	gleichnamigen Unterverzeichniss.
+
+LICENSE:
+	Die Lizensen der einzelnen Bibliotheken befinden sich im Verzeichniss doc/copying
+	Das Gesamte Projekt wird unter den GPL (General Gnu Public License) veröffentlicht
+	(ebenfalls zu finden im Ordner doc/copying)
+
+Build:
+Mithilfe von cmake können makefiles für alle Bibliotheken erstellt werden.
+Mit Ausnahme des gui.. diese muss mit qmake (von Qt) erstellt werden.
+
+Beispiel:
+
+- cmake -G"Unix Makefiles"
+- make
+- cd gui
+- qmake
+- make
+
+Danach befindet sich eine ausführbare Datei im Ordner gui 
+inklusive der anderen Module in .so Form unter Linux.
+
+Unter Windows kann es je nach Konfiguration noch Handarbeit erfordern alle 
+benötigten dlls in die richtigen Verzeichnisse zu kopieren.
+
+
+
+
+
+
+
+
