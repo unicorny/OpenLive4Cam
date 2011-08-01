@@ -30,11 +30,15 @@ Mutex* mutex_init()
 
 int mutex_lock(Mutex* m)
 {
+	int ret = 1;
+#ifdef _WIN32
+	DWORD waitResult = 0;
+#endif
     if(!m) return -1;
     if(!m->mutex) return -2;
-    int ret = 1;
+    
 #ifdef _WIN32
-	DWORD waitResult = WaitForSingleObject(m->mutex, INFINITE);
+	waitResult = WaitForSingleObject(m->mutex, INFINITE);
 	if(waitResult == WAIT_OBJECT_0)
         {
 		ret = 0;
@@ -55,9 +59,10 @@ int mutex_lock(Mutex* m)
 
 int mutex_unlock(Mutex* m)
 {
+	int ret = 0;
+
     if(!m) return -1;
     if(!m->mutex) return -2;
-    int ret = 0;
 #ifdef _WIN32   
     ret = !ReleaseMutex(m->mutex);
 #else

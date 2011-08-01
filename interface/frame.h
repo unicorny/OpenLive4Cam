@@ -5,7 +5,11 @@
 #include "mutex.h"
 #include <malloc.h>
 #include <memory.h>
+#ifndef WIN32
 #include <sys/time.h>
+#else
+#include <time.h>
+#endif
 
 
 

@@ -3,6 +3,10 @@
 #include <stdio.h>
 #endif
 
+#if (defined(__WIN32__) || defined(_WIN32)) && !defined(IMN_PIM)
+// For Windoze, we need to implement our own gettimeofday()
+int gettimeofday(struct timeval*, int*);
+#endif
 
 SFrame_stack* stack_init(unsigned char* data, int size)
 {
@@ -40,10 +44,11 @@ SFrame_stack* stack_init(unsigned char* data, int size)
 }
 int count_stack(SFrame_stack* s)
 {
+	int count = 0;
     if(!s) return 0;
     if(mutex_lock(s->mutex))
         printf("interface.count_stack Fehler bei mutex_lock\n");
-    int count = s->count;
+    count = s->count;
     if(mutex_unlock(s->mutex))
         printf("interface.count_stack Fehler bei mutex_unlock\n");
     return count;
