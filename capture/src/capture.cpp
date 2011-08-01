@@ -290,12 +290,13 @@ int start()
     if(!g_capture.isOpened())  // check if we succeeded
     {
         //printf("Kamera konnte nicht geöffnet werden!");
+        
         g_Messages.push(string("start</b> <font color='red'>Kamera konnte nicht geoeffnet werden!</font>"));
         if(mutex_unlock(mutex))
              g_Messages.push(string("start</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
         return -7;
     }
-    
+    g_Messages.push(string("start</b> <font color='green'>Kamera wurde erfolgreich geoeffnet!</font>"));
     g_capture.set(CV_CAP_PROP_FRAME_WIDTH, g_cfg.width);
     g_capture.set(CV_CAP_PROP_FRAME_HEIGHT, g_cfg.height);
     
@@ -303,6 +304,10 @@ int start()
     g_capture >> temp;
     g_cfg.width = temp.cols;
     g_cfg.height = temp.rows;
+    
+    char buffer[256];
+    sprintf(buffer, "start</b> <font color='green'>Resolution: %dx%d</font>", g_cfg.width, g_cfg.height);
+    g_Messages.push(string(buffer));
     
     g_run = true;
     printf("start called\n");
@@ -331,7 +336,10 @@ SPicture* getPicture(int rgb/* = 0*/, int removeFrame/* = 1*/)
     // if start wasn't called
     if(!g_run)
     {
-        g_capture.release();
+        while(g_capture.isOpened())
+                g_capture.release();
+        printf("encoder.getPicture after call g_capture.release\n");
+        g_Messages.push(string("getPicture</b> <font color='blue'>Kamera wurde geschlossen</font>"));
         if(mutex_unlock(mutex))
             g_Messages.push(string("getPicture</b> <font color='red'>Fehler bei mutex_unlock 1</font>"));
         return 0;

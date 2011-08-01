@@ -260,6 +260,8 @@ int start()
     }
 	g_Messages.push(string("start</b> <font color='green'>Encoder gestartet</font>"));
  //   return 0;
+    
+    if(rtspServer) g_Messages.push(string("start</b> <font color='red'>rtspServer exist!</font>"));
         
     rtspServer = RTSPServer::createNew(*env, g_Port, authDB);
     if (rtspServer == NULL) {
@@ -326,16 +328,37 @@ int start()
 }
 int stop()
 {
+    printf("server.stop start\n");
+    
+    if(mutex_lock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_lock</font>"));
+    
+    printf("server.stop after lock\n");
     g_run = false;
+    if(mutex_unlock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_unlock</font>"));
+    
+    printf("server.stop after unlock\n");
+    
+    
    // rtspServer->close(*env, "h264");
     
     if(encoder)
         encoder->stop();
-	Medium::close(eds);
-    Medium::close(sms);
-    sms = NULL;
-    Medium::close(rtspServer);
-    rtspServer = NULL;
+    if(mutex_lock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_lock 2</font>"));
+    
+    if(sms)
+    {
+        rtspServer->removeServerMediaSession(sms);
+        sms = NULL;
+    }
+    if(rtspServer)
+        Medium::close(rtspServer);  
+    rtspServer = NULL; sms = NULL; eds = NULL;
+    
+    if(mutex_unlock(mutex))
+        g_Messages.push(string("stop</b> <font color='red'>Fehler bei mutex_unlock 2</font>"));
      //g_watch = 1;
     return 0;
 }

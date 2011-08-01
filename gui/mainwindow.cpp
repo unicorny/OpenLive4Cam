@@ -50,10 +50,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(updateCount(int)), this->findChild<QLCDNumber*>("lcdNumber"), SLOT(display(int)));
 
     mServer->start();
+    mTimer.start(30);
 }
 
 MainWindow::~MainWindow()
 {
+    mTimer.stop();
     QFile file("log.html");
     file.open( QIODevice::ReadWrite);
     QTextStream stream( &file );
@@ -103,7 +105,6 @@ void MainWindow::on_startButton_clicked()
         if(!mCapture->startStreaming(source->itemData(source_index).toInt(), res->itemData(res_index).toInt()))
         {
             //Start Stream
-            mTimer.start(30);
             mStreamingRunning = true;
             mEncoderThread->start();
             res->setEnabled(false);
@@ -118,10 +119,9 @@ void MainWindow::on_startButton_clicked()
     }
     else //Stop Stream
     {
-        mTimer.stop();
         mCapture->stopStream();
         mStreamingRunning = false;
-        mEncoderThread->exit();
+      //  mEncoderThread->exit();
         res->setEnabled(true);
         port->setEnabled(true);
     }

@@ -58,11 +58,12 @@ void EncoderThread::run()
         mutex.lock();
         SPicture* pic = NULL;
 
-
-        if(encodeFrame())
+        int ret = 0;
+        if((ret = encodeFrame()))
         {
             mutex.unlock();
-            emit appendLog("<b>gui.encoderThread</b> <font color='red'>Fehler in encodeFrame aufgetreten!</font>");
+            if(ret == -1)
+                emit appendLog("<b>gui.encoderThread</b> <font color='red'>Fehler in encodeFrame aufgetreten!</font>");
             break;
         }
         if(mInterface->getParameter("server.client.count"))
@@ -78,7 +79,8 @@ void EncoderThread::run()
 
         if(pic <= 0)
         {
-            emit appendLog(str.sprintf("<b>gui.EncoderThread::run</b><font color='red'> Picture is %d!</font>", (int)pic));
+            ret = encodeFrame();
+            emit appendLog(str.sprintf("<b>gui.EncoderThread::run</b><font color='red'> Picture is %d, ret from encodeFrame: %d!</font>", (int)pic, ret));
             break;
         }
 
@@ -112,5 +114,7 @@ void EncoderThread::run()
         mutex.unlock();
         usleep(1000);
     }
+    mutex.unlock();
+    usleep(100);
 //*/
 }

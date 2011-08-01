@@ -97,7 +97,7 @@ void ende()
     if(mutex_lock(mutex))
         printf("encoder.ende Fehler bei mutex_lock 2\n");
     //löschen des letzten Frames
-    getFrame(NULL);
+    getFrame(NULL, NULL);
     if(mutex_unlock(mutex))
         printf("encoder.ende Fehler bei mutex_unlock 2\n");
 
@@ -232,6 +232,7 @@ int start()
 }
 //! \brief encode one frame and safe it to stack, threadsafe
 //! \return 0 for okay
+//! \return 1 fur stop
 //! \return -1 if encode_frames() failed
 int encodeFrame()
 {
@@ -239,8 +240,9 @@ int encodeFrame()
         printf("encoder.encodeFrame Fehler bei mutex_lock\n");
     if(!g_run)
     {
+        encoder_stop_frames();
         if(mutex_unlock(mutex))
-            printf("encoder.encodeFrame Fehler bei mutex_unlock 1\n");
+            printf("encoder.encodeFrame Fehler bei mutex_unlock 1\n");        
         return 1;
     }
     if(encode_frames())
@@ -274,12 +276,11 @@ int getStackCount()
 int stop()
 {
     if(capture) capture->stop();
-    return 0;
+ //   return 0;
     
     if(mutex_lock(mutex))
         printf("encoder.stop Fehler bei mutex_lock\n");
     g_run = 0;
-    encoder_stop_frames();
     if(mutex_unlock(mutex))
         printf("encoder.stop Fehler bei mutex_unlock\n");
     /*printf("en_data.h: %d\n", (int)en_data.h);

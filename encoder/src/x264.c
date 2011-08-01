@@ -597,18 +597,17 @@ unsigned char* getFrame(int *size, struct timeval* frame_time)
   //  encode_frames(&opt);
    // return NULL;
     static SFrame* current = NULL;
+    
     if(current) delete_frame(current);
     current = NULL;
-
+    
     if(size)
-    {
-        
+    {        
         if(!g_FrameBuffer || g_FrameBuffer->count < 2) return 0;
         stack_pop(g_FrameBuffer, &current, frame_time);
         //return 0;
         //printf("encoder.x264::getFrame stack-count: %d, current. %d\n", g_FrameBuffer->count, (int)current);
         if(!current) return 0;
- 
         
         //return NULL;
         *size = current->size;

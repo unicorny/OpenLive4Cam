@@ -274,6 +274,23 @@ static int close_file( hnd_t handle, int64_t largest_pts, int64_t second_largest
         return 0;
 	
     //return 0;
+    if(g_FrameBuffer)
+    {
+        if(mutex_lock(g_FrameBuffer->mutex))
+            printf("encoder.rtp_output::close_file Fehler bei mutex_lock\n");
+        
+        SFrame_stack* t = g_FrameBuffer;
+        g_FrameBuffer = NULL;
+        
+        if(mutex_unlock(t->mutex))
+            printf("encoder.rtp_output::close_file Fehler bei mutex_unlock\n");
+        
+        clear_stack(t);
+        t = NULL;
+        printf("encoder.rtp_output::close_file stack cleared!\n");
+    }
+    
+            
     fprintf(p->log, "Ende, close from handle and log-file\n");
     int ret = fclose(p->log);
     fclose(p->binaryOut);

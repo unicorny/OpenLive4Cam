@@ -90,13 +90,17 @@ EncoderDeviceSource::~EncoderDeviceSource() {
 void EncoderDeviceSource::doGetNextFrame() {
   // This function is called (by our 'downstream' object) when it asks for new data.
   // Note: If, for some reason, the source device stops being readable (e.g., it gets closed), then you do the following:
+    if(mutex_lock(mutex))
+      g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b>"
+                             "<font color='red'>Fehler bei mutex_lock!</font>"));
   if (!*fParams.running){//!fParams.running /* the source stops being readable */ /*%%% TO BE WRITTEN %%%*/) {
+      if(mutex_unlock(mutex))
+          g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b>"
+                             "<font color='red'>Fehler bei mutex_unlock 1!</font>"));
     handleClosure(this);
     return;
   }
-  if(mutex_lock(mutex))
-      g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b>"
-                             "<font color='red'>Fehler bei mutex lock!</font>"));
+  
   //deliverFrame();
   FILE* f = fopen("IwasHere.txt", "at");
   FILE* f2 = fopen("vidddeo.264", "ab");
@@ -138,7 +142,7 @@ void EncoderDeviceSource::doGetNextFrame() {
   
   if(mutex_unlock(mutex))
       g_Messages.push(string("EncoderDeviceSource::doGetNextFrame</b> "
-                             "<font color='red'>Fehler bei mutex_unlock</font>"));
+                             "<font color='red'>Fehler bei mutex_unlock 2</font>"));
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
     deliverFrame();

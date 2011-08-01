@@ -194,7 +194,7 @@ void delete_frame(SFrame* f)
 
 void clear_stack(SFrame_stack* g_s)
 {
-	SFrame * temp;
+    SFrame * temp;
     if(!g_s) return;   
     
     while(g_s->top != 0 && g_s->bottom != 0)

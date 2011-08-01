@@ -40,7 +40,7 @@ ENCODER_API int  getParameter(const char* name);
 ENCODER_API int start();
 ENCODER_API int stop();
 
-ENCODER_API unsigned char* getFrame(int *size);
+ENCODER_API unsigned char* getFrame(int *size, struct timeval* time);
 ENCODER_API int encodeFrame();
 
 #ifdef __cplusplus
