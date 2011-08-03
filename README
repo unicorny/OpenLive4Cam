@@ -5,6 +5,9 @@ opencv : <http://opencv.willowgarage.com>
 x264   : <http://www.videolan.org/developers/x264.html>
 Qt	   : <http://qt.nokia.com/products/>
 
+Der Gesamte Quellcode des Projektes ist auch zu finden unter
+https://github.com/unicorny/OpenLive4Cam
+
 von der live555 Bibliothekensammlung befinden sich benötigte Header und Libs
 im Verzeichnis des Server-Moduls (server)
 der x264 befindet sich komplett in einem Unterverzeichniss des Capture-Moduls (capture/x264)
@@ -31,6 +34,9 @@ Beispiel:
 - cd gui
 - qmake
 - make
+
+Erstellen von Visual Studio Projekt Files vom Qt Project:
+qmake -spec win32-msvc2010 -tp vc gui.pro
 
 Danach befindet sich eine ausführbare Datei im Ordner gui 
 inklusive der anderen Module in .so Form unter Linux.

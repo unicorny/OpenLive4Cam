@@ -131,7 +131,7 @@ void checkIfNewDataAvailable()
  //   g_Messages.push(string("checkIfNewDataAvailable</b>"));
     if(mutex_lock(mutex)) g_Messages.push(string("checkIfNewDataAvailable</b> "
             "<font color='red'>Fehler bei mutex_lock</font>"));
-    if(g_run && getStackCount() >= 2)
+    if(g_run == 2 && getStackCount() >= 2)
         signalNewFrameData();
     if(mutex_unlock(mutex)) g_Messages.push(string("checkIfNewDataAvailable</b> "
             "<font color='red'>Fehler bei unlock_mutex</font>"));
