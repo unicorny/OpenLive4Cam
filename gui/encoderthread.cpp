@@ -66,8 +66,10 @@ void EncoderThread::run()
                 emit appendLog("<b>gui.encoderThread</b> <font color='red'>Fehler in encodeFrame aufgetreten!</font>");
             break;
         }
+#ifdef _WIN32
         if(mInterface->getParameter("server.client.count"))
             checkIfNewDataAvailable();
+#endif
 
         pic = getPictureFunc(1, 0);
 

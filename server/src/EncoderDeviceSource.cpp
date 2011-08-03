@@ -48,9 +48,9 @@ EncoderDeviceSource::EncoderDeviceSource(UsageEnvironment& env,
 
   // Any instance-specific initialization of the device would be done here:
   //%%% TO BE WRITTEN %%%
-  FILE* f = fopen("IwasHere.txt", "wt");
-  FILE* f2 = fopen("viddeo.264", "wb");
-  FILE* f3 = fopen("vidddeo.264", "wb");
+  FILE* f = fopen("server.EncoderDeviceSource_Log.txt", "wt");
+  FILE* f2 = fopen("server.doGetNextFrame_video.264", "wb");
+  FILE* f3 = fopen("server.deliverFrame_video.264", "wb");
   bin = fopen("jumper2.h264", "rb");
   fprintf(f, "Constructor!\n");
   fclose(f);
@@ -102,8 +102,8 @@ void EncoderDeviceSource::doGetNextFrame() {
   }
   
   //deliverFrame();
-  FILE* f = fopen("IwasHere.txt", "at");
-  FILE* f2 = fopen("vidddeo.264", "ab");
+  FILE* f = fopen("server.EncoderDeviceSource_Log.txt", "at");
+  FILE* f2 = fopen("server.doGetNextFrame_video.264", "ab");
            
   //printf("\n\ndoGetNextFrame\n\n");
   if(!fParams.used)
@@ -146,6 +146,10 @@ void EncoderDeviceSource::doGetNextFrame() {
   // If a new frame of data is immediately available to be delivered, then do this now:
   if (fParams.tempSize /* a new frame of data is immediately available to be delivered*/ /*%%% TO BE WRITTEN %%%*/) {
     deliverFrame();
+  }
+  else
+  {
+      *fParams.running = 2;
   }
 /*  else
   {
@@ -190,8 +194,8 @@ void EncoderDeviceSource::deliverFrame() {
   if(mutex_lock(mutex)) g_Messages.push(string("EncoderDeviceSource::deliverFrame</b> "
                                 "<font color='red'>Fehler bei mutex_lock</font>"));
   
-  FILE* f = fopen("IwasHere.txt", "at");
-  FILE* f2 = fopen("viddeo.264", "ab");
+  FILE* f = fopen("server.EncoderDeviceSource_Log.txt", "at");
+  FILE* f2 = fopen("server.deliverFrame_video.264", "ab");
   fprintf(f, "Hallo!\n");
   fflush(f);
         

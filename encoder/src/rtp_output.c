@@ -113,8 +113,8 @@ static int open_file( char *psz_target, hnd_t *p_handle, cli_output_opt_t *opt)
 	
 	//*p_handle = fopen("log.txt", "wt");
 	rtp_out_handle* p = malloc(sizeof(rtp_out_handle));
-	p->log = fopen("log.txt", "wt");
-        p->binaryOut = fopen("raw_video.264", "w+b");
+	p->log = fopen("encoder.rp_output_log.txt", "wt");
+        p->binaryOut = fopen("encoder_rtp_ouput.264", "w+b");
     //    p->binaryOut = NULL;
         fprintf(p->log, "log oeffnet, open_file called\n");
 	/*p->socket = openSocket(server, cport);
