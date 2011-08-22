@@ -22,7 +22,8 @@ extern "C" {
 
 typedef struct Mutex{
 #ifdef _WIN32
-	void* mutex;
+	//void* mutex;
+    CRITICAL_SECTION mutex;
 #else
         pthread_mutex_t* mutex; 
 #endif

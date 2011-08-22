@@ -47,7 +47,7 @@ FramedSource* eds = NULL;
 Mutex* mutex = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
-bool g_run = false;
+int g_run = false;
 char g_watch = 0;
 #ifdef ACCESS_CONTROL
   // To implement client access control to the RTSP server, do the following:

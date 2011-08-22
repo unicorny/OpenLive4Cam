@@ -22,7 +22,7 @@
 using namespace std;
 #define MAX_PARAMETER_COUNT 8
 const char g_modulname[] = "server";
-extern bool g_run;
+extern int g_run;
 extern stack<string> g_Messages;
 extern TaskScheduler* scheduler;
 extern FramedSource* eds;
