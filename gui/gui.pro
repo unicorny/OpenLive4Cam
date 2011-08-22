@@ -19,5 +19,5 @@ HEADERS += mainwindow.h \
     serverthread.h \
     encoderthread.h
 FORMS += mainwindow.ui
-LIBS += -L../interface -linterface
-#win32:LIBS += ../interface/interface.lib
+LIBS += -L../interface \
+    -linterface

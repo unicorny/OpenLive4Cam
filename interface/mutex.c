@@ -7,16 +7,17 @@ Mutex* mutex_init()
 {
     Mutex* m = (Mutex*)malloc(sizeof(Mutex));
     if(!m) return NULL;
+    m->mutex = SDL_CreateMutex();
+    return m;
+    /*
 #ifdef _WIN32
-        InitializeCriticalSection(&m->mutex);
-	//m->mutex = CreateMutex(NULL, FALSE, NULL);
-/*	if(m->mutex == NULL)
+	m->mutex = CreateMutex(NULL, FALSE, NULL);
+	if(m->mutex == NULL)
 	{
 	    //printf("Fehler: %d bei mutex init", GetLastError());
             free(m);
             return NULL;
 	}
- * */
 #else
 	m->mutex = (pthread_mutex_t*)malloc(sizeof(pthread_mutex_t));
     if(pthread_mutex_init(m->mutex, NULL))
@@ -26,23 +27,26 @@ Mutex* mutex_init()
         return NULL;
     }
 #endif
-        
+        */
     return m;
 }
 
 int mutex_lock(Mutex* m)
 {
 	int ret = 1;
+        if(SDL_mutexP(m->mutex)==-1)
+            printf("Fehler bei lock mutex\n");
+        else
+            return 0;
+        /*
 #ifdef _WIN32
 	DWORD waitResult = 0;
-#else
-        if(!m->mutex) return -2;
 #endif
-    if(!m) return -1;    
+    if(!m) return -1;
+    if(!m->mutex) return -2;
     
 #ifdef _WIN32
-        EnterCriticalSection(&m->mutex);
-	/*waitResult = WaitForSingleObject(m->mutex, INFINITE);
+	waitResult = WaitForSingleObject(m->mutex, INFINITE);
 	if(waitResult == WAIT_OBJECT_0)
         {
 		ret = 0;
@@ -51,50 +55,55 @@ int mutex_lock(Mutex* m)
 	else if(waitResult == WAIT_FAILED)
         {
 		//printf("Fehler %d bei lock mutex\n", GetLastError());
-        }*/
+        }
 
 #else
     ret = pthread_mutex_lock((pthread_mutex_t*)m->mutex);
 #endif
+         * * */
     //if(ret)
         //printf("capture.lock_mutex fehler bei lock mutex\n");
+         
     return ret;  
 }
 
 int mutex_unlock(Mutex* m)
 {
-	int ret = 0;
-#ifdef _UNIX
-        if(!m->mutex) return -2;
-#endif
-    if(!m) return -1;
+    int ret = 0;
     
+
+    if(!m) return -1;
+    if(!m->mutex) return -2;
+    if(SDL_mutexV(m->mutex)==-1)
+        printf("Fehler bei unlock!\n");
+    else return 0;
+    /*
+
 #ifdef _WIN32   
-    //ret = !ReleaseMutex(m->mutex);
-        LeaveCriticalSection(&m->mutex);
+    ret = !ReleaseMutex(m->mutex);
 #else
     ret = pthread_mutex_unlock((pthread_mutex_t*)m->mutex);
 #endif
     
     //if(ret)
         //printf("capture.unlock_mutex fehler bei unlock mutex\n");
+     * */
     return ret;
 }
 
 void mutex_close(Mutex* m)
 {
     if(!m) return;
-#ifdef _WIN32
-	//CloseHandle(m->mutex);
-        DeleteCriticalSection(&m->mutex);
-#else
     if(m->mutex)    
     {
-
+        SDL_DestroyMutex(m->mutex);
+/*#ifdef _WIN32
+	CloseHandle(m->mutex);
+#else
         pthread_mutex_destroy(m->mutex);
 	free(m->mutex);
-
-    }
 #endif
+ * */
+    }
     free(m);
 }

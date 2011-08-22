@@ -1,3 +1,7 @@
+OpenLive4Cam ist ein Programm welches ein Videobild von einer lokalen Webcam,
+live ins Internet streamen kann. Dabei wird das Video H.264 encodiert. 
+Das Programm arbeitet unter anderem als RTSP-Server und sendet den Livestream an
+alle Zuschauer per RTP auch getunnelt über HTTP.
 
 Verwendete Bibliotheken und deren Hompages
 live555: <http://www.live555.com/liveMedia/>
@@ -43,6 +47,7 @@ inklusive der anderen Module in .so Form unter Linux.
 
 Unter Windows kann es je nach Konfiguration noch Handarbeit erfordern alle 
 benötigten dlls in die richtigen Verzeichnisse zu kopieren.
+Die DLLs der Module werden unter Windows in das Verzeichnis gui/debug kopiert.
 
 
 

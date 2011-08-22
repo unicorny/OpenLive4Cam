@@ -17,7 +17,8 @@ SET(CaptureSrc ${CaptureSrc} ../include/capture.h ../include/camera.h ../../inte
 SET(PA ../../interface/)
 
 find_library(INTERFACE interface PATHS ${PA} REQUIRED)
-SET(LIBS ${INTERFACE} ${OpenCV_LIBS})
+find_library(SDL_LIB SDL PATHS ${PA} REQUIRED)
+SET(LIBS ${INTERFACE} ${SDL_LIB} ${OpenCV_LIBS})
 
 # Declare the target (an executable)
 ADD_LIBRARY(capture SHARED ${CaptureSrc})

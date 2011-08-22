@@ -47,7 +47,9 @@ FramedSource* eds = NULL;
 Mutex* mutex = NULL;
 UserAuthenticationDatabase* authDB = NULL;
 
-int g_run = false;
+SDL_Thread* mThread = NULL;
+
+bool g_run = false;
 char g_watch = 0;
 #ifdef ACCESS_CONTROL
   // To implement client access control to the RTSP server, do the following:
@@ -101,6 +103,7 @@ int init()
     
     mutex = mutex_init();
     if(!mutex) printf("server.init Fehler bei mutex_init\n");
+    
  //return 0;    
     //live starten
     scheduler = BasicTaskScheduler::createNew();
@@ -110,11 +113,15 @@ int init()
         printf("server::init fehler, live konnte nicht initalisisert werden!");
         return -1;
     }
+    mThread = SDL_CreateThread(run, NULL);
+    if(!mThread) printf("server.init Fehler bei create Thread\n");
+    
     return 0;
 }
 
-int run()
+int run(void* data)
 {
+    g_Messages.push(string("run</b>"));
     if(env)
     {
         g_watch = 0;
@@ -141,6 +148,10 @@ void ende()
 {
     g_run = 0;
     g_watch = 1;
+    int returnState = 0;
+    printf("server.ende wait envent loop to exit\n");
+    SDL_WaitThread(mThread, &returnState);
+    printf("server.ende envent loop exit\n");
 //    SAVE_DELETE(env);    
     if(encoder)
     {

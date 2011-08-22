@@ -23,7 +23,7 @@ void ServerThread::run()
         mutex.lock();
 
         tick = (int (*)())mInterface->getParameter("server.getTickFunc");
-        if(tick) tick();
+      //  if(tick) tick();
 
         mutex.unlock();
         usleep(100);
