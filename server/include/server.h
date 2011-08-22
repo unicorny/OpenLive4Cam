@@ -57,7 +57,7 @@ SERVER_API void setParameter(const char* name, int value);
 SERVER_API int  getParameter(const char* name);
 SERVER_API int start();
 SERVER_API int stop();
-SERVER_API int run();
+SERVER_API int run(void* data);
 
 
 extern unsigned char* (*getFrameFunc)(int*, struct timeval*);

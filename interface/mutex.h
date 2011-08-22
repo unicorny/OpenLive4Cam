@@ -9,7 +9,7 @@
 #define	__OPEN_LIVE_4_CAM_INTERFACE_MUTEX__
 
 #include <memory.h>
-
+#include "include/SDL.h"
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -21,11 +21,12 @@ extern "C" {
 #endif
 
 typedef struct Mutex{
-#ifdef _WIN32
+/*#ifdef _WIN32
 	void* mutex;
 #else
         pthread_mutex_t* mutex; 
-#endif
+#endif*/
+    SDL_mutex* mutex;
 } Mutex;
 
 Mutex* mutex_init();
